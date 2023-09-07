@@ -29,7 +29,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
 
-      drawer: NavBar(),
+      // drawer: NavBar(),
       appBar: AppBar(
 
         backgroundColor: Color(0xffF6EEF6),
