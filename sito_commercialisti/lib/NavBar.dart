@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:sito_commercialisti/profilo.dart';
+import 'package:sito_commercialisti/transition.dart';
 
 
 
@@ -86,7 +88,11 @@ class NavBar extends StatelessWidget {
               color: Color(0xff9B63F8),
             ),
             title: Text('Profilo'),
-            onTap: () => print('NavBar Profilo BTN Pressed'),
+            onTap: () {
+              Navigator.of(context).push(CustomPageRoute(
+                  child: Profilo(),
+                  direction: AxisDirection.up),);
+            },
           ),
 
           ListTile(
