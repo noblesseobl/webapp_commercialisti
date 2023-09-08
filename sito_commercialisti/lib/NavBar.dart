@@ -7,6 +7,7 @@ class NavBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Drawer(
+
       child: ListView(
         padding: EdgeInsets.zero,
         children: [
@@ -16,7 +17,7 @@ class NavBar extends StatelessWidget {
             currentAccountPicture: CircleAvatar(
               child: ClipOval(
                   child: Image.asset(
-                'assets/g_wagon.png',
+                '',
                 fit: BoxFit.cover,
               )),
             ),
@@ -29,6 +30,56 @@ class NavBar extends StatelessWidget {
               ),
             ),
           ),
+
+
+
+
+
+          ListTile(
+            leading: Icon(
+              Icons.work_outlined,
+              color: Color(0xff9B63F8),
+            ),
+            title: Text('Dipendenti'),
+            onTap: () => print('NavBar Profilo BTN Pressed'),
+          ),
+          ListTile(
+            leading: Icon(
+              Icons.handshake_outlined,
+              color: Color(0xff9B63F8),
+            ),
+            title: Text('Clienti'),
+            onTap: () => print('NavBar Profilo BTN Pressed'),
+          ),
+
+          ListTile(
+            leading: Icon(
+              Icons.mail_outlined,
+              color: Color(0xff9B63F8),
+            ),
+            title: Text('Messaggi'),
+            onTap: () => print('NavBar Profilo BTN Pressed'),
+          ),
+          ListTile(
+            leading: Icon(
+              Icons.newspaper_outlined,
+              color: Color(0xff9B63F8),
+            ),
+            title: Text('News/documenti'),
+            onTap: () => print('NavBar Profilo BTN Pressed'),
+          ),
+          ListTile(
+            leading: Icon(
+              Icons.key,
+              color: Color(0xff9B63F8),
+            ),
+            title: Text('Tools'),
+            onTap: () => print('NavBar Profilo BTN Pressed'),
+          ),
+
+
+          Divider(),
+
           ListTile(
             leading: Icon(
               Icons.person,
@@ -37,25 +88,7 @@ class NavBar extends StatelessWidget {
             title: Text('Profilo'),
             onTap: () => print('NavBar Profilo BTN Pressed'),
           ),
-          ListTile(
-            leading: Icon(Icons.favorite_outlined, color: Color(0xff9B63F8)),
-            title: Text('Favorite'),
-            onTap: () => print('NavBar Favorite BTN Pressed'),
-          ),
-          Divider(),
-          ListTile(
-            leading: Icon(Icons.info, color: Color(0xff9B63F8)),
-            title: Text('About Us'),
-            onTap: () {
 
-            },
-          ),
-          ListTile(
-            leading: Icon(Icons.settings, color: Color(0xff9B63F8)),
-            title: Text('Impostazioni'),
-            onTap: () => print('NavBar Impostazioni Us BTN Pressed'),
-          ),
-          Divider(),
           ListTile(
               leading: Icon(Icons.logout_rounded, color: Color(0xff9B63F8)),
               title: Text('Logout'),
