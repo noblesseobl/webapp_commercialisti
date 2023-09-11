@@ -19,6 +19,8 @@ class Bacheca extends StatefulWidget {
 
 class BachecaState extends State<Bacheca> {
 
+  final _formKey = GlobalKey<FormState>();
+  String? testo;
 
   @override
   Widget build(BuildContext context) {
@@ -78,29 +80,168 @@ class BachecaState extends State<Bacheca> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
                 //SizedBox(height: 0,),
-                Row(
-                  children:[
-                    Text("Bacheca",
-                        style: TextStyle(fontSize: 25, fontWeight: FontWeight.w500, color: Colors.grey.shade700)
-                    ),
-                    Spacer(),
-                    ElevatedButton(
-                      onPressed: ()  {
-                        Navigator.of(context).push(
-                          CustomPageRoute(
-                              child: HomePageSito(),
-                              direction:AxisDirection.up
-                          ),);
-                      },
-                      child: Text("+", style: TextStyle(fontSize: 16),),
-                      style: ElevatedButton.styleFrom(
-                        primary: Colors.deepPurple.shade400, // Background color
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(30.0)
-                        ),
+              Material(
+                elevation: 0,
+                borderRadius: BorderRadius.circular(12),
+                shadowColor: Colors.black,
+                child: Card(
+
+                  shape: RoundedRectangleBorder(
+                      side: BorderSide(
+                        color: Colors.deepPurple.shade600,
                       ),
+                      borderRadius: BorderRadius.circular(12)),
+                  shadowColor: Colors.black26,
+                  color: Colors.white,
+
+                  child: Container(
+
+                    margin: EdgeInsets.fromLTRB(40, 30, 150, 30),
+
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.end,
+
+                      children: [
+                        Text("Bacheca",style: TextStyle(fontSize: 45, fontWeight: FontWeight.w600, color: Colors.grey.shade700) ),
+                        Spacer(),
+                        FloatingActionButton(
+                          backgroundColor: Colors.deepPurple.shade400,
+                          elevation: 10,
+                          onPressed: () {
+                            showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return StatefulBuilder(
+                                      builder: (BuildContext context, StateSetter setState) {
+                                        return AlertDialog(
+                                          backgroundColor: Colors.deepPurple.shade100,
+                                          scrollable: true,
+                                          content: Form(
+                                            key: _formKey,
+                                            child: Column(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: <Widget>[
+                                                Padding(
+                                                  padding: const EdgeInsets.symmetric(horizontal: 2.0),
+                                                  child: Container(
+                                                    decoration:BoxDecoration(
+                                                        color: Colors.blueGrey.shade50,
+                                                        borderRadius: BorderRadius.circular(15),
+                                                        border: Border.all(color: Colors.deepPurple.shade400)
+                                                    ),
+                                                    child:Padding(
+                                                      padding: const EdgeInsets.only(left: 12),
+
+                                                      child: TextFormField(
+                                                        decoration: InputDecoration(
+                                                            border: InputBorder.none,
+                                                            hintText: 'Inserisci titolo'
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                                SizedBox(height: 10,),
+                                                Padding(
+                                                  padding: const EdgeInsets.symmetric(horizontal: 2.0),
+                                                  child: Container(
+                                                    height: 170,
+                                                    decoration:BoxDecoration(
+                                                        color: Colors.blueGrey.shade50,
+                                                        borderRadius: BorderRadius.circular(15),
+                                                        border: Border.all(color: Colors.deepPurple.shade400)
+                                                    ),
+                                                    child:Padding(
+                                                      padding: const EdgeInsets.only(left: 0),
+
+                                                      child: TextFormField(
+
+                                                        decoration: InputDecoration(
+                                                          hintText: 'Inserisci descrizione',
+                                                          filled: true,
+                                                        ),
+                                                        keyboardType: TextInputType.multiline,
+                                                        expands: false,
+                                                        maxLines: null,
+                                                        validator: (value) {
+                                                          if (value == null || value.isEmpty) {
+                                                            return 'Inserisci testo!';
+                                                          }
+                                                          testo=value;
+                                                          return null;
+                                                        },
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+
+                                                SizedBox(height: 30,),
+
+
+                                                Row(
+                                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                  children: [
+                                                    Padding(
+
+                                                      padding: const EdgeInsets.all(1.0),
+                                                      child: ElevatedButton(
+                                                        style: ElevatedButton.styleFrom(
+                                                          primary: Colors.deepPurple.shade400, // Background color
+                                                          shape: RoundedRectangleBorder(
+                                                              borderRadius: BorderRadius.circular(20.0)
+                                                          ),
+                                                        ),
+                                                        child: Icon(Icons.upload_rounded),
+
+                                                        onPressed: () {
+                                                          if (_formKey.currentState!.validate()) {
+                                                            _formKey.currentState!.save();
+                                                          }
+                                                        },
+                                                      ),
+                                                    ),
+                                                    Padding(
+                                                      padding: const EdgeInsets.all(8.0),
+                                                      child: ElevatedButton(
+                                                        style: ElevatedButton.styleFrom(
+                                                          primary: Colors.deepPurple.shade400, // Background color
+                                                          shape: RoundedRectangleBorder(
+                                                              borderRadius: BorderRadius.circular(20.0)
+                                                          ),
+                                                        ),
+                                                        child: Text("Submit"),
+
+                                                        onPressed: () {
+                                                          if (_formKey.currentState!.validate()) {
+                                                            _formKey.currentState!.save();
+                                                          }
+                                                        },
+                                                      ),
+                                                    )
+                                                  ],
+                                                ),
+
+
+                                                SizedBox(height: 10,),
+                                              ],
+                                            ),
+                                          ),
+                                        );
+                                      }
+                                  );
+                                });
+                          },
+                          child: Icon(
+                            Icons.add,
+                            color: Colors.white,
+                            weight: 20,
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
+                  ),
+                  ),
                 ),
                 SizedBox(height: 40,),
                 Expanded(
@@ -152,9 +293,129 @@ class BachecaState extends State<Bacheca> {
                     cellBuilder: (item) =>
                         Text(DateFormat.yMd().format(item.createdAt))),
                 TableColumn(
-                    title: "Enabled",
+                    title: "              ",
                     sizeFactor: null,
-                    cellBuilder: (item) => IconButton(onPressed: (){print("ciao");}, icon: Icon(Icons.add))),
+                    cellBuilder: (item) => Row(
+                        children: [
+                          IconButton(onPressed: (){
+                            //print(item.content);
+                            showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return StatefulBuilder(
+                                      builder: (BuildContext context, StateSetter setState) {
+                                        return AlertDialog(
+                                          backgroundColor: Colors.deepPurple.shade100,
+                                          scrollable: true,
+                                          content: Form(
+                                            key: _formKey,
+                                            child: Column(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: <Widget>[
+                                                Padding(
+                                                  padding: const EdgeInsets.symmetric(horizontal: 2.0),
+                                                  child: Container(
+                                                    decoration:BoxDecoration(
+                                                        color: Colors.blueGrey.shade50,
+                                                        borderRadius: BorderRadius.circular(15),
+                                                        border: Border.all(color: Colors.deepPurple.shade400)
+                                                    ),
+                                                    child:Padding(
+                                                      padding: const EdgeInsets.only(left: 12, right: 12),
+
+                                                      child: Text(item.content)
+                                                    ),
+                                                  ),
+                                                ),
+                                                SizedBox(height: 10,),
+                                                Padding(
+                                                  padding: const EdgeInsets.symmetric(horizontal: 2.0),
+                                                  child: Container(
+                                                    height: 170,
+                                                    decoration:BoxDecoration(
+                                                        color: Colors.blueGrey.shade50,
+                                                        borderRadius: BorderRadius.circular(15),
+                                                        border: Border.all(color: Colors.deepPurple.shade400)
+                                                    ),
+                                                    child:Padding(
+                                                      padding: const EdgeInsets.only(left: 12, right: 12),
+                                                        child: Text(item.content)
+
+                                                    ),
+                                                  ),
+                                                ),
+
+                                                SizedBox(height: 30,),
+
+                                              ],
+                                            ),
+                                          ),
+                                        );
+                                      }
+                                  );
+                                });
+                            }, icon: Icon(Icons.edit, color: Colors.deepPurple.shade400)),
+                          IconButton(onPressed: (){showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return StatefulBuilder(
+                                    builder: (BuildContext context, StateSetter setState) {
+                                      return AlertDialog(
+                                        backgroundColor: Colors.deepPurple.shade100,
+                                        scrollable: true,
+                                        content: Form(
+                                          key: _formKey,
+                                          child: Column(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: <Widget>[
+                                              Padding(
+                                                padding: const EdgeInsets.symmetric(horizontal: 2.0),
+                                                child: Container(
+                                                  decoration:BoxDecoration(
+                                                      color: Colors.blueGrey.shade50,
+                                                      borderRadius: BorderRadius.circular(15),
+                                                      border: Border.all(color: Colors.deepPurple.shade400)
+                                                  ),
+                                                  child:Padding(
+                                                      padding: const EdgeInsets.only(left: 12, right: 12),
+
+                                                      child: Text(item.content)
+                                                  ),
+                                                ),
+                                              ),
+                                              SizedBox(height: 10,),
+                                              Padding(
+                                                padding: const EdgeInsets.symmetric(horizontal: 2.0),
+                                                child: Container(
+                                                  height: 170,
+                                                  decoration:BoxDecoration(
+                                                      color: Colors.blueGrey.shade50,
+                                                      borderRadius: BorderRadius.circular(15),
+                                                      border: Border.all(color: Colors.deepPurple.shade400)
+                                                  ),
+                                                  child:Padding(
+                                                      padding: const EdgeInsets.only(left: 12, right: 12),
+                                                      child: Text(item.content)
+
+                                                  ),
+                                                ),
+                                              ),
+
+                                              SizedBox(height: 30,),
+
+                                            ],
+                                          ),
+                                        ),
+                                      );
+                                    }
+                                );
+                              });}, icon: Icon(Icons.remove_red_eye, color: Colors.deepPurple.shade400)),
+                          IconButton(onPressed: (){
+                            print(item.id);
+                            tableController.removeRow(item.id);
+                            }, icon: Icon(Icons.delete, color: Colors.deepPurple.shade400))
+                      ]),
+                    ),
               ],
               filters: [
                 TextTableFilter(
