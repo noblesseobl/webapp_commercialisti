@@ -116,6 +116,7 @@ class HomePageSitoState extends State<HomePageSito> {
 
                           Text("Clienti",style: TextStyle(fontSize: 45, fontWeight: FontWeight.w600, color: Colors.grey.shade700) ),
 
+                          Spacer(),
                           ElevatedButton(
                               style:ElevatedButton.styleFrom(
                                 padding: EdgeInsets.all(20),
@@ -129,10 +130,13 @@ class HomePageSitoState extends State<HomePageSito> {
                               child: Text("importa csv",style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600, color: Colors.white))
                           ),
 
+                          SizedBox(width: 30),
                           ElevatedButton(
 
-                            style:ElevatedButton.styleFrom(
+
+                            style: ElevatedButton.styleFrom(
                               padding: EdgeInsets.all(20),
+
 
 
                               shape: RoundedRectangleBorder(
@@ -165,7 +169,8 @@ class HomePageSitoState extends State<HomePageSito> {
 
                                                       SizedBox(height: 30),
 
-                                                      Text("ciao"),
+                                                      Text("Clienti",style: TextStyle(fontSize: 25, fontWeight: FontWeight.w600, color: Colors.grey.shade700) ),
+
 
                                                       SizedBox(height: 20),
 
