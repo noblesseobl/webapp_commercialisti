@@ -1,9 +1,12 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:sito_commercialisti/AggiustaSize.dart';
 import 'package:sito_commercialisti/NavBar.dart';
-import 'package:data_table_2/data_table_2.dart';
-import 'package:sito_commercialisti/tabella/nav_helper.dart';
+import 'package:paged_datatable/paged_datatable.dart';
+import 'package:intl/intl.dart';
+import 'Post.dart';
 
 class HomePageSito extends StatefulWidget {
   HomePageSito();
@@ -14,22 +17,9 @@ class HomePageSito extends StatefulWidget {
 
 class HomePageSitoState extends State<HomePageSito> {
 
-  List<Persona> persone=  [Persona(1, "gionni"),Persona(2, "gianni"),Persona(3, "gino")];
-
-  late Classe modello;
-
-  int _rowsPerPage= 30;
-
-  int? _sortColumnIndex;
-
-  bool _sortAscending = true;
-
-
 
   @override
   Widget build(BuildContext context) {
-
-    modello=Classe(persone, context);
 
 
     return Scaffold(
@@ -77,62 +67,219 @@ class HomePageSitoState extends State<HomePageSito> {
           ],),
       ),
 
-      body: Container(
-        child: PaginatedDataTable2(
-          availableRowsPerPage: const [2, 5, 10, 30, 100],
-          //horizontalMargin: 20,
-          checkboxHorizontalMargin: 12,
-          columnSpacing: 0,
-          wrapInCard: false,
-          renderEmptyRowsInTheEnd: false,
-          header: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-            const Text('PaginatedDataTable2'),
+      body:Container(
+        color: const Color.fromARGB(255, 208, 208, 208),
+        padding: const EdgeInsets.all(20.0),
+        child: PagedDataTable<String, int, Post>(
+          rowsSelectable: true,
+          theme: theme,
+          idGetter: (post) => post.id,
+          controller: tableController,
+          fetchPage: (pageToken, pageSize, sortBy, filtering) async {
+            if (filtering.valueOrNull("authorName") == "error!") {
+              throw Exception("This is an unexpected error, wow!");
+            }
+
+            var result = await PostsRepository.getPosts(
+                pageSize: pageSize,
+                pageToken: pageToken,
+                sortBy: sortBy?.columnId,
+                sortDescending: sortBy?.descending ?? false,
+                gender: filtering.valueOrNullAs<Gender>("gender"),
+                authorName: filtering.valueOrNullAs<String>("authorName"),
+                between: filtering.valueOrNullAs<DateTimeRange>("betweenDate"));
+            return PaginationResult.items(
+                elements: result.items, nextPageToken: result.nextPageToken);
+          },
+          initialPage: "",
+          columns: [
+            TableColumn(
+              title: "Identificator",
+              cellBuilder: (item) => Text(item.id.toString()),
+              sizeFactor: .05,
+            ),
+            TableColumn(
+                title: "Author", cellBuilder: (item) => Text(item.author)),
+            LargeTextTableColumn(
+                title: "Content",
+                getter: (post) => post.content,
+                setter: (post, newContent, rowIndex) async {
+                  await Future.delayed(const Duration(seconds: 1));
+                  post.content = newContent;
+                  return true;
+                },
+                sizeFactor: .3),
+            TableColumn(
+                id: "createdAt",
+                title: "Created At",
+                sortable: true,
+                cellBuilder: (item) =>
+                    Text(DateFormat.yMd().format(item.createdAt))),
+            DropdownTableColumn<Post, Gender>(
+              title: "Gender",
+              sizeFactor: null,
+              getter: (post) => post.authorGender,
+              setter: (post, newGender, rowIndex) async {
+                post.authorGender = newGender;
+                await Future.delayed(const Duration(seconds: 1));
+                return true;
+              },
+              items: const [
+                DropdownMenuItem(value: Gender.male, child: Text("Male")),
+                DropdownMenuItem(value: Gender.female, child: Text("Female")),
+                DropdownMenuItem(
+                    value: Gender.unespecified, child: Text("Unspecified")),
+              ],
+            ),
+            TableColumn(
+                title: "Enabled",
+                sizeFactor: null,
+                cellBuilder: (item) => IconButton(onPressed: (){print("ciao");}, icon: Icon(Icons.add))),
+            TextTableColumn(
+                title: "Number",
+                id: "number",
+                sortable: true,
+                sizeFactor: .05,
+                isNumeric: true,
+                getter: (post) => post.number.toString(),
+                setter: (post, newValue, rowIndex) async {
+                  await Future.delayed(const Duration(seconds: 1));
+
+                  int? number = int.tryParse(newValue);
+                  if (number == null) {
+                    return false;
+                  }
+
+                  post.number = number;
+
+                  // if you want to do this too, dont forget to call refreshRow
+                  post.author = "empty content haha";
+                  tableController.refreshRow(rowIndex);
+                  return true;
+                }),
+            TableColumn(
+                title: "Fixed Value",
+                cellBuilder: (item) => const Text("abc"),
+                sizeFactor: null),
+          ],
+          filters: [
+            TextTableFilter(
+                id: "authorName",
+                title: "Author's name",
+                chipFormatter: (text) => "By $text"),
+            DropdownTableFilter<Gender>(
+                id: "gender",
+                title: "Gender",
+                defaultValue: Gender.male,
+                chipFormatter: (gender) =>
+                'Only ${gender.name.toLowerCase()} posts',
+                items: const [
+                  DropdownMenuItem(value: Gender.male, child: Text("Male")),
+                  DropdownMenuItem(value: Gender.female, child: Text("Female")),
+                  DropdownMenuItem(
+                      value: Gender.unespecified, child: Text("Unspecified")),
+                ]),
+            DatePickerTableFilter(
+              id: "date",
+              title: "Date",
+              chipFormatter: (date) => 'Only on ${DateFormat.yMd().format(date)}',
+              firstDate: DateTime(2000, 1, 1),
+              lastDate: DateTime.now(),
+            ),
+            DateRangePickerTableFilter(
+              id: "betweenDate",
+              title: "Between",
+              chipFormatter: (date) =>
+              'Between ${DateFormat.yMd().format(date.start)} and ${DateFormat.yMd().format(date.end)}',
+              firstDate: DateTime(2000, 1, 1),
+              lastDate: DateTime.now(),
+            )
+          ],
+          footer: TextButton(
+            onPressed: () {},
+            child: const Text("Im a footer button"),
+          ),
+
+          menu: PagedDataTableFilterBarMenu(items: [
+            FilterMenuItem(
+              title: const Text("Apply new theme"),
+              onTap: () {
+                setState(() {
+                  if (theme == null) {
+                    theme = kCustomPagedDataTableTheme;
+                  } else {
+                    theme = null;
+                  }
+                });
+              },
+            ),
+            const FilterMenuDivider(),
+            FilterMenuItem(
+              title: const Text("Remove row"),
+              onTap: () {
+                tableController.removeRow(tableController.currentDataset.first.id);
+              },
+            ),
+            FilterMenuItem(
+              title: const Text("Remove filters"),
+              onTap: () {
+                tableController.removeFilters();
+              },
+            ),
+            FilterMenuItem(
+                title: const Text("Add filter"),
+                onTap: () {
+                  tableController.setFilter("gender", Gender.male);
+                }),
+            const FilterMenuDivider(),
+            FilterMenuItem(
+                title: const Text("Print selected rows"),
+                onTap: () {
+                  var selectedPosts = tableController.getSelectedRows();
+                  debugPrint("SELECTED ROWS ----------------------------");
+                  debugPrint(selectedPosts
+                      .map((e) =>
+                  "Id [${e.id}] Author [${e.author}] Gender [${e.authorGender.name}]")
+                      .join("\n"));
+                  debugPrint("------------------------------------------");
+                }),
+            FilterMenuItem(
+                title: const Text("Unselect all rows"),
+                onTap: () {
+                  tableController.unselectAllRows();
+                }),
+            FilterMenuItem(
+                title: const Text("Select random row"),
+                onTap: () {
+                  final random = Random.secure();
+                  tableController.selectRow(tableController
+                      .currentDataset[random.nextInt(tableController.currentDataset.length)].id);
+                }),
+            const FilterMenuDivider(),
+            FilterMenuItem(
+                title: const Text("Update first row's gender and number"),
+                onTap: () {
+                  tableController.modifyRowValue(1, (item) {
+                    item.authorGender = Gender.male;
+                    item.number = 1;
+                    item.author = "Tomas";
+                    item.content = "empty content";
+                  });
+                }),
+            const FilterMenuDivider(),
+            FilterMenuItem(
+              title: const Text("Refresh cache"),
+              onTap: () {
+                tableController.refresh(currentDataset: false);
+              },
+            ),
+            FilterMenuItem(
+              title: const Text("Refresh current dataset"),
+              onTap: () {
+                tableController.refresh();
+              },
+            ),
           ]),
-
-          rowsPerPage: _rowsPerPage,
-          headingRowColor: MaterialStateColor.resolveWith((states) => Colors.grey[200]!),
-
-          //autoRowsToHeight: getCurrentRouteOption(context) == autoRows,
-          minWidth: 800,
-          fit: FlexFit.tight,
-          border: TableBorder(
-              top: const BorderSide(color: Colors.black),
-              bottom: BorderSide(color: Colors.grey[300]!),
-              left: BorderSide(color: Colors.grey[300]!),
-              right: BorderSide(color: Colors.grey[300]!),
-              verticalInside: BorderSide(color: Colors.grey[300]!),
-              horizontalInside: const BorderSide(color: Colors.grey, width: 1)),
-
-          empty: Center(
-              child: Container(
-                  padding: const EdgeInsets.all(20),
-                  color: Colors.grey[200],
-                  child: const Text('No data'))),
-
-          sortColumnIndex: _sortColumnIndex,
-          sortAscending: _sortAscending,
-          sortArrowIcon: Icons.keyboard_arrow_up, // custom arrow
-          sortArrowAnimationDuration:
-          const Duration(milliseconds: 0),
-          columns: _columns,
-          source: getCurrentRouteOption(context) == noData
-               ? Classe.empty(context)
-               : modello,
-
-          initialFirstRowIndex: 0,
-          onRowsPerPageChanged: (value) {
-            // No need to wrap into setState, it will be called inside the widget
-            // and trigger rebuild
-            //setState(() {
-            _rowsPerPage = value!;
-            print(_rowsPerPage);
-            //});
-          },
-
-          onPageChanged: (rowIndex) {
-            print(rowIndex / _rowsPerPage);
-          },
-
         ),
       ),
 
@@ -140,208 +287,43 @@ class HomePageSitoState extends State<HomePageSito> {
   }
 
 
-
-
-  List<DataColumn> get _columns {
-    return [
-      DataColumn(
-        label: const Text('Id'),
-        // onSort: (columnIndex, ascending) =>
-        //     sort<String>((d) => d.name, columnIndex, ascending),
-      ),
-      DataColumn(
-        label: const Text('nome'),
-        numeric: true,
-        // onSort: (columnIndex, ascending) =>
-        //     sort<num>((d) => d.calories, columnIndex, ascending),
-      ),
-    ];
+  @override
+  void dispose() {
+    tableController.dispose();
+    super.dispose();
   }
-}
 
-
-class Persona{
-  int? id;
-  String? nome;
-  String? cognome;
-  String? mail;
-  String? telefono;
-  bool selected=false;
-
-  Persona(this.id, this.nome);
 
 
 }
 
 
-class Classe extends DataTableSource{
-
-  Classe.empty(this.context){
-    persone=[];
-  }
-
-  bool hasRowTaps = false;
-  // Override height values for certain rows
-  bool hasRowHeightOverrides = false;
-  // Color each Row by index's parity
-  bool hasZebraStripes = true;
-
-  final BuildContext context;
-  late List<Persona> persone;
 
 
-  void sort<T>(Comparable<T> Function(Persona d) getField, bool ascending) {
-    persone.sort((a, b) {
-      final aValue = getField(a);
-      final bValue = getField(b);
-      return ascending
-          ? Comparable.compare(aValue, bValue)
-          : Comparable.compare(bValue, aValue);
-    });
-    notifyListeners();
-  }
-
-
-
-  void updateSelectedDesserts(RestorableDessertSelections selectedRows) {
-    _selectedCount = 0;
-    for (var i = 0; i < persone.length; i += 1) {
-      var dessert = persone[i];
-      if (selectedRows.isSelected(i)) {
-        dessert.selected = true;
-        _selectedCount += 1;
-      } else {
-        dessert.selected = false;
-      }
-    }
-    notifyListeners();
-  }
-
-  @override
-  DataRow? getRow(int index, [Color? color]) {
-
-    assert(index >= 0);
-    if (index >= persone.length) throw 'index > persone.length';
-    final dessert = persone[index];
-
-    return DataRow2.byIndex(
-        index: index,
-        selected: dessert.selected,
-        color: color != null
-            ? MaterialStateProperty.all(color)
-            : (hasZebraStripes && index.isEven
-            ? MaterialStateProperty.all(Theme.of(context).highlightColor)
-            : null),
-
-        onSelectChanged: (value) {
-          if (dessert.selected != value) {
-            _selectedCount += value! ? 1 : -1;
-            assert(_selectedCount >= 0);
-            dessert.selected = value;
-            notifyListeners();
-          }ù
-
-        },
-
-        onTap: hasRowTaps
-            ? () => _showSnackbar(context, 'Tapped on row ${dessert.id} ${dessert.nome}')
-            : null,
-        onDoubleTap: hasRowTaps
-            ? () => _showSnackbar(context, 'Double Tapped on row ${dessert.id} ${dessert.nome}')
-            : null,
-        onLongPress: hasRowTaps
-            ? () => _showSnackbar(context, 'Long pressed on row ${dessert.id} ${dessert.nome}')
-            : null,
-        onSecondaryTap: hasRowTaps
-            ? () => _showSnackbar(context, 'Right clicked on row ${dessert.id} ${dessert.nome}')
-            : null,
-        onSecondaryTapDown: hasRowTaps
-            ? (d) =>
-            _showSnackbar(context, 'Right button down on row ${dessert.id} ${dessert.nome}')
-            : null,
-
-        cells: [
-          DataCell(Text(persone[index].id.toString())),
-          DataCell(Text(persone[index].nome!)),
-        ],
-
-    );
-
-  }
-
-  @override
-  bool get isRowCountApproximate => false;
-
-  @override
-  int get rowCount => persone.length;
-
-  @override
-  int get selectedRowCount => _selectedCount;
-
-
-  int _selectedCount = 0;
-
-
-  void selectAll(bool? checked) {
-    for (final dessert in persone) {
-      dessert.selected = checked ?? false;
-    }
-    _selectedCount = (checked ?? false) ? persone.length : 0;
-    notifyListeners();
-  }
-
-  Classe(this.persone, this.context);
-}
-
-class RestorableDessertSelections extends RestorableProperty<Set<int>> {
-  Set<int> _dessertSelections = {};
-
-  /// Returns whether or not a dessert row is selected by index.
-  bool isSelected(int index) => _dessertSelections.contains(index);
-
-  /// Takes a list of [Dessert]s and saves the row indices of selected rows
-  /// into a [Set].
-  void setDessertSelections(List<Persona> desserts) {
-    final updatedSet = <int>{};
-    for (var i = 0; i < desserts.length; i += 1) {
-      var dessert = desserts[i];
-      if (dessert.selected) {
-        updatedSet.add(i);
-      }
-    }
-    _dessertSelections = updatedSet;
-    notifyListeners();
-  }
-
-  @override
-  Set<int> createDefaultValue() => _dessertSelections;
-
-  @override
-  Set<int> fromPrimitives(Object? data) {
-    final selectedItemIndices = data as List<dynamic>;
-    _dessertSelections = {
-      ...selectedItemIndices.map<int>((dynamic id) => id as int),
-    };
-    return _dessertSelections;
-  }
-
-  @override
-  void initWithValue(Set<int> value) {
-    _dessertSelections = value;
-  }
-
-  @override
-  Object toPrimitives() => _dessertSelections.toList();
-}
+final tableController = PagedDataTableController<String, int, Post>();
+PagedDataTableThemeData? theme;
 
 
 
 
-
-_showSnackbar(BuildContext context, String text, [Color? color]) {
-  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-    backgroundColor: color,
-    duration: const Duration(seconds: 1),
-    content: Text(text),
-  ));
-}
+const kCustomPagedDataTableTheme = PagedDataTableThemeData(
+    rowColors: [
+      Color(0xFFC4E6E3),
+      Color(0xFFE5EFEE),
+    ],
+    backgroundColor: Color(0xFFE0F2F1),
+    headerBackgroundColor: Color(0xFF80CBC4),
+    filtersHeaderBackgroundColor: Color(0xFF80CBC4),
+    footerBackgroundColor: Color(0xFF80CBC4),
+    footerTextStyle: TextStyle(color: Colors.white),
+    textStyle: TextStyle(fontWeight: FontWeight.normal),
+    buttonsColor: Colors.white,
+    chipTheme: ChipThemeData(
+        backgroundColor: Colors.teal,
+        labelStyle: TextStyle(color: Colors.white),
+        deleteIconColor: Colors.white),
+    configuration: PagedDataTableConfiguration(
+        footer: PagedDataTableFooterConfiguration(footerVisible: true),
+        allowRefresh: true,
+        pageSizes: [50, 75, 100],
+        initialPageSize: 50));
