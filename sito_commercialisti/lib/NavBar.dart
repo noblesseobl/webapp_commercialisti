@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sito_commercialisti/bacheca.dart';
 import 'package:sito_commercialisti/profilo.dart';
 import 'package:sito_commercialisti/transition.dart';
 
@@ -68,7 +69,9 @@ class NavBar extends StatelessWidget {
               color: Color(0xff9B63F8),
             ),
             title: Text('News/documenti'),
-            onTap: () => print('NavBar Profilo BTN Pressed'),
+            onTap: (){Navigator.of(context).push(CustomPageRoute(
+                child: Bacheca(),
+                direction: AxisDirection.up),);},
           ),
           ListTile(
             leading: Icon(
