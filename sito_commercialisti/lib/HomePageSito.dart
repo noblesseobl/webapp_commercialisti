@@ -23,7 +23,9 @@ class HomePageSitoState extends State<HomePageSito> {
 
 
     return Scaffold(
+
       drawer: NavBar(),
+
       appBar: AppBar(
         //leading: Icon(Icons.menu, size: 45, color: Colors.black,),
         elevation: 5,
@@ -67,219 +69,294 @@ class HomePageSitoState extends State<HomePageSito> {
           ],),
       ),
 
-      body:Container(
-        color: const Color.fromARGB(255, 208, 208, 208),
-        padding: const EdgeInsets.all(20.0),
-        child: PagedDataTable<String, int, Post>(
-          rowsSelectable: true,
-          theme: theme,
-          idGetter: (post) => post.id,
-          controller: tableController,
-          fetchPage: (pageToken, pageSize, sortBy, filtering) async {
-            if (filtering.valueOrNull("authorName") == "error!") {
-              throw Exception("This is an unexpected error, wow!");
-            }
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: Colors.purple.shade200,
+        elevation: 10,
+        onPressed: () { print("ciao frossasco");  },
+        child: Icon(
+          Icons.add,
+          color: Colors.white,
+          weight: 20,
+        ),
+      ),
 
-            var result = await PostsRepository.getPosts(
-                pageSize: pageSize,
-                pageToken: pageToken,
-                sortBy: sortBy?.columnId,
-                sortDescending: sortBy?.descending ?? false,
-                gender: filtering.valueOrNullAs<Gender>("gender"),
-                authorName: filtering.valueOrNullAs<String>("authorName"),
-                between: filtering.valueOrNullAs<DateTimeRange>("betweenDate"));
-            return PaginationResult.items(
-                elements: result.items, nextPageToken: result.nextPageToken);
-          },
-          initialPage: "",
-          columns: [
-            TableColumn(
-              title: "Identificator",
-              cellBuilder: (item) => Text(item.id.toString()),
-              sizeFactor: .05,
-            ),
-            TableColumn(
-                title: "Author", cellBuilder: (item) => Text(item.author)),
-            LargeTextTableColumn(
-                title: "Content",
-                getter: (post) => post.content,
-                setter: (post, newContent, rowIndex) async {
-                  await Future.delayed(const Duration(seconds: 1));
-                  post.content = newContent;
-                  return true;
-                },
-                sizeFactor: .3),
-            TableColumn(
-                id: "createdAt",
-                title: "Created At",
-                sortable: true,
-                cellBuilder: (item) =>
-                    Text(DateFormat.yMd().format(item.createdAt))),
-            DropdownTableColumn<Post, Gender>(
-              title: "Gender",
-              sizeFactor: null,
-              getter: (post) => post.authorGender,
-              setter: (post, newGender, rowIndex) async {
-                post.authorGender = newGender;
-                await Future.delayed(const Duration(seconds: 1));
-                return true;
-              },
-              items: const [
-                DropdownMenuItem(value: Gender.male, child: Text("Male")),
-                DropdownMenuItem(value: Gender.female, child: Text("Female")),
-                DropdownMenuItem(
-                    value: Gender.unespecified, child: Text("Unspecified")),
+      body:Center(
+
+        child: Container(
+
+          color: const Color.fromARGB(255, 208, 208, 208),
+
+          padding: const EdgeInsets.all(20.0),
+
+          child: Padding(
+
+            padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 10),
+
+            child: Column(
+              children: [
+                Material(
+
+
+                  elevation: 5,
+                  borderRadius: BorderRadius.circular(12),
+                  shadowColor: Colors.black,
+                  child: Card(
+
+                    shape: RoundedRectangleBorder(
+                        side: BorderSide(
+                          color: Colors.deepPurple.shade600,
+                        ),
+                        borderRadius: BorderRadius.circular(12)),
+                    shadowColor: Colors.black26,
+                    color: Colors.white,
+
+                    child: Container(
+
+                      margin: EdgeInsets.fromLTRB(40, 30, 150, 30),
+
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Text("Clienti",style: TextStyle(fontSize: 45, fontWeight: FontWeight.w600, color: Colors.grey.shade700) ),
+                          ElevatedButton(
+                              style:ElevatedButton.styleFrom(
+                                padding: EdgeInsets.all(20),
+
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(20.0)
+                                ),
+                              ),
+
+                              onPressed: (){ print("ciao volpiano");},
+                              child: Text("importa csv",style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600, color: Colors.white))
+                          )
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+
+                SizedBox(height: 20,),
+
+
+                Expanded(
+                  child: PagedDataTable<String, int, Post>(
+                    rowsSelectable: true,
+                    theme: theme,
+                    idGetter: (post) => post.id,
+                    controller: tableController,
+                    fetchPage: (pageToken, pageSize, sortBy, filtering) async {
+                      if (filtering.valueOrNull("authorName") == "error!") {
+                        throw Exception("This is an unexpected error, wow!");
+                      }
+
+                      var result = await PostsRepository.getPosts(
+                          pageSize: pageSize,
+                          pageToken: pageToken,
+                          sortBy: sortBy?.columnId,
+                          sortDescending: sortBy?.descending ?? false,
+                          gender: filtering.valueOrNullAs<Gender>("gender"),
+                          authorName: filtering.valueOrNullAs<String>("authorName"),
+                          between: filtering.valueOrNullAs<DateTimeRange>("betweenDate"));
+                      return PaginationResult.items(
+                          elements: result.items, nextPageToken: result.nextPageToken);
+                    },
+                    initialPage: "",
+                    columns: [
+                      TableColumn(
+                        title: "Identificator",
+                        cellBuilder: (item) => Text(item.id.toString()),
+                        sizeFactor: .05,
+                      ),
+                      TableColumn(
+                          title: "Author", cellBuilder: (item) => Text(item.author)),
+                      LargeTextTableColumn(
+                          title: "Content",
+                          getter: (post) => post.content,
+                          setter: (post, newContent, rowIndex) async {
+                            await Future.delayed(const Duration(seconds: 1));
+                            post.content = newContent;
+                            return true;
+                          },
+                          sizeFactor: .3),
+                      TableColumn(
+                          id: "createdAt",
+                          title: "Created At",
+                          sortable: true,
+                          cellBuilder: (item) =>
+                              Text(DateFormat.yMd().format(item.createdAt))),
+                      DropdownTableColumn<Post, Gender>(
+                        title: "Gender",
+                        sizeFactor: null,
+                        getter: (post) => post.authorGender,
+                        setter: (post, newGender, rowIndex) async {
+                          post.authorGender = newGender;
+                          await Future.delayed(const Duration(seconds: 1));
+                          return true;
+                        },
+                        items: const [
+                          DropdownMenuItem(value: Gender.male, child: Text("Male")),
+                          DropdownMenuItem(value: Gender.female, child: Text("Female")),
+                          DropdownMenuItem(
+                              value: Gender.unespecified, child: Text("Unspecified")),
+                        ],
+                      ),
+                      TableColumn(
+                          title: "Enabled",
+                          sizeFactor: null,
+                          cellBuilder: (item) => IconButton(onPressed: (){print("ciao");}, icon: Icon(Icons.add))),
+                      TextTableColumn(
+                          title: "Number",
+                          id: "number",
+                          sortable: true,
+                          sizeFactor: .05,
+                          isNumeric: true,
+                          getter: (post) => post.number.toString(),
+                          setter: (post, newValue, rowIndex) async {
+                            await Future.delayed(const Duration(seconds: 1));
+
+                            int? number = int.tryParse(newValue);
+                            if (number == null) {
+                              return false;
+                            }
+
+                            post.number = number;
+
+                            // if you want to do this too, dont forget to call refreshRow
+                            post.author = "empty content haha";
+                            tableController.refreshRow(rowIndex);
+                            return true;
+                          }),
+                      TableColumn(
+                          title: "Fixed Value",
+                          cellBuilder: (item) => const Text("abc"),
+                          sizeFactor: null),
+                    ],
+                    filters: [
+                      TextTableFilter(
+                          id: "authorName",
+                          title: "Author's name",
+                          chipFormatter: (text) => "By $text"),
+                      DropdownTableFilter<Gender>(
+                          id: "gender",
+                          title: "Gender",
+                          defaultValue: Gender.male,
+                          chipFormatter: (gender) =>
+                          'Only ${gender.name.toLowerCase()} posts',
+                          items: const [
+                            DropdownMenuItem(value: Gender.male, child: Text("Male")),
+                            DropdownMenuItem(value: Gender.female, child: Text("Female")),
+                            DropdownMenuItem(
+                                value: Gender.unespecified, child: Text("Unspecified")),
+                          ]),
+                      DatePickerTableFilter(
+                        id: "date",
+                        title: "Date",
+                        chipFormatter: (date) => 'Only on ${DateFormat.yMd().format(date)}',
+                        firstDate: DateTime(2000, 1, 1),
+                        lastDate: DateTime.now(),
+                      ),
+                      DateRangePickerTableFilter(
+                        id: "betweenDate",
+                        title: "Between",
+                        chipFormatter: (date) =>
+                        'Between ${DateFormat.yMd().format(date.start)} and ${DateFormat.yMd().format(date.end)}',
+                        firstDate: DateTime(2000, 1, 1),
+                        lastDate: DateTime.now(),
+                      )
+                    ],
+                    footer: TextButton(
+                      onPressed: () {},
+                      child: const Text("Im a footer button"),
+                    ),
+
+                    menu: PagedDataTableFilterBarMenu(items: [
+                      FilterMenuItem(
+                        title: const Text("Apply new theme"),
+                        onTap: () {
+                          setState(() {
+                            if (theme == null) {
+                              theme = kCustomPagedDataTableTheme;
+                            } else {
+                              theme = null;
+                            }
+                          });
+                        },
+                      ),
+                      const FilterMenuDivider(),
+                      FilterMenuItem(
+                        title: const Text("Remove row"),
+                        onTap: () {
+                          tableController.removeRow(tableController.currentDataset.first.id);
+                        },
+                      ),
+                      FilterMenuItem(
+                        title: const Text("Remove filters"),
+                        onTap: () {
+                          tableController.removeFilters();
+                        },
+                      ),
+                      FilterMenuItem(
+                          title: const Text("Add filter"),
+                          onTap: () {
+                            tableController.setFilter("gender", Gender.male);
+                          }),
+                      const FilterMenuDivider(),
+                      FilterMenuItem(
+                          title: const Text("Print selected rows"),
+                          onTap: () {
+                            var selectedPosts = tableController.getSelectedRows();
+                            debugPrint("SELECTED ROWS ----------------------------");
+                            debugPrint(selectedPosts
+                                .map((e) =>
+                            "Id [${e.id}] Author [${e.author}] Gender [${e.authorGender.name}]")
+                                .join("\n"));
+                            debugPrint("------------------------------------------");
+                          }),
+                      FilterMenuItem(
+                          title: const Text("Unselect all rows"),
+                          onTap: () {
+                            tableController.unselectAllRows();
+                          }),
+                      FilterMenuItem(
+                          title: const Text("Select random row"),
+                          onTap: () {
+                            final random = Random.secure();
+                            tableController.selectRow(tableController
+                                .currentDataset[random.nextInt(tableController.currentDataset.length)].id);
+                          }),
+                      const FilterMenuDivider(),
+                      FilterMenuItem(
+                          title: const Text("Update first row's gender and number"),
+                          onTap: () {
+                            tableController.modifyRowValue(1, (item) {
+                              item.authorGender = Gender.male;
+                              item.number = 1;
+                              item.author = "Tomas";
+                              item.content = "empty content";
+                            });
+                          }),
+                      const FilterMenuDivider(),
+                      FilterMenuItem(
+                        title: const Text("Refresh cache"),
+                        onTap: () {
+                          tableController.refresh(currentDataset: false);
+                        },
+                      ),
+                      FilterMenuItem(
+                        title: const Text("Refresh current dataset"),
+                        onTap: () {
+                          tableController.refresh();
+                        },
+                      ),
+                    ]),
+                  ),
+                ),
               ],
             ),
-            TableColumn(
-                title: "Enabled",
-                sizeFactor: null,
-                cellBuilder: (item) => IconButton(onPressed: (){print("ciao");}, icon: Icon(Icons.add))),
-            TextTableColumn(
-                title: "Number",
-                id: "number",
-                sortable: true,
-                sizeFactor: .05,
-                isNumeric: true,
-                getter: (post) => post.number.toString(),
-                setter: (post, newValue, rowIndex) async {
-                  await Future.delayed(const Duration(seconds: 1));
-
-                  int? number = int.tryParse(newValue);
-                  if (number == null) {
-                    return false;
-                  }
-
-                  post.number = number;
-
-                  // if you want to do this too, dont forget to call refreshRow
-                  post.author = "empty content haha";
-                  tableController.refreshRow(rowIndex);
-                  return true;
-                }),
-            TableColumn(
-                title: "Fixed Value",
-                cellBuilder: (item) => const Text("abc"),
-                sizeFactor: null),
-          ],
-          filters: [
-            TextTableFilter(
-                id: "authorName",
-                title: "Author's name",
-                chipFormatter: (text) => "By $text"),
-            DropdownTableFilter<Gender>(
-                id: "gender",
-                title: "Gender",
-                defaultValue: Gender.male,
-                chipFormatter: (gender) =>
-                'Only ${gender.name.toLowerCase()} posts',
-                items: const [
-                  DropdownMenuItem(value: Gender.male, child: Text("Male")),
-                  DropdownMenuItem(value: Gender.female, child: Text("Female")),
-                  DropdownMenuItem(
-                      value: Gender.unespecified, child: Text("Unspecified")),
-                ]),
-            DatePickerTableFilter(
-              id: "date",
-              title: "Date",
-              chipFormatter: (date) => 'Only on ${DateFormat.yMd().format(date)}',
-              firstDate: DateTime(2000, 1, 1),
-              lastDate: DateTime.now(),
-            ),
-            DateRangePickerTableFilter(
-              id: "betweenDate",
-              title: "Between",
-              chipFormatter: (date) =>
-              'Between ${DateFormat.yMd().format(date.start)} and ${DateFormat.yMd().format(date.end)}',
-              firstDate: DateTime(2000, 1, 1),
-              lastDate: DateTime.now(),
-            )
-          ],
-          footer: TextButton(
-            onPressed: () {},
-            child: const Text("Im a footer button"),
           ),
-
-          menu: PagedDataTableFilterBarMenu(items: [
-            FilterMenuItem(
-              title: const Text("Apply new theme"),
-              onTap: () {
-                setState(() {
-                  if (theme == null) {
-                    theme = kCustomPagedDataTableTheme;
-                  } else {
-                    theme = null;
-                  }
-                });
-              },
-            ),
-            const FilterMenuDivider(),
-            FilterMenuItem(
-              title: const Text("Remove row"),
-              onTap: () {
-                tableController.removeRow(tableController.currentDataset.first.id);
-              },
-            ),
-            FilterMenuItem(
-              title: const Text("Remove filters"),
-              onTap: () {
-                tableController.removeFilters();
-              },
-            ),
-            FilterMenuItem(
-                title: const Text("Add filter"),
-                onTap: () {
-                  tableController.setFilter("gender", Gender.male);
-                }),
-            const FilterMenuDivider(),
-            FilterMenuItem(
-                title: const Text("Print selected rows"),
-                onTap: () {
-                  var selectedPosts = tableController.getSelectedRows();
-                  debugPrint("SELECTED ROWS ----------------------------");
-                  debugPrint(selectedPosts
-                      .map((e) =>
-                  "Id [${e.id}] Author [${e.author}] Gender [${e.authorGender.name}]")
-                      .join("\n"));
-                  debugPrint("------------------------------------------");
-                }),
-            FilterMenuItem(
-                title: const Text("Unselect all rows"),
-                onTap: () {
-                  tableController.unselectAllRows();
-                }),
-            FilterMenuItem(
-                title: const Text("Select random row"),
-                onTap: () {
-                  final random = Random.secure();
-                  tableController.selectRow(tableController
-                      .currentDataset[random.nextInt(tableController.currentDataset.length)].id);
-                }),
-            const FilterMenuDivider(),
-            FilterMenuItem(
-                title: const Text("Update first row's gender and number"),
-                onTap: () {
-                  tableController.modifyRowValue(1, (item) {
-                    item.authorGender = Gender.male;
-                    item.number = 1;
-                    item.author = "Tomas";
-                    item.content = "empty content";
-                  });
-                }),
-            const FilterMenuDivider(),
-            FilterMenuItem(
-              title: const Text("Refresh cache"),
-              onTap: () {
-                tableController.refresh(currentDataset: false);
-              },
-            ),
-            FilterMenuItem(
-              title: const Text("Refresh current dataset"),
-              onTap: () {
-                tableController.refresh();
-              },
-            ),
-          ]),
         ),
       ),
 
