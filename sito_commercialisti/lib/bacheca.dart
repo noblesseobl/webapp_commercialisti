@@ -398,41 +398,15 @@ class BachecaState extends State<Bacheca> {
                                                       key: _formKey,
                                                       child: Column(
                                                         mainAxisSize: MainAxisSize.min,
+                                                        mainAxisAlignment: MainAxisAlignment.start,
+                                                        crossAxisAlignment: CrossAxisAlignment.start,
                                                         children: <Widget>[
-                                                          Padding(
-                                                            padding: const EdgeInsets.symmetric(horizontal: 2.0),
-                                                            child: Container(
-                                                              decoration:BoxDecoration(
-                                                                  color: Colors.blueGrey.shade50,
-                                                                  borderRadius: BorderRadius.circular(15),
-                                                                  border: Border.all(color: Colors.deepPurple.shade400)
-                                                              ),
-                                                              child:Padding(
-                                                                  padding: const EdgeInsets.only(left: 12, right: 12),
-
-                                                                  child: Text(item.content)
-                                                              ),
-                                                            ),
-                                                          ),
-                                                          SizedBox(height: 10,),
-                                                          Padding(
-                                                            padding: const EdgeInsets.symmetric(horizontal: 2.0),
-                                                            child: Container(
-                                                              height: 170,
-                                                              decoration:BoxDecoration(
-                                                                  color: Colors.blueGrey.shade50,
-                                                                  borderRadius: BorderRadius.circular(15),
-                                                                  border: Border.all(color: Colors.deepPurple.shade400)
-                                                              ),
-                                                              child:Padding(
-                                                                  padding: const EdgeInsets.only(left: 12, right: 12),
-                                                                  child: Text(item.content)
-
-                                                              ),
-                                                            ),
-                                                          ),
-
-                                                          SizedBox(height: 30,),
+                                                          Text("Titolo", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22)),
+                                                          Text("${item.content}"),
+                                                          SizedBox(height: 20,),
+                                                          Text("Descrizione", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22)),
+                                                          Text("${item.content}"),
+                                                          SizedBox(height: 20,),
 
                                                         ],
                                                       ),
