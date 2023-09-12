@@ -8,14 +8,14 @@ import 'package:paged_datatable/paged_datatable.dart';
 import 'package:intl/intl.dart';
 import 'Post.dart';
 
-class Bacheca extends StatefulWidget {
-  Bacheca();
+class Tools extends StatefulWidget {
+  Tools();
 
   @override
-  State<Bacheca> createState() => BachecaState();
+  State<Tools> createState() => ToolsState();
 }
 
-class BachecaState extends State<Bacheca> {
+class ToolsState extends State<Tools> {
 
   final _formKey = GlobalKey<FormState>();
   String? testo;
@@ -101,7 +101,7 @@ class BachecaState extends State<Bacheca> {
                           crossAxisAlignment: CrossAxisAlignment.end,
 
                           children: [
-                            Text("Bacheca",style: TextStyle(fontSize: 45, fontWeight: FontWeight.w600, color: Colors.grey.shade700) ),
+                            Text("Tipologia Cliente",style: TextStyle(fontSize: 45, fontWeight: FontWeight.w600, color: Colors.grey.shade700) ),
                             Spacer(),
 
                             ElevatedButton(
@@ -136,7 +136,7 @@ class BachecaState extends State<Bacheca> {
                                                           child: TextFormField(
                                                             decoration: InputDecoration(
                                                                 border: InputBorder.none,
-                                                                hintText: 'Inserisci titolo'
+                                                                hintText: 'Inserisci codice'
                                                             ),
                                                           ),
                                                         ),
@@ -146,7 +146,6 @@ class BachecaState extends State<Bacheca> {
                                                     Padding(
                                                       padding: const EdgeInsets.symmetric(horizontal: 2.0),
                                                       child: Container(
-                                                        height: 170,
                                                         decoration:BoxDecoration(
                                                             color: Colors.blueGrey.shade50,
                                                             borderRadius: BorderRadius.circular(15),
@@ -158,6 +157,7 @@ class BachecaState extends State<Bacheca> {
                                                           child: TextFormField(
 
                                                             decoration: InputDecoration(
+                                                              border: InputBorder.none,
                                                               hintText: 'Inserisci descrizione',
                                                               filled: true,
                                                             ),
@@ -182,25 +182,6 @@ class BachecaState extends State<Bacheca> {
                                                     Row(
                                                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                                       children: [
-                                                        Padding(
-
-                                                          padding: const EdgeInsets.all(1.0),
-                                                          child: ElevatedButton(
-                                                            style: ElevatedButton.styleFrom(
-                                                              primary: Colors.deepPurple.shade400, // Background color
-                                                              shape: RoundedRectangleBorder(
-                                                                  borderRadius: BorderRadius.circular(20.0)
-                                                              ),
-                                                            ),
-                                                            child: Icon(Icons.upload_rounded),
-
-                                                            onPressed: () {
-                                                              if (_formKey.currentState!.validate()) {
-                                                                _formKey.currentState!.save();
-                                                              }
-                                                            },
-                                                          ),
-                                                        ),
                                                         Padding(
                                                           padding: const EdgeInsets.all(8.0),
                                                           child: ElevatedButton(
@@ -256,27 +237,27 @@ class BachecaState extends State<Bacheca> {
                   ),
                   SizedBox(height: 20,),
                   Expanded(
-                      child: Material(
-                        elevation: 5,
-                        borderRadius: BorderRadius.circular(12),
-                        shadowColor: Colors.black,
+                    child: Material(
+                      elevation: 5,
+                      borderRadius: BorderRadius.circular(12),
+                      shadowColor: Colors.black,
 
-                        child: Card(
-
-
-                          shape: RoundedRectangleBorder(
-                              side: BorderSide(
-                                color: Colors.deepPurple.shade600,
-                              ),
-                              borderRadius: BorderRadius.circular(12)),
-                          shadowColor: Colors.black26,
-                          color: Colors.white,
+                      child: Card(
 
 
-                          child: Container(
+                        shape: RoundedRectangleBorder(
+                            side: BorderSide(
+                              color: Colors.deepPurple.shade600,
+                            ),
+                            borderRadius: BorderRadius.circular(12)),
+                        shadowColor: Colors.black26,
+                        color: Colors.white,
 
-                            margin: EdgeInsets.fromLTRB(40, 30, 150, 30),
-                            child: PagedDataTable<String, int, Post>(
+
+                        child: Container(
+
+                          margin: EdgeInsets.fromLTRB(40, 30, 150, 30),
+                          child: PagedDataTable<String, int, Post>(
                             rowsSelectable: true,
                             theme: theme,
                             idGetter: (post) => post.id,
@@ -299,30 +280,19 @@ class BachecaState extends State<Bacheca> {
                             },
                             initialPage: "",
                             columns: [
-                              LargeTextTableColumn(
-                                  title: "Titolo",
-                                  getter: (post) => post.content,
-                                  setter: (post, newContent, rowIndex) async {
-                                    await Future.delayed(const Duration(seconds: 1));
-                                    post.content = newContent;
-                                    return true;
-                                  },
-                                  sizeFactor: .3),
+                              TableColumn(
+                                title: "Codice",
+                                cellBuilder: (item) => Text(item.id.toString()),
+                              ),
                               LargeTextTableColumn(
                                   title: "Descrizione",
-                                  getter: (post) => post.content,
+                                  getter: (post) => post.author,
                                   setter: (post, newContent, rowIndex) async {
                                     await Future.delayed(const Duration(seconds: 1));
                                     post.content = newContent;
                                     return true;
                                   },
-                                  sizeFactor: .3),
-                              TableColumn(
-                                  id: "createdAt",
-                                  title: "Data caricamento",
-                                  sortable: true,
-                                  cellBuilder: (item) =>
-                                      Text(DateFormat.yMd().format(item.createdAt))),
+                                  sizeFactor: .5),
                               TableColumn(
                                 title: "              ",
                                 sizeFactor: null,
@@ -354,7 +324,7 @@ class BachecaState extends State<Bacheca> {
                                                                 child:Padding(
                                                                     padding: const EdgeInsets.only(left: 12, right: 12),
 
-                                                                    child: Text(item.content)
+                                                                    child: Text("${item.id}")
                                                                 ),
                                                               ),
                                                             ),
@@ -362,7 +332,6 @@ class BachecaState extends State<Bacheca> {
                                                             Padding(
                                                               padding: const EdgeInsets.symmetric(horizontal: 2.0),
                                                               child: Container(
-                                                                height: 170,
                                                                 decoration:BoxDecoration(
                                                                     color: Colors.blueGrey.shade50,
                                                                     borderRadius: BorderRadius.circular(15),
@@ -370,13 +339,11 @@ class BachecaState extends State<Bacheca> {
                                                                 ),
                                                                 child:Padding(
                                                                     padding: const EdgeInsets.only(left: 12, right: 12),
-                                                                    child: Text(item.content)
+                                                                    child: Text(item.author)
 
                                                                 ),
                                                               ),
                                                             ),
-
-                                                            SizedBox(height: 30,),
 
                                                           ],
                                                         ),
@@ -398,41 +365,15 @@ class BachecaState extends State<Bacheca> {
                                                       key: _formKey,
                                                       child: Column(
                                                         mainAxisSize: MainAxisSize.min,
+                                                        mainAxisAlignment: MainAxisAlignment.start,
+                                                        crossAxisAlignment: CrossAxisAlignment.start,
                                                         children: <Widget>[
-                                                          Padding(
-                                                            padding: const EdgeInsets.symmetric(horizontal: 2.0),
-                                                            child: Container(
-                                                              decoration:BoxDecoration(
-                                                                  color: Colors.blueGrey.shade50,
-                                                                  borderRadius: BorderRadius.circular(15),
-                                                                  border: Border.all(color: Colors.deepPurple.shade400)
-                                                              ),
-                                                              child:Padding(
-                                                                  padding: const EdgeInsets.only(left: 12, right: 12),
-
-                                                                  child: Text(item.content)
-                                                              ),
-                                                            ),
-                                                          ),
-                                                          SizedBox(height: 10,),
-                                                          Padding(
-                                                            padding: const EdgeInsets.symmetric(horizontal: 2.0),
-                                                            child: Container(
-                                                              height: 170,
-                                                              decoration:BoxDecoration(
-                                                                  color: Colors.blueGrey.shade50,
-                                                                  borderRadius: BorderRadius.circular(15),
-                                                                  border: Border.all(color: Colors.deepPurple.shade400)
-                                                              ),
-                                                              child:Padding(
-                                                                  padding: const EdgeInsets.only(left: 12, right: 12),
-                                                                  child: Text(item.content)
-
-                                                              ),
-                                                            ),
-                                                          ),
-
-                                                          SizedBox(height: 30,),
+                                                          Text("Codice", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22)),
+                                                          Text("${item.id}"),
+                                                          SizedBox(height: 20,),
+                                                          Text("Descrizione", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22)),
+                                                          Text("${item.author}"),
+                                                          SizedBox(height: 20,),
 
                                                         ],
                                                       ),
@@ -569,15 +510,15 @@ class BachecaState extends State<Bacheca> {
                                 },
                               ),
                             ]),
-                    ),
                           ),
                         ),
                       ),
+                    ),
                   ),
                 ],
               ),
             )
-          ),
+        ),
       ),
 
     );

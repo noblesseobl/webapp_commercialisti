@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:sito_commercialisti/bacheca.dart';
 import 'package:sito_commercialisti/profilo.dart';
+import 'package:sito_commercialisti/tools.dart';
+import 'package:sito_commercialisti/tools2.dart';
 import 'package:sito_commercialisti/transition.dart';
 
 
@@ -75,11 +77,23 @@ class NavBar extends StatelessWidget {
           ),
           ListTile(
             leading: Icon(
-              Icons.key,
+              Icons.chair,
               color: Color(0xff9B63F8),
             ),
-            title: Text('Tools'),
-            onTap: () => print('NavBar Profilo BTN Pressed'),
+            title: Text('Tipologia Cliente'),
+            onTap: (){Navigator.of(context).push(CustomPageRoute(
+                child: Tools(),
+                direction: AxisDirection.up),);},
+          ),
+          ListTile(
+            leading: Icon(
+              Icons.home_work,
+              color: Color(0xff9B63F8),
+            ),
+            title: Text('Ufficio'),
+            onTap: (){Navigator.of(context).push(CustomPageRoute(
+                child: Tools2(),
+                direction: AxisDirection.up),);},
           ),
 
 
