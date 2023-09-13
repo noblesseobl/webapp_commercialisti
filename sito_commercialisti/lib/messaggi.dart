@@ -8,17 +8,38 @@ import 'package:paged_datatable/paged_datatable.dart';
 import 'package:intl/intl.dart';
 import 'Post.dart';
 
-class Bacheca extends StatefulWidget {
-  Bacheca();
+class Messaggi extends StatefulWidget {
+  Messaggi();
 
   @override
-  State<Bacheca> createState() => BachecaState();
+  State<Messaggi> createState() => MessaggiState();
 }
 
-class BachecaState extends State<Bacheca> {
+List list =["Ricevuti", "Inviati"];
+List tipocliente=["Privato", "Aziendale"];
+
+class MessaggiState extends State<Messaggi> {
 
   final _formKey = GlobalKey<FormState>();
   String? testo;
+  String? dropdownValue = list.first;
+  String? dropdownValue2 = tipocliente.first;
+
+  String? get $dropdownValue => null;
+  String? get $dropdownValue2 => null;
+
+  List<Map> categories = [
+    {"name": "Mario Rossi", "isChecked": false},
+    {"name": "Giacomo Giallo", "isChecked": false},
+    {"name": "Luca Verdi", "isChecked": false},
+  ];
+
+  List<Map> categories2 = [
+    {"name": "Fabio Alberti", "isChecked": false},
+    {"name": "Pinco Pallino", "isChecked": false},
+    {"name": "Gianluca Viola", "isChecked": false},
+  ];
+
 
   @override
   Widget build(BuildContext context) {
@@ -96,12 +117,14 @@ class BachecaState extends State<Bacheca> {
 
                         margin: EdgeInsets.fromLTRB(40, 30, 150, 30),
 
-                        child: Row(
+                        child: Column(
+                            children:[
+                              Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           crossAxisAlignment: CrossAxisAlignment.end,
 
                           children: [
-                            Text("Bacheca",style: TextStyle(fontSize: 45, fontWeight: FontWeight.w600, color: Colors.grey.shade700) ),
+                            Text("Messaggi",style: TextStyle(fontSize: 45, fontWeight: FontWeight.w600, color: Colors.grey.shade700) ),
                             Spacer(),
 
                             ElevatedButton(
@@ -122,6 +145,180 @@ class BachecaState extends State<Bacheca> {
                                                 child: Column(
                                                   mainAxisSize: MainAxisSize.min,
                                                   children: <Widget>[
+                                                    Padding(
+                                                      padding: const EdgeInsets.symmetric(horizontal: 0),
+                                                      child: Container(
+                                                        decoration:BoxDecoration(
+                                                            color: Colors.blueGrey.shade50,
+                                                            borderRadius: BorderRadius.circular(15),
+                                                            border: Border.all(color: Colors.deepPurple.shade400)
+                                                        ),
+                                                        child:Padding(
+                                                          padding: const EdgeInsets.only(left: 10),
+                                                          child: DropdownButtonHideUnderline(
+                                                            child: DropdownButton(
+                                                                items: tipocliente!.map<DropdownMenuItem<String>>(
+                                                                        (dynamic value) {
+                                                                      return DropdownMenuItem<String>(
+                                                                        child: Text(value),
+                                                                        value: value.toString(),
+                                                                      );
+                                                                    }).toList(),
+                                                                value: dropdownValue2,
+                                                                iconEnabledColor: Colors.deepPurple.shade400,
+                                                                iconDisabledColor: Colors.deepPurple.shade400,
+                                                                isExpanded: true,
+                                                                icon: const Icon(Icons.arrow_downward),
+                                                                elevation: 16,
+                                                                style:
+                                                                TextStyle(color: Colors.blueGrey.shade700),
+                                                                underline: Container(
+                                                                  width: 100,
+                                                                  height: 2,
+                                                                  color: Colors.deepPurple.shade400,
+                                                                ),
+                                                                onChanged: (String? value) {
+                                                                  setState(() {
+                                                                    dropdownValue2 = value;
+                                                                    print(dropdownValue2);
+                                                                  });
+                                                                }),),),),),
+                                                    SizedBox(height: 20,),
+                                                    if(dropdownValue2==tipocliente[0])
+                                                      Padding(
+                                                        padding: const EdgeInsets.all(20),
+                                                        child:
+                                                        Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                                                          const Text(
+                                                            "Scegli i clienti desiderati: ",
+                                                            style: TextStyle(fontSize: 16),
+                                                          ),
+                                                          const SizedBox(height: 10),
+                                                          const Divider(),
+                                                          const SizedBox(height: 10),
+                                                          Column(
+                                                              children: categories.map((favorite) {
+                                                                return CheckboxListTile(
+                                                                    activeColor: Colors.deepPurple.shade400,
+                                                                    checkboxShape: RoundedRectangleBorder(
+                                                                        borderRadius: BorderRadius.circular(5)),
+                                                                    value: favorite["isChecked"],
+                                                                    title: Text(favorite["name"]),
+                                                                    onChanged: (val) {
+                                                                      setState(() {
+                                                                        favorite["isChecked"] = val;
+                                                                      });
+                                                                    });
+                                                              }).toList()),
+                                                          const SizedBox(height: 10),
+                                                          const Divider(),
+                                                        ]),
+                                                      )
+                                                    else
+                                                      Padding(
+                                                        padding: const EdgeInsets.all(20),
+                                                        child:
+                                                        Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                                                          const Text(
+                                                            "Scegli i clienti desiderati: ",
+                                                            style: TextStyle(fontSize: 16),
+                                                          ),
+                                                          const SizedBox(height: 10),
+                                                          const Divider(),
+                                                          const SizedBox(height: 10),
+                                                          Column(
+                                                              children: categories2.map((favorite) {
+                                                                return CheckboxListTile(
+                                                                    activeColor: Colors.deepPurple.shade400,
+                                                                    checkboxShape: RoundedRectangleBorder(
+                                                                        borderRadius: BorderRadius.circular(5)),
+                                                                    value: favorite["isChecked"],
+                                                                    title: Text(favorite["name"]),
+                                                                    onChanged: (val) {
+                                                                      setState(() {
+                                                                        favorite["isChecked"] = val;
+                                                                      });
+                                                                    });
+                                                              }).toList()),
+                                                          const SizedBox(height: 10),
+                                                          const Divider(),
+                                                        ]),
+                                                      ),
+                                                    Wrap(
+                                                      children: categories.map((favorite) {
+                                                        if (favorite["isChecked"] == true) {
+                                                          return Card(
+                                                            elevation: 3,
+                                                            color: Colors.deepPurple.shade400,
+                                                            child: Padding(
+                                                              padding: const EdgeInsets.all(8.0),
+                                                              child: Row(
+                                                                mainAxisSize: MainAxisSize.min,
+                                                                children: [
+                                                                  Text(
+                                                                    favorite["name"],
+                                                                    style: const TextStyle(color: Colors.white),
+                                                                  ),
+                                                                  const SizedBox(
+                                                                    width: 5,
+                                                                  ),
+                                                                  GestureDetector(
+                                                                    onTap: () {
+                                                                      setState(() {
+                                                                        favorite["isChecked"] = !favorite["isChecked"];
+                                                                      });
+                                                                    },
+                                                                    child: const Icon(
+                                                                      Icons.delete_forever_rounded,
+                                                                      color: Colors.white,
+                                                                    ),
+                                                                  ),
+                                                                ],
+                                                              ),
+                                                            ),
+                                                          );
+                                                        }
+                                                        return Container();
+                                                      }).toList(),
+                                                    ),
+                                                    Wrap(
+                                                      children: categories2.map((favorite) {
+                                                        if (favorite["isChecked"] == true) {
+                                                          return Card(
+                                                            elevation: 3,
+                                                            color: Colors.deepPurple.shade400,
+                                                            child: Padding(
+                                                              padding: const EdgeInsets.all(8.0),
+                                                              child: Row(
+                                                                mainAxisSize: MainAxisSize.min,
+                                                                children: [
+                                                                  Text(
+                                                                    favorite["name"],
+                                                                    style: const TextStyle(color: Colors.white),
+                                                                  ),
+                                                                  const SizedBox(
+                                                                    width: 5,
+                                                                  ),
+                                                                  GestureDetector(
+                                                                    onTap: () {
+                                                                      setState(() {
+                                                                        favorite["isChecked"] = !favorite["isChecked"];
+                                                                      });
+                                                                    },
+                                                                    child: const Icon(
+                                                                      Icons.delete_forever_rounded,
+                                                                      color: Colors.white,
+                                                                    ),
+                                                                  ),
+                                                                ],
+                                                              ),
+                                                            ),
+                                                          );
+                                                        }
+                                                        return Container();
+                                                      }).toList(),
+                                                    ),
+                                                    SizedBox(height: 30),
                                                     Padding(
                                                       padding: const EdgeInsets.symmetric(horizontal: 2.0),
                                                       child: Container(
@@ -251,32 +448,75 @@ class BachecaState extends State<Bacheca> {
                             ),
                           ],
                         ),
+                              SizedBox(height: 24,),
+                              Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 0),
+                                child: Container(
+                                  decoration:BoxDecoration(
+                                      color: Colors.blueGrey.shade50,
+                                      borderRadius: BorderRadius.circular(15),
+                                      border: Border.all(color: Colors.deepPurple.shade400)
+                                  ),
+                                  child:Padding(
+                                    padding: const EdgeInsets.only(left: 10),
+                                    child: DropdownButtonHideUnderline(
+                                      child: DropdownButton(
+                                          items: list!.map<DropdownMenuItem<String>>(
+                                                  (dynamic value) {
+                                                return DropdownMenuItem<String>(
+                                                  child: Text(value),
+                                                  value: value.toString(),
+                                                );
+                                              }).toList(),
+                                          value: dropdownValue,
+                                          iconEnabledColor: Colors.deepPurple.shade400,
+                                          iconDisabledColor: Colors.deepPurple.shade400,
+                                          isExpanded: true,
+                                          icon: const Icon(Icons.arrow_downward),
+                                          elevation: 16,
+                                          style:
+                                          TextStyle(color: Colors.blueGrey.shade700),
+                                          underline: Container(
+                                            width: 100,
+                                            height: 2,
+                                            color: Colors.deepPurple.shade400,
+                                          ),
+                                          onChanged: (String? value) {
+                                            setState(() {
+                                              dropdownValue = value;
+                                              print(dropdownValue);
+                                            });
+                                          }),),),),),
+
+
+                              SizedBox(height: 10,),
+                            ]),
                       ),
                     ),
                   ),
                   SizedBox(height: 20,),
                   Expanded(
-                      child: Material(
-                        elevation: 5,
-                        borderRadius: BorderRadius.circular(12),
-                        shadowColor: Colors.black,
+                    child: Material(
+                      elevation: 5,
+                      borderRadius: BorderRadius.circular(12),
+                      shadowColor: Colors.black,
 
-                        child: Card(
-
-
-                          shape: RoundedRectangleBorder(
-                              side: BorderSide(
-                                color: Colors.deepPurple.shade600,
-                              ),
-                              borderRadius: BorderRadius.circular(12)),
-                          shadowColor: Colors.black26,
-                          color: Colors.white,
+                      child: Card(
 
 
-                          child: Container(
+                        shape: RoundedRectangleBorder(
+                            side: BorderSide(
+                              color: Colors.deepPurple.shade600,
+                            ),
+                            borderRadius: BorderRadius.circular(12)),
+                        shadowColor: Colors.black26,
+                        color: Colors.white,
 
-                            margin: EdgeInsets.fromLTRB(40, 30, 150, 30),
-                            child: PagedDataTable<String, int, Post>(
+
+                        child: Container(
+
+                          margin: EdgeInsets.fromLTRB(40, 30, 150, 30),
+                          child: PagedDataTable<String, int, Post>(
                             rowsSelectable: true,
                             theme: theme,
                             idGetter: (post) => post.id,
@@ -328,100 +568,55 @@ class BachecaState extends State<Bacheca> {
                                 sizeFactor: null,
                                 cellBuilder: (item) => Row(
                                     children: [
-                                      Flexible(child:IconButton(onPressed: (){
+                                      if(1<0)
+                                        Flexible(child:IconButton(onPressed: (){
                                         print(item.id);
-                                      }, icon: Icon(Icons.download, color: Colors.deepPurple.shade400))),
-                                      Flexible(child:IconButton(onPressed: (){
-                                        //print(item.content);
-                                        showDialog(
-                                            context: context,
-                                            builder: (BuildContext context) {
-                                              return StatefulBuilder(
-                                                  builder: (BuildContext context, StateSetter setState) {
-                                                    return AlertDialog(
-                                                      backgroundColor: Colors.deepPurple.shade100,
-                                                      scrollable: true,
-                                                      content: Form(
-                                                        key: _formKey,
-                                                        child: Column(
-                                                          mainAxisSize: MainAxisSize.min,
-                                                          children: <Widget>[
-                                                            Padding(
-                                                              padding: const EdgeInsets.symmetric(horizontal: 2.0),
-                                                              child: Container(
-                                                                decoration:BoxDecoration(
-                                                                    color: Colors.blueGrey.shade50,
-                                                                    borderRadius: BorderRadius.circular(15),
-                                                                    border: Border.all(color: Colors.deepPurple.shade400)
-                                                                ),
-                                                                child:Padding(
-                                                                    padding: const EdgeInsets.only(left: 12, right: 12),
-
-                                                                    child: Text(item.content)
-                                                                ),
-                                                              ),
-                                                            ),
-                                                            SizedBox(height: 10,),
-                                                            Padding(
-                                                              padding: const EdgeInsets.symmetric(horizontal: 2.0),
-                                                              child: Container(
-                                                                height: 170,
-                                                                decoration:BoxDecoration(
-                                                                    color: Colors.blueGrey.shade50,
-                                                                    borderRadius: BorderRadius.circular(15),
-                                                                    border: Border.all(color: Colors.deepPurple.shade400)
-                                                                ),
-                                                                child:Padding(
-                                                                    padding: const EdgeInsets.only(left: 12, right: 12),
-                                                                    child: Text(item.content)
-
-                                                                ),
-                                                              ),
-                                                            ),
-
-                                                            SizedBox(height: 30,),
-
-                                                          ],
-                                                        ),
-                                                      ),
-                                                    );
-                                                  }
-                                              );
-                                            });
-                                      }, icon: Icon(Icons.edit, color: Colors.deepPurple.shade400)),),
+                                      }, icon: Icon(Icons.download, color: Colors.deepPurple.shade400)))
+                                      else
+                                        Flexible(child:IconButton(onPressed: (){
+                  print(item.id);
+                  }, icon: Icon(Icons.download, color: Colors.grey.shade300))),
+                                      if(1<0)
+                                        Flexible(child: IconButton(onPressed: (){
+                                        print(item.id);
+                                      }, icon: Icon(Icons.mail_outline_outlined, color: Colors.deepPurple.shade400)))
+                                      else
+                                        Flexible(child: IconButton(onPressed: (){
+                                        print(item.id);
+                                      }, icon: Icon(Icons.mail_outline_outlined, color: Colors.grey.shade300))),
                                       Flexible(child: IconButton(onPressed: (){showDialog(
-                                          context: context,
-                                          builder: (BuildContext context) {
-                                            return StatefulBuilder(
-                                                builder: (BuildContext context, StateSetter setState) {
-                                                  return AlertDialog(
-                                                    backgroundColor: Colors.deepPurple.shade100,
-                                                    scrollable: true,
-                                                    content: Form(
-                                                      key: _formKey,
-                                                      child: Column(
-                                                        mainAxisSize: MainAxisSize.min,
-                                                        mainAxisAlignment: MainAxisAlignment.start,
-                                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                                        children: <Widget>[
-                                                          Text("Titolo", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22)),
-                                                          Text("${item.content}"),
-                                                          SizedBox(height: 20,),
-                                                          Text("Descrizione", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22)),
-                                                          Text("${item.content}"),
-                                                          SizedBox(height: 20,),
+                                                        context: context,
+                                                        builder: (BuildContext context) {
+                                                          return StatefulBuilder(
+                                                              builder: (BuildContext context, StateSetter setState) {
+                                                                return AlertDialog(
+                                                                  backgroundColor: Colors.deepPurple.shade100,
+                                                                  scrollable: true,
+                                                                  content: Form(
+                                                                    key: _formKey,
+                                                                    child: Column(
+                                                                      mainAxisSize: MainAxisSize.min,
+                                                                      mainAxisAlignment: MainAxisAlignment.start,
+                                                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                                                      children: <Widget>[
+                                                                        Text("Titolo", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22)),
+                                                                        Text("${item.content}"),
+                                                                        SizedBox(height: 20,),
+                                                                        Text("Descrizione", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22)),
+                                                                        Text("${item.content}"),
+                                                                        SizedBox(height: 20,),
 
-                                                        ],
-                                                      ),
-                                                    ),
-                                                  );
-                                                }
-                                            );
-                                          });}, icon: Icon(Icons.remove_red_eye, color: Colors.deepPurple.shade400)),),
-                                      Flexible(child:IconButton(onPressed: (){
-                                        print(item.id);
-                                        tableController.removeRow(item.id);
-                                      }, icon: Icon(Icons.delete, color: Colors.deepPurple.shade400)))
+                                                                      ],
+                                                                    ),
+                                                                  ),
+                                                                );
+                                                              }
+                                                          );
+                                                        });}, icon: Icon(Icons.remove_red_eye, color: Colors.deepPurple.shade400))),
+                                      Flexible(child: IconButton(onPressed: (){
+                                                      print(item.id);
+                                                      tableController.removeRow(item.id);
+                                                    }, icon: Icon(Icons.delete, color: Colors.deepPurple.shade400))),
                                     ]),
                               ),
                             ],
@@ -546,15 +741,15 @@ class BachecaState extends State<Bacheca> {
                                 },
                               ),
                             ]),
-                    ),
                           ),
                         ),
                       ),
+                    ),
                   ),
                 ],
               ),
             )
-          ),
+        ),
       ),
 
     );

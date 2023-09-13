@@ -298,7 +298,7 @@ class Tools2State extends State<Tools2> {
                                 sizeFactor: null,
                                 cellBuilder: (item) => Row(
                                     children: [
-                                      IconButton(onPressed: (){
+                                      Flexible(child:IconButton(onPressed: (){
                                         //print(item.content);
                                         showDialog(
                                             context: context,
@@ -352,8 +352,8 @@ class Tools2State extends State<Tools2> {
                                                   }
                                               );
                                             });
-                                      }, icon: Icon(Icons.edit, color: Colors.deepPurple.shade400)),
-                                      IconButton(onPressed: (){showDialog(
+                                      }, icon: Icon(Icons.edit, color: Colors.deepPurple.shade400))),
+                                      Flexible(child:IconButton(onPressed: (){showDialog(
                                           context: context,
                                           builder: (BuildContext context) {
                                             return StatefulBuilder(
@@ -381,11 +381,11 @@ class Tools2State extends State<Tools2> {
                                                   );
                                                 }
                                             );
-                                          });}, icon: Icon(Icons.remove_red_eye, color: Colors.deepPurple.shade400)),
-                                      IconButton(onPressed: (){
+                                          });}, icon: Icon(Icons.remove_red_eye, color: Colors.deepPurple.shade400))),
+                                      Flexible(child:IconButton(onPressed: (){
                                         print(item.id);
                                         tableController.removeRow(item.id);
-                                      }, icon: Icon(Icons.delete, color: Colors.deepPurple.shade400))
+                                      }, icon: Icon(Icons.delete, color: Colors.deepPurple.shade400)))
                                     ]),
                               ),
                             ],
