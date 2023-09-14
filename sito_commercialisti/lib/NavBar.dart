@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:sito_commercialisti/Dipendenti.dart';
+import 'package:sito_commercialisti/HomePageSito.dart';
 import 'package:sito_commercialisti/bacheca.dart';
 import 'package:sito_commercialisti/messaggi.dart';
 import 'package:sito_commercialisti/profilo.dart';
@@ -47,7 +49,14 @@ class NavBar extends StatelessWidget {
               color: Color(0xff9B63F8),
             ),
             title: Text('Dipendenti'),
-            onTap: () => print('NavBar Profilo BTN Pressed'),
+              onTap: (){
+                Navigator.of(context).push(
+                  CustomPageRoute(
+                    child: Dipendenti(),
+                    direction: AxisDirection.up
+                  ),
+                );
+              },
           ),
           ListTile(
             leading: Icon(
@@ -55,7 +64,13 @@ class NavBar extends StatelessWidget {
               color: Color(0xff9B63F8),
             ),
             title: Text('Clienti'),
-            onTap: () => print('NavBar Profilo BTN Pressed'),
+              onTap: (){
+                Navigator.of(context).push(
+                  CustomPageRoute(
+                    child: HomePageSito(),
+                    direction: AxisDirection.up),
+                );
+              },
           ),
 
           ListTile(
