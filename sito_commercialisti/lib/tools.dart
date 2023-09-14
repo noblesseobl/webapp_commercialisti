@@ -17,6 +17,11 @@ class Tools extends StatefulWidget {
 
 class ToolsState extends State<Tools> {
 
+
+
+  final tableController = PagedDataTableController<String, int, Post>();
+  PagedDataTableThemeData? theme;
+
   final _formKey = GlobalKey<FormState>();
   String? testo;
 
@@ -524,22 +529,9 @@ class ToolsState extends State<Tools> {
     );
   }
 
-
-  @override
-  void dispose() {
-    tableController.dispose();
-    super.dispose();
-  }
-
-
-
 }
 
 
-
-
-final tableController = PagedDataTableController<String, int, Post>();
-PagedDataTableThemeData? theme;
 
 
 

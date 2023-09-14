@@ -20,8 +20,13 @@ class BachecaState extends State<Bacheca> {
   final _formKey = GlobalKey<FormState>();
   String? testo;
 
+
+  final tableController = PagedDataTableController<String, int, Post>();
+  PagedDataTableThemeData? theme;
+
   @override
   Widget build(BuildContext context) {
+
 
 
     return Scaffold(
@@ -561,21 +566,12 @@ class BachecaState extends State<Bacheca> {
   }
 
 
-  @override
-  void dispose() {
-    tableController.dispose();
-    super.dispose();
-  }
-
 
 
 }
 
 
 
-
-final tableController = PagedDataTableController<String, int, Post>();
-PagedDataTableThemeData? theme;
 
 
 

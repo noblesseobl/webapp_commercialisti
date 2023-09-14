@@ -20,6 +20,14 @@ class Tools2State extends State<Tools2> {
   final _formKey = GlobalKey<FormState>();
   String? testo;
 
+
+
+  final tableController = PagedDataTableController<String, int, Post>();
+  PagedDataTableThemeData? theme;
+
+
+
+
   @override
   Widget build(BuildContext context) {
 
@@ -525,21 +533,11 @@ class Tools2State extends State<Tools2> {
   }
 
 
-  @override
-  void dispose() {
-    tableController.dispose();
-    super.dispose();
-  }
 
 
 
 }
 
-
-
-
-final tableController = PagedDataTableController<String, int, Post>();
-PagedDataTableThemeData? theme;
 
 
 

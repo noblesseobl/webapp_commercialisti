@@ -22,6 +22,11 @@ class DipendentiState extends State<Dipendenti> {
 
 
 
+  final tableController = PagedDataTableController<String, int, Post>();
+  PagedDataTableThemeData? theme;
+
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -539,21 +544,11 @@ class DipendentiState extends State<Dipendenti> {
   }
 
 
-  @override
-  void dispose() {
-    tableController.dispose();
-    super.dispose();
-  }
 
 
 
 }
 
-
-
-
-final tableController = PagedDataTableController<String, int, Post>();
-PagedDataTableThemeData? theme;
 
 
 

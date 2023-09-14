@@ -58,6 +58,7 @@ class NavBar extends StatelessWidget {
                 );
               },
           ),
+
           ListTile(
             leading: Icon(
               Icons.handshake_outlined,
@@ -85,6 +86,7 @@ class NavBar extends StatelessWidget {
                   direction: AxisDirection.up),);
             },
           ),
+
           ListTile(
             leading: Icon(
               Icons.newspaper_outlined,
@@ -95,6 +97,7 @@ class NavBar extends StatelessWidget {
                 child: Bacheca(),
                 direction: AxisDirection.up),);},
           ),
+
           ListTile(
             leading: Icon(
               Icons.chair,
@@ -105,6 +108,7 @@ class NavBar extends StatelessWidget {
                 child: Tools(),
                 direction: AxisDirection.up),);},
           ),
+
           ListTile(
             leading: Icon(
               Icons.home_work,
