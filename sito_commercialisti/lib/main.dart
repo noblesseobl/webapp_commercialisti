@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:paged_datatable/paged_datatable.dart';
 import 'package:sito_commercialisti/AggiustaSize.dart';
-import 'package:sito_commercialisti/HomePageSito.dart';
+import 'package:sito_commercialisti/Clienti.dart';
 import 'package:sito_commercialisti/NavBar.dart';
 import 'package:sito_commercialisti/transition.dart';
 
@@ -10,11 +10,8 @@ import 'Post.dart';
 
 void main() {
 
-
   PostsRepository.generate(200);
-  runApp(MyHomePage(
-
-  ));
+  runApp(MyHomePage());
 }
 
 
@@ -202,7 +199,7 @@ class _LoginState extends State<LoginUser> {
                                 onPressed: ()  {
                                   Navigator.of(context).push(
                                                   CustomPageRoute(
-                                                      child: HomePageSito(),
+                                                      child: Clienti(),
                                                        direction:AxisDirection.up
                                                   ),);
                                 },

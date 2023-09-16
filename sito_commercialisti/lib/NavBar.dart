@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sito_commercialisti/Dipendenti.dart';
-import 'package:sito_commercialisti/HomePageSito.dart';
+import 'package:sito_commercialisti/Clienti.dart';
 import 'package:sito_commercialisti/bacheca.dart';
 import 'package:sito_commercialisti/messaggi.dart';
 import 'package:sito_commercialisti/profilo.dart';
@@ -68,7 +68,7 @@ class NavBar extends StatelessWidget {
               onTap: (){
                 Navigator.of(context).push(
                   CustomPageRoute(
-                    child: HomePageSito(),
+                    child: Clienti(),
                     direction: AxisDirection.up),
                 );
               },

@@ -7,7 +7,7 @@ import 'package:sito_commercialisti/NavBar.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:sito_commercialisti/transition.dart';
 
-import 'HomePageSito.dart';
+import 'Clienti.dart';
 
 class Profilo extends StatefulWidget {
   Profilo();
@@ -266,7 +266,7 @@ class ProfiloState extends State<Profilo> {
               onPressed: ()  {
                 Navigator.of(context).push(
                   CustomPageRoute(
-                      child: HomePageSito(),
+                      child: Clienti(),
                       direction:AxisDirection.up
                   ),);
               },
