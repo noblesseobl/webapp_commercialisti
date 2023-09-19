@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:sito_commercialisti/AggiustaSize.dart';
@@ -29,10 +27,7 @@ class ClientiState extends State<Clienti> {
 
 
     return Scaffold(
-
-
           drawer: NavBar(),
-
           appBar: AppBar(
             //leading: Icon(Icons.menu, size: 45, color: Colors.black,),
             elevation: 5,

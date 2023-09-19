@@ -3,7 +3,6 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:paged_datatable/paged_datatable.dart';
 import 'package:sito_commercialisti/AggiustaSize.dart';
 import 'package:sito_commercialisti/Clienti.dart';
-import 'package:sito_commercialisti/NavBar.dart';
 import 'package:sito_commercialisti/transition.dart';
 
 import 'Post.dart';
