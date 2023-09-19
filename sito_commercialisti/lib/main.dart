@@ -3,6 +3,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:paged_datatable/paged_datatable.dart';
 import 'package:sito_commercialisti/AggiustaSize.dart';
 import 'package:sito_commercialisti/Clienti.dart';
+import 'package:sito_commercialisti/messaggi.dart';
 import 'package:sito_commercialisti/transition.dart';
 
 import 'Post.dart';
@@ -198,7 +199,7 @@ class _LoginState extends State<LoginUser> {
                                 onPressed: ()  {
                                   Navigator.of(context).push(
                                                   CustomPageRoute(
-                                                      child: Clienti(),
+                                                      child: Messaggi(),
                                                        direction:AxisDirection.up
                                                   ),);
                                 },

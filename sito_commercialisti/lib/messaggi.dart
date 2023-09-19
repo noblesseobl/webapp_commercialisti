@@ -298,7 +298,7 @@ footer: TextButton(
                                 border: Border.all(color: Colors.deepPurple.shade400)
                             ),
                             child:Padding(
-                              padding: const EdgeInsets.only(left: 10),
+                              padding: const EdgeInsets.only(left: 10, right: 10),
                               child:  DropdownButtonHideUnderline(
                                 child: DropdownButton(
                                     items: list!.map<DropdownMenuItem<String>>(
@@ -345,7 +345,291 @@ footer: TextButton(
                                 builder: (BuildContext context) {
                                   return StatefulBuilder(
                                       builder: (BuildContext context, StateSetter setState) {
-                                        return popUp();
+                                        return AlertDialog(
+                                          
+                                          backgroundColor: Colors.deepPurple.shade100,
+                                          scrollable: true,
+                                          content: Form(
+                                            key: _formKey,
+                                            child: Column(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: <Widget>[
+                                                Padding(
+                                                  padding: const EdgeInsets.symmetric(horizontal: 0),
+                                                  child: Container(
+                                                    decoration:BoxDecoration(
+                                                        color: Colors.blueGrey.shade50,
+                                                        borderRadius: BorderRadius.circular(15),
+                                                        border: Border.all(color: Colors.deepPurple.shade400)
+                                                    ),
+                                                    child:Padding(
+                                                      padding: const EdgeInsets.only(left: 10, right: 10),
+                                                      child: DropdownButtonHideUnderline(
+                                                        child: DropdownButton(
+                                                            items: tipocliente!.map<DropdownMenuItem<String>>(
+                                                                    (dynamic value) {
+                                                                  return DropdownMenuItem<String>(
+                                                                    child: Text(value),
+                                                                    value: value.toString(),
+                                                                  );
+                                                                }).toList(),
+                                                            value: dropdownValue2,
+                                                            iconEnabledColor: Colors.deepPurple.shade400,
+                                                            iconDisabledColor: Colors.deepPurple.shade400,
+                                                            //isExpanded: true,
+                                                            icon: const Icon(Icons.arrow_downward),
+                                                            elevation: 16,
+                                                            style:
+                                                            TextStyle(color: Colors.blueGrey.shade700),
+                                                            underline: Container(
+                                                              width: 100,
+                                                              height: 2,
+                                                              color: Colors.deepPurple.shade400,
+                                                            ),
+                                                            onChanged: (String? value) {
+                                                              setState(() {
+                                                                dropdownValue2 = value;
+                                                                print(dropdownValue2);
+                                                              });
+                                                            }),),),),
+                                                ),
+                                                SizedBox(height: 20,),
+                                                if(dropdownValue2==tipocliente[0])
+                                                  Padding(
+                                                    padding: const EdgeInsets.all(20),
+                                                    child:
+                                                    Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                                                      const Text(
+                                                        "Scegli i clienti desiderati: ",
+                                                        style: TextStyle(fontSize: 16),
+                                                      ),
+                                                      const SizedBox(height: 10),
+                                                      const Divider(),
+                                                      const SizedBox(height: 10),
+                                                      Column(
+                                                          children: categories.map((favorite) {
+                                                            return CheckboxListTile(
+                                                                activeColor: Colors.deepPurple.shade400,
+                                                                checkboxShape: RoundedRectangleBorder(
+                                                                    borderRadius: BorderRadius.circular(5)),
+                                                                value: favorite["isChecked"],
+                                                                title: Text(favorite["name"]),
+                                                                onChanged: (val) {
+                                                                  setState(() {
+                                                                    favorite["isChecked"] = val;
+                                                                  });
+                                                                });
+                                                          }).toList()),
+                                                      const SizedBox(height: 10),
+                                                      const Divider(),
+                                                    ]),
+                                                  )
+                                                else
+                                                  Padding(
+                                                    padding: const EdgeInsets.all(20),
+                                                    child:
+                                                    Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                                                      const Text(
+                                                        "Scegli i clienti desiderati: ",
+                                                        style: TextStyle(fontSize: 16),
+                                                      ),
+                                                      const SizedBox(height: 10),
+                                                      const Divider(),
+                                                      const SizedBox(height: 10),
+                                                      Column(
+                                                          children: categories2.map((favorite) {
+                                                            return CheckboxListTile(
+                                                                activeColor: Colors.deepPurple.shade400,
+                                                                checkboxShape: RoundedRectangleBorder(
+                                                                    borderRadius: BorderRadius.circular(5)),
+                                                                value: favorite["isChecked"],
+                                                                title: Text(favorite["name"]),
+                                                                onChanged: (val) {
+                                                                  setState(() {
+                                                                    favorite["isChecked"] = val;
+                                                                  });
+                                                                });
+                                                          }).toList()),
+                                                      const SizedBox(height: 10),
+                                                      const Divider(),
+                                                    ]),
+                                                  ),
+                                                Wrap(
+                                                  children: categories.map((favorite) {
+                                                    if (favorite["isChecked"] == true) {
+                                                      return Card(
+                                                        elevation: 3,
+                                                        color: Colors.deepPurple.shade400,
+                                                        child: Padding(
+                                                          padding: const EdgeInsets.all(8.0),
+                                                          child: Row(
+                                                            mainAxisSize: MainAxisSize.min,
+                                                            children: [
+                                                              Text(
+                                                                favorite["name"],
+                                                                style: const TextStyle(color: Colors.white),
+                                                              ),
+                                                              const SizedBox(
+                                                                width: 5,
+                                                              ),
+                                                              GestureDetector(
+                                                                onTap: () {
+                                                                  setState(() {
+                                                                    favorite["isChecked"] = !favorite["isChecked"];
+                                                                  });
+                                                                },
+                                                                child: const Icon(
+                                                                  Icons.delete_forever_rounded,
+                                                                  color: Colors.white,
+                                                                ),
+                                                              ),
+                                                            ],
+                                                          ),
+                                                        ),
+                                                      );
+                                                    }
+                                                    return Container();
+                                                  }).toList(),
+                                                ),
+                                                Wrap(
+                                                  children: categories2.map((favorite) {
+                                                    if (favorite["isChecked"] == true) {
+                                                      return Card(
+                                                        elevation: 3,
+                                                        color: Colors.deepPurple.shade400,
+                                                        child: Padding(
+                                                          padding: const EdgeInsets.all(8.0),
+                                                          child: Row(
+                                                            mainAxisSize: MainAxisSize.min,
+                                                            children: [
+                                                              Text(
+                                                                favorite["name"],
+                                                                style: const TextStyle(color: Colors.white),
+                                                              ),
+                                                              const SizedBox(
+                                                                width: 5,
+                                                              ),
+                                                              GestureDetector(
+                                                                onTap: () {
+                                                                  setState(() {
+                                                                    favorite["isChecked"] = !favorite["isChecked"];
+                                                                  });
+                                                                },
+                                                                child: const Icon(
+                                                                  Icons.delete_forever_rounded,
+                                                                  color: Colors.white,
+                                                                ),
+                                                              ),
+                                                            ],
+                                                          ),
+                                                        ),
+                                                      );
+                                                    }
+                                                    return Container();
+                                                  }).toList(),
+                                                ),
+                                                SizedBox(height: 30),
+                                                Padding(
+                                                  padding: const EdgeInsets.symmetric(horizontal: 5.0),
+                                                  child: Container(
+                                                    decoration:BoxDecoration(
+                                                        color: Colors.blueGrey.shade50,
+                                                        borderRadius: BorderRadius.circular(5),
+                                                        border: Border.all(color: Colors.deepPurple.shade400)
+                                                    ),
+                                                    child:Padding(
+                                                      padding: const EdgeInsets.only(left: 12),
+
+                                                      child: TextFormField(
+                                                        decoration: InputDecoration(
+                                                            border: InputBorder.none,
+                                                            hintText: 'Inserisci titolo'
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                                SizedBox(height: 10,),
+                                                Padding(
+                                                  padding: const EdgeInsets.all( 5.0),
+                                                  child: Container(
+                                                    height: 170,
+                                                    width: 500,
+                                                    decoration:BoxDecoration(
+                                                        color: Colors.blueGrey.shade50,
+                                                        borderRadius: BorderRadius.circular(5),
+                                                        border: Border.all(color: Colors.deepPurple.shade400)
+                                                    ),
+                                                    child:TextFormField(
+
+                                                      decoration: InputDecoration(
+                                                        hintText: 'Inserisci descrizione',
+                                                        border: InputBorder.none,
+                                                        filled: true,
+
+                                                      ),
+                                                      keyboardType: TextInputType.multiline,
+                                                      expands: true,
+                                                      maxLines: null,
+                                                      validator: (value) {
+                                                        if (value == null || value.isEmpty) {
+                                                          return 'Inserisci testo!';
+                                                        }
+                                                        testo=value;
+                                                        return null;
+                                                      },
+                                                    ),
+                                                  ),
+                                                ),
+
+                                                SizedBox(height: 30,),
+                                                Row(
+                                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                  children: [
+                                                    Padding(
+
+                                                      padding: const EdgeInsets.all(1.0),
+                                                      child: ElevatedButton(
+                                                        style: ElevatedButton.styleFrom(
+                                                          primary: Colors.deepPurple.shade400, // Background color
+                                                          shape: RoundedRectangleBorder(
+                                                              borderRadius: BorderRadius.circular(20.0)
+                                                          ),
+                                                        ),
+                                                        child: Icon(Icons.upload_rounded),
+
+                                                        onPressed: () {
+                                                          if (_formKey.currentState!.validate()) {
+                                                            _formKey.currentState!.save();
+                                                          }
+                                                        },
+                                                      ),
+                                                    ),
+                                                    Padding(
+                                                      padding: const EdgeInsets.all(8.0),
+                                                      child: ElevatedButton(
+                                                        style: ElevatedButton.styleFrom(
+                                                          primary: Colors.deepPurple.shade400, // Background color
+                                                          shape: RoundedRectangleBorder(
+                                                              borderRadius: BorderRadius.circular(20.0)
+                                                          ),
+                                                        ),
+                                                        child: Text("Submit"),
+
+                                                        onPressed: () {
+                                                          if (_formKey.currentState!.validate()) {
+                                                            _formKey.currentState!.save();
+                                                          }
+                                                        },
+                                                      ),
+                                                    )
+                                                  ],
+                                                ),
+                                                SizedBox(height: 10,),
+                                              ],
+                                            ),
+                                          ),
+                                        );
                                       }
                                   );
                                 });
@@ -373,299 +657,6 @@ footer: TextButton(
   }
 
 
-  //sistema
-
-  AlertDialog popUp(){
-    return AlertDialog(
-        backgroundColor: Colors.deepPurple.shade100,
-        scrollable: true,
-        content: Form(
-          key: _formKey,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 0),
-                child: Container(
-                  decoration:BoxDecoration(
-                      color: Colors.blueGrey.shade50,
-                      borderRadius: BorderRadius.circular(15),
-                      border: Border.all(color: Colors.deepPurple.shade400)
-                  ),
-                  child:Padding(
-                    padding: const EdgeInsets.only(left: 10),
-                    child: DropdownButtonHideUnderline(
-                      child: DropdownButton(
-                          items: tipocliente!.map<DropdownMenuItem<String>>(
-                                  (dynamic value) {
-                                return DropdownMenuItem<String>(
-                                  child: Text(value),
-                                  value: value.toString(),
-                                );
-                              }).toList(),
-                          value: dropdownValue2,
-                          iconEnabledColor: Colors.deepPurple.shade400,
-                          iconDisabledColor: Colors.deepPurple.shade400,
-                          isExpanded: true,
-                          icon: const Icon(Icons.arrow_downward),
-                          elevation: 16,
-                          style:
-                          TextStyle(color: Colors.blueGrey.shade700),
-                          underline: Container(
-                            width: 100,
-                            height: 2,
-                            color: Colors.deepPurple.shade400,
-                          ),
-                          onChanged: (String? value) {
-                            setState(() {
-                              dropdownValue2 = value;
-                              print(dropdownValue2);
-                            });
-                          }),),),),),
-              SizedBox(height: 20,),
-              if(dropdownValue2==tipocliente[0])
-                Padding(
-                  padding: const EdgeInsets.all(20),
-                  child:
-                  Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                    const Text(
-                      "Scegli i clienti desiderati: ",
-                      style: TextStyle(fontSize: 16),
-                    ),
-                    const SizedBox(height: 10),
-                    const Divider(),
-                    const SizedBox(height: 10),
-                    Column(
-                        children: categories.map((favorite) {
-                          return CheckboxListTile(
-                              activeColor: Colors.deepPurple.shade400,
-                              checkboxShape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(5)),
-                              value: favorite["isChecked"],
-                              title: Text(favorite["name"]),
-                              onChanged: (val) {
-                                setState(() {
-                                  favorite["isChecked"] = val;
-                                });
-                              });
-                        }).toList()),
-                    const SizedBox(height: 10),
-                    const Divider(),
-                  ]),
-                )
-              else
-                Padding(
-                  padding: const EdgeInsets.all(20),
-                  child:
-                  Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                    const Text(
-                      "Scegli i clienti desiderati: ",
-                      style: TextStyle(fontSize: 16),
-                    ),
-                    const SizedBox(height: 10),
-                    const Divider(),
-                    const SizedBox(height: 10),
-                    Column(
-                        children: categories2.map((favorite) {
-                          return CheckboxListTile(
-                              activeColor: Colors.deepPurple.shade400,
-                              checkboxShape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(5)),
-                              value: favorite["isChecked"],
-                              title: Text(favorite["name"]),
-                              onChanged: (val) {
-                                setState(() {
-                                  favorite["isChecked"] = val;
-                                });
-                              });
-                        }).toList()),
-                    const SizedBox(height: 10),
-                    const Divider(),
-                  ]),
-                ),
-              Wrap(
-                children: categories.map((favorite) {
-                  if (favorite["isChecked"] == true) {
-                    return Card(
-                      elevation: 3,
-                      color: Colors.deepPurple.shade400,
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              favorite["name"],
-                              style: const TextStyle(color: Colors.white),
-                            ),
-                            const SizedBox(
-                              width: 5,
-                            ),
-                            GestureDetector(
-                              onTap: () {
-                                setState(() {
-                                  favorite["isChecked"] = !favorite["isChecked"];
-                                });
-                              },
-                              child: const Icon(
-                                Icons.delete_forever_rounded,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  }
-                  return Container();
-                }).toList(),
-              ),
-              Wrap(
-                children: categories2.map((favorite) {
-                  if (favorite["isChecked"] == true) {
-                    return Card(
-                      elevation: 3,
-                      color: Colors.deepPurple.shade400,
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              favorite["name"],
-                              style: const TextStyle(color: Colors.white),
-                            ),
-                            const SizedBox(
-                              width: 5,
-                            ),
-                            GestureDetector(
-                              onTap: () {
-                                setState(() {
-                                  favorite["isChecked"] = !favorite["isChecked"];
-                                });
-                              },
-                              child: const Icon(
-                                Icons.delete_forever_rounded,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  }
-                  return Container();
-                }).toList(),
-              ),
-              SizedBox(height: 30),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 2.0),
-                child: Container(
-                  decoration:BoxDecoration(
-                      color: Colors.blueGrey.shade50,
-                      borderRadius: BorderRadius.circular(15),
-                      border: Border.all(color: Colors.deepPurple.shade400)
-                  ),
-                  child:Padding(
-                    padding: const EdgeInsets.only(left: 12),
-
-                    child: TextFormField(
-                      decoration: InputDecoration(
-                          border: InputBorder.none,
-                          hintText: 'Inserisci titolo'
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              SizedBox(height: 10,),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 2.0),
-                child: Container(
-                  height: 170,
-                  decoration:BoxDecoration(
-                      color: Colors.blueGrey.shade50,
-                      borderRadius: BorderRadius.circular(15),
-                      border: Border.all(color: Colors.deepPurple.shade400)
-                  ),
-                  child:Padding(
-                    padding: const EdgeInsets.only(left: 0),
-
-                    child: TextFormField(
-
-                      decoration: InputDecoration(
-                        hintText: 'Inserisci descrizione',
-                        filled: true,
-                      ),
-                      keyboardType: TextInputType.multiline,
-                      expands: false,
-                      maxLines: null,
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Inserisci testo!';
-                        }
-                        testo=value;
-                        return null;
-                      },
-                    ),
-                  ),
-                ),
-              ),
-
-              SizedBox(height: 30,),
-
-
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Padding(
-
-                    padding: const EdgeInsets.all(1.0),
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        primary: Colors.deepPurple.shade400, // Background color
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20.0)
-                        ),
-                      ),
-                      child: Icon(Icons.upload_rounded),
-
-                      onPressed: () {
-                        if (_formKey.currentState!.validate()) {
-                          _formKey.currentState!.save();
-                        }
-                      },
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        primary: Colors.deepPurple.shade400, // Background color
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20.0)
-                        ),
-                      ),
-                      child: Text("Submit"),
-
-                      onPressed: () {
-                        if (_formKey.currentState!.validate()) {
-                          _formKey.currentState!.save();
-                        }
-                      },
-                    ),
-                  )
-                ],
-              ),
-
-
-              SizedBox(height: 10,),
-            ],
-          ),
-        ),
-      );
-
-  }
 
 
 
