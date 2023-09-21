@@ -101,16 +101,6 @@ class ProfiloState extends State<Profilo> {
               children: [
                 ElevatedButton(
                   onPressed: () {
-                    _getFromCamera();
-                  },
-                  child: Text("PICK FROM CAMERA"),
-                  style: ElevatedButton.styleFrom(
-                    primary: Colors.deepPurple.shade400, // Background color
-                  ),
-                ),
-                SizedBox(width: 10,),
-                ElevatedButton(
-                  onPressed: () {
                     _getFromGallery();
                   },
                   child: Text("PICK FROM GALLERY"),

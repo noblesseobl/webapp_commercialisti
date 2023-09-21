@@ -445,11 +445,11 @@ AlertDialog popUp(){
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 2.0),
+            padding: const EdgeInsets.symmetric(horizontal: 5.0),
             child: Container(
               decoration:BoxDecoration(
                   color: Colors.blueGrey.shade50,
-                  borderRadius: BorderRadius.circular(15),
+                  borderRadius: BorderRadius.circular(5),
                   border: Border.all(color: Colors.deepPurple.shade400)
               ),
               child:Padding(
@@ -466,34 +466,32 @@ AlertDialog popUp(){
           ),
           SizedBox(height: 10,),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 2.0),
+            padding: const EdgeInsets.all( 5.0),
             child: Container(
               height: 170,
+              width: 500,
               decoration:BoxDecoration(
                   color: Colors.blueGrey.shade50,
-                  borderRadius: BorderRadius.circular(15),
+                  borderRadius: BorderRadius.circular(5),
                   border: Border.all(color: Colors.deepPurple.shade400)
               ),
-              child:Padding(
-                padding: const EdgeInsets.only(left: 0),
+              child:TextFormField(
 
-                child: TextFormField(
-
-                  decoration: InputDecoration(
-                    hintText: 'Inserisci descrizione',
-                    filled: true,
-                  ),
-                  keyboardType: TextInputType.multiline,
-                  expands: false,
-                  maxLines: null,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Inserisci testo!';
-                    }
-                    testo=value;
-                    return null;
-                  },
+                decoration: InputDecoration(
+                  hintText: 'Inserisci descrizione',
+                  border: InputBorder.none,
+                  filled: true,
                 ),
+                keyboardType: TextInputType.multiline,
+                expands: true,
+                maxLines: null,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Inserisci testo!';
+                  }
+                  testo=value;
+                  return null;
+                },
               ),
             ),
           ),

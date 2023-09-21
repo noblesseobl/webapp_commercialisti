@@ -40,6 +40,7 @@ class MessaggiState extends State<Messaggi> {
     {"name": "Gianluca Viola", "isChecked": false},
   ];
 
+  //late List<Map> categoriescombined= categories+categories2;
 
   final tableController = PagedDataTableController<String, int, Post>();
   PagedDataTableThemeData? theme;
@@ -454,6 +455,7 @@ footer: TextButton(
                                                       const Divider(),
                                                     ]),
                                                   ),
+
                                                 Wrap(
                                                   children: categories.map((favorite) {
                                                     if (favorite["isChecked"] == true) {
@@ -489,7 +491,7 @@ footer: TextButton(
                                                       );
                                                     }
                                                     return Container();
-                                                  }).toList(),
+                                                  }).toList() ,
                                                 ),
                                                 Wrap(
                                                   children: categories2.map((favorite) {
