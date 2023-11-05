@@ -202,82 +202,96 @@ class _LoginState extends State<LoginUser> {
 
                               ElevatedButton(
                                 onPressed: ()    async {
-                                  //
-                                  // if (_formKey.currentState!.validate()) {
-                                  //
-                                  //   ScaffoldMessenger.of(context).showSnackBar(
-                                  //     const SnackBar(content: Text('Processing Data')),
-                                  //   );
-                                  //   try{
-                                  //
-                                  //     var request = http.Request('POST', Uri.parse('http://localhost:51868/Login/LoginCheck'));
-                                  //     request.body = '''{\r\n    "codiceUtente": "MARROS",\r\n\t"password" : "mario!rossi@22"\r\n}''';
-                                  //
-                                  //
-                                  //     http.Response response = (await request.send()) as http.Response;
-                                  //
-                                  //     final jsonData = jsonDecode(response.body) as Map< String, dynamic>;
-                                  //
-                                  //     if (jsonData["retCode"]!="-1") {
-                                  //
-                                  //
-                                  //       request = http.Request('POST', Uri.parse('http://localhost:51868/token'));
-                                  //       request.bodyFields = {
-                                  //         'username': 'super',
-                                  //         'password': 'super',
-                                  //         'grant_type': 'password'
-                                  //       };
-                                  //
-                                  //       http.Response response2 = (await request.send()) as http.Response;
-                                  //
-                                  //       final jsonData2 = jsonDecode(response2.body) as Map< String, dynamic>;
-                                  //
-                                  //
-                                  //       token = jsonData2["access_token"];
-                                  //
-                                  //
-                                  //       //
-                                  //       // if (response.statusCode == 200) {
-                                  //       //   Navigator.of(context).push(
-                                  //       //     CustomPageRoute(
-                                  //       //         child: Messaggi(),
-                                  //       //         direction:AxisDirection.up
-                                  //       //     ),);
-                                  //       // }  else {
-                                  //       //   print(response.reasonPhrase);
-                                  //       // }
-                                  //
-                                  //
-                                  //
-                                  //
-                                  //
-                                  //     }
-                                  //     else if (jsonData["retCode"]=="-1"){
-                                  //       print(response.reasonPhrase);
-                                  //       sbagliato=true;
-                                  //     }else{
-                                  //       print(response.reasonPhrase);
-                                  //       sbagliato=true;
-                                  //     }
-                                  //
-                                  //
-                                  //
-                                  //   }catch(er){
-                                  //     print(er);
-                                  //   }
-                                  //
-                                  //
-                                  //
-                                  // }
+
+                                  if (_formKey.currentState!.validate()) {
+
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(content: Text('Processing Data')),
+                                    );
+
+
+                                    try{
 
 
 
-                                  Navigator.of(context).push(
-                                  CustomPageRoute(
-                                  child: Messaggi(),
-                                  direction:AxisDirection.up
-                                  ),);
 
+                                      var request = http.Request('POST', Uri.parse('www.studiodoc.it/api/Login/LoginCheck'));
+                                      request.body = '''{\r\n    "codiceUtente": "MARRSI",\r\n\t"password" : "giove002"\r\n}''';
+
+
+                                      http.StreamedResponse response = await request.send() ;
+
+
+                                      if (response.statusCode == 200) {
+                                        print(response.stream.bytesToString());
+                                      }
+                                      else {
+                                        print(response.reasonPhrase);
+                                      }
+
+                                      print("ciao");
+                                      // if (jsonData["retCode"]!="-1") {
+                                      //
+                                      //
+                                      //   request = http.Request('POST', Uri.parse('http://www.studiodoc.it/api/token'));
+                                      //   request.bodyFields = {
+                                      //     'username': 'super',
+                                      //     'password': 'super',
+                                      //     'grant_type': 'password'
+                                      //   };
+                                      //
+                                      //   http.Response response2 = (await request.send()) as http.Response;
+                                      //
+                                      //   final jsonData2 = jsonDecode(response2.body) as Map< String, dynamic>;
+                                      //
+                                      //
+                                      //   token = jsonData2["access_token"];
+                                      //   print(token);
+                                      //
+                                      //
+                                      //
+                                      //   if (response.statusCode == 200) {
+                                      //     Navigator.of(context).push(
+                                      //       CustomPageRoute(
+                                      //           child: Messaggi(),
+                                      //           direction:AxisDirection.up
+                                      //       ),);
+                                      //   }  else {
+                                      //     print(response.reasonPhrase);
+                                      //   }
+                                      //
+                                      //
+                                      //
+                                      //
+                                      //
+                                      // }
+                                      // else if (jsonData["retCode"]=="-1"){
+                                      //   print(response.reasonPhrase);
+                                      //   sbagliato=true;
+                                      // }
+                                      // else{
+                                      //   print(response.reasonPhrase);
+                                      //   sbagliato=true;
+                                      // }
+
+
+
+                                    }catch(er){
+                                      print(er);
+                                    }
+
+
+
+                                  }
+
+                                  //
+                                  //
+                                  // Navigator.of(context).push(
+                                  // CustomPageRoute(
+                                  // child: Messaggi(),
+                                  // direction:AxisDirection.up
+                                  // ),);
+                                  //
 
 
                                 },

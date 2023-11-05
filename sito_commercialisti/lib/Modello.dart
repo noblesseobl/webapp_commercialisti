@@ -19,3 +19,5 @@ class Modello {
 
 
 String? token=null;
+String? token_type=null;
+int? expiration=null;
