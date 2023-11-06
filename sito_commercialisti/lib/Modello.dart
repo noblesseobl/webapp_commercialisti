@@ -1,23 +1,20 @@
 
+
+
 class Modello {
-  Modello? _instanza= null;
+  static final Modello _singleton = Modello._internal();
 
-
-  _Modello() {
-    // TODO: implement _Modello
-    throw UnimplementedError();
+  factory Modello() {
+    return _singleton;
   }
 
-  Modello? getModello(){
-    if (_instanza==null){
-      _instanza=_Modello();
-    }
-    return _instanza;
-  }
+  Modello._internal();
+
+
+   String? token=null;
+   String? token_type=null;
+   int? expiration=null;
+   //le faccio statiche ???
 
 }
 
-
-String? token=null;
-String? token_type=null;
-int? expiration=null;

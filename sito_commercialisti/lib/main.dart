@@ -77,8 +77,10 @@ class _LoginState extends State<LoginUser> {
 
   GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
+  Modello? modello=Modello();
 
   Future<http.Response> login() {
+
     return http.post( Uri.parse('http://www.studiodoc.it/api/Login/LoginCheck'),
       headers: <String, String>{
         'Content-Type': 'application/json',
@@ -251,9 +253,9 @@ class _LoginState extends State<LoginUser> {
                                         if (response2.statusCode == 200) {
                                           //salva token ed entra
 
-                                          token= jsonData2["access_token"];
-                                          token_type= jsonData2["token_type"];
-                                          expiration= jsonData2["expires_in"];
+                                          modello!.token= jsonData2["access_token"];
+                                          modello!.token_type= jsonData2["token_type"];
+                                          modello!.expiration= jsonData2["expires_in"];
 
                                           Navigator.of(context).push(
                                             CustomPageRoute(

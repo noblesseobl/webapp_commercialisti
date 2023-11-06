@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -9,6 +10,7 @@ import 'package:paged_datatable/paged_datatable.dart';
 import 'package:intl/intl.dart';
 import 'Post.dart';
 import 'package:http/http.dart' as http;
+import 'package:file_picker/file_picker.dart';
 
 
 class Messaggi extends StatefulWidget {
@@ -25,11 +27,15 @@ class MessaggiState extends State<Messaggi> {
 
   final _formKey = GlobalKey<FormState>();
   String? testo;
+  File? file;
+  String? titolo;
   String? dropdownValue = list.first;
   String? dropdownValue2 = tipocliente.first;
 
   String? get $dropdownValue => null;
   String? get $dropdownValue2 => null;
+
+  Modello modello=Modello();
 
   List<Map> categories = [
     {"name": "Mario Rossi", "isChecked": false},
@@ -50,9 +56,10 @@ class MessaggiState extends State<Messaggi> {
 
 
 
+
   @override
   Widget build(BuildContext context) {
-
+    getMessaggi();
     return Scaffold(
       drawer: NavBar(),
       appBar: AppBar(
@@ -323,42 +330,7 @@ class MessaggiState extends State<Messaggi> {
                             shape: CircleBorder( ),
                           ),
 
-                          onPressed: () async {
-
-                            var request = http.Request('GET', Uri.parse('http://www.studiodoc.it/api/Studio/StudioListGet/-1'));
-                            request.body = '''''';
-                            request.headers['Authorization'] = 'Bearer $token';
-
-                            http.StreamedResponse response3 = await request.send();
-
-                            if (response3.statusCode == 200) {
-                              print(await response3.stream.bytesToString());
-                            }
-                            else {
-                              print(response3.reasonPhrase);
-                            }
-
-
-                            // var request = http.Request('POST', Uri.parse('http://www.studiodoc.it/api/Messaggio/MessaggioMsgGet'));
-                            // request.body = '''{\r\n    "studioId": "1",
-                            // \r\n    "inviatoDaStudio" : "true",
-                            // \r\n    "dipendenteId": null,
-                            // \r\n    "clienteId": null,
-                            // \r\n    "ufficioId": null,
-                            // \r\n    "dataDal": "19000101",
-                            // \r\n    "dataAl": "19000101",
-                            // \r\n    "messaggioId": "1"\r\n}''';
-                            // request.headers['Authorization'] = 'Bearer $token';
-                            //
-                            // http.StreamedResponse response = await request.send();
-                            //
-                            // if (response.statusCode == 200) {
-                            //   print(await response.stream.bytesToString());
-                            // }
-                            // else {
-                            // print(response.reasonPhrase);
-                            // }
-
+                          onPressed: () {
 
                             showDialog(
                                 context: context,
@@ -566,6 +538,13 @@ class MessaggiState extends State<Messaggi> {
                                                             border: InputBorder.none,
                                                             hintText: 'Inserisci titolo'
                                                         ),
+                                                        validator: (value) {
+                                                          if (value == null || value.isEmpty) {
+                                                            return 'Inserisci titolo!';
+                                                          }
+                                                          titolo=value;
+                                                          return null;
+                                                        },
                                                       ),
                                                     ),
                                                   ),
@@ -604,6 +583,7 @@ class MessaggiState extends State<Messaggi> {
                                                 ),
 
                                                 SizedBox(height: 30,),
+
                                                 Row(
                                                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                                   children: [
@@ -619,9 +599,11 @@ class MessaggiState extends State<Messaggi> {
                                                         ),
                                                         child: Icon(Icons.upload_rounded),
 
-                                                        onPressed: () {
+                                                        onPressed: () async {
                                                           if (_formKey.currentState!.validate()) {
                                                             _formKey.currentState!.save();
+
+                                                            //richiama il file picker                                                           }
                                                           }
                                                         },
                                                       ),
@@ -637,15 +619,38 @@ class MessaggiState extends State<Messaggi> {
                                                         ),
                                                         child: Text("Submit"),
 
-                                                        onPressed: () {
+                                                        onPressed: () async {
+
                                                           if (_formKey.currentState!.validate()) {
-                                                            _formKey.currentState!.save();
+
+                                                            var request = http.Request('POST', Uri.parse('http://www.studiodoc.it/api/Messaggio/MessaggioMsgMng'));
+                                                            request.body = '''{\r\n    
+                                                            "studioId" : "1",
+                                                            \r\n    "titolo": $titolo,
+                                                            \r\n    "testo" : $testo,
+                                                            \r\n    "inviatoDaStudio" : "true",
+                                                            \r\n    "dipendenteId" : null,
+                                                            \r\n    "clienteIds" :  "3",
+                                                            \r\n    "utenteInvioMsgId": "3",
+                                                            \r\n    "allegatoFileNames": $file,
+                                                            \r\n    "tipoOperazione" : "I"\r\n}\r\n''';
+
+                                                            http.StreamedResponse response = await request.send();
+
+                                                            if (response.statusCode == 200) {
+                                                              print(await response.stream.bytesToString());
+                                                            }
+                                                            else {
+                                                              print(response.reasonPhrase);
+                                                            }
+
                                                           }
                                                         },
                                                       ),
                                                     )
                                                   ],
                                                 ),
+
                                                 SizedBox(height: 10,),
                                               ],
                                             ),
@@ -679,9 +684,35 @@ class MessaggiState extends State<Messaggi> {
 
 
 
+  getMessaggi() async {
+    var request = http.Request('POST', Uri.parse('http://www.studiodoc.it/api/Messaggio/MessaggioMsgGet'));
+    String tt=modello.token!;
+    request.body = '''{\r\n    
+    "studioId": "1",\r\n    
+    "inviatoDaStudio" : "true",\r\n    
+    "dipendenteId": null,\r\n    
+    "clienteId": null,\r\n    
+    "ufficioId": null,\r\n    
+    "dataDal": "19000101",\r\n    
+    "dataAl": "19000101",\r\n    
+    "messaggioId": "1"\r\n}''';
+    request.headers['Authorization'] = 'Bearer $tt';
+
+    http.StreamedResponse response = await request.send();
+
+    if (response.statusCode == 200) {
+      print(await response.stream.bytesToString());
+    }
+    else {
+      print(response.reasonPhrase);
+    }
+  }
 
 
 }
+
+
+
 
 
 //sposta nel table se poi ti dovessero servire
