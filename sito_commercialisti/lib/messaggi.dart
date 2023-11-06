@@ -3,10 +3,13 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:sito_commercialisti/AggiustaSize.dart';
+import 'package:sito_commercialisti/Modello.dart';
 import 'package:sito_commercialisti/NavBar.dart';
 import 'package:paged_datatable/paged_datatable.dart';
 import 'package:intl/intl.dart';
 import 'Post.dart';
+import 'package:http/http.dart' as http;
+
 
 class Messaggi extends StatefulWidget {
   Messaggi();
@@ -49,7 +52,6 @@ class MessaggiState extends State<Messaggi> {
 
   @override
   Widget build(BuildContext context) {
-
 
     return Scaffold(
       drawer: NavBar(),
@@ -103,7 +105,6 @@ class MessaggiState extends State<Messaggi> {
                 padding: const EdgeInsets.only(top:80, left: 3, right: 3),
                 child: Card(
 
-
                   elevation: 5,
                   shape: RoundedRectangleBorder(
                       side: BorderSide(
@@ -113,6 +114,8 @@ class MessaggiState extends State<Messaggi> {
                   shadowColor: Colors.black26,
                   color: Colors.white,
                   child: Container(
+
+                    margin: EdgeInsets.symmetric(vertical: 5, horizontal: 20),
 
                     child: PagedDataTable<String, int, Post>(
                       rowsSelectable: true,
@@ -223,19 +226,7 @@ class MessaggiState extends State<Messaggi> {
                             id: "authorName",
                             title: "Author's name",
                             chipFormatter: (text) => "By $text"),
-                        /* DropdownTableFilter<Gender>(
-            id: "gender",
-            title: "Gender",
-            defaultValue: Gender.male,
-            chipFormatter: (gender) =>
-            'Only ${gender.name.toLowerCase()} posts',
-            items: const [
-              DropdownMenuItem(value: Gender.male, child: Text("Male")),
-              DropdownMenuItem(value: Gender.female, child: Text("Female")),
-              DropdownMenuItem(
-                  value: Gender.unespecified, child: Text("Unspecified")),
-            ]),
-  */
+
                         DatePickerTableFilter(
                           id: "date",
                           title: "Date",
@@ -252,17 +243,9 @@ class MessaggiState extends State<Messaggi> {
                           lastDate: DateTime.now(),
                         )
                       ],
-                      /*
-footer: TextButton(
-  onPressed: () {},
-  child: const Text("Im a footer button"),
-),
- */
 
 
                     ),
-
-                    margin: EdgeInsets.symmetric(vertical: 5, horizontal: 20),
 
                 ),
               )
@@ -340,7 +323,43 @@ footer: TextButton(
                             shape: CircleBorder( ),
                           ),
 
-                          onPressed: () {
+                          onPressed: () async {
+
+                            var request = http.Request('GET', Uri.parse('http://www.studiodoc.it/api/Studio/StudioListGet/-1'));
+                            request.body = '''''';
+                            request.headers['Authorization'] = 'Bearer $token';
+
+                            http.StreamedResponse response3 = await request.send();
+
+                            if (response3.statusCode == 200) {
+                              print(await response3.stream.bytesToString());
+                            }
+                            else {
+                              print(response3.reasonPhrase);
+                            }
+
+
+                            // var request = http.Request('POST', Uri.parse('http://www.studiodoc.it/api/Messaggio/MessaggioMsgGet'));
+                            // request.body = '''{\r\n    "studioId": "1",
+                            // \r\n    "inviatoDaStudio" : "true",
+                            // \r\n    "dipendenteId": null,
+                            // \r\n    "clienteId": null,
+                            // \r\n    "ufficioId": null,
+                            // \r\n    "dataDal": "19000101",
+                            // \r\n    "dataAl": "19000101",
+                            // \r\n    "messaggioId": "1"\r\n}''';
+                            // request.headers['Authorization'] = 'Bearer $token';
+                            //
+                            // http.StreamedResponse response = await request.send();
+                            //
+                            // if (response.statusCode == 200) {
+                            //   print(await response.stream.bytesToString());
+                            // }
+                            // else {
+                            // print(response.reasonPhrase);
+                            // }
+
+
                             showDialog(
                                 context: context,
                                 builder: (BuildContext context) {
@@ -543,7 +562,7 @@ footer: TextButton(
                                                       padding: const EdgeInsets.only(left: 12),
 
                                                       child: TextFormField(
-                                                        decoration: InputDecoration(
+                                                        decoration: const InputDecoration(
                                                             border: InputBorder.none,
                                                             hintText: 'Inserisci titolo'
                                                         ),
@@ -564,7 +583,7 @@ footer: TextButton(
                                                     ),
                                                     child:TextFormField(
 
-                                                      decoration: InputDecoration(
+                                                      decoration: const InputDecoration(
                                                         hintText: 'Inserisci descrizione',
                                                         border: InputBorder.none,
                                                         filled: true,
@@ -638,7 +657,7 @@ footer: TextButton(
                           },
 
 
-                          child: Icon(
+                          child: const Icon(
                             Icons.add,
                             color: Colors.black,
                             size: 20,
@@ -663,3 +682,27 @@ footer: TextButton(
 
 
 }
+
+
+//sposta nel table se poi ti dovessero servire
+
+/*
+footer: TextButton(
+  onPressed: () {},
+  child: const Text("Im a footer button"),
+),
+ */
+
+/* DropdownTableFilter<Gender>(
+            id: "gender",
+            title: "Gender",
+            defaultValue: Gender.male,
+            chipFormatter: (gender) =>
+            'Only ${gender.name.toLowerCase()} posts',
+            items: const [
+              DropdownMenuItem(value: Gender.male, child: Text("Male")),
+              DropdownMenuItem(value: Gender.female, child: Text("Female")),
+              DropdownMenuItem(
+                  value: Gender.unespecified, child: Text("Unspecified")),
+            ]),
+  */

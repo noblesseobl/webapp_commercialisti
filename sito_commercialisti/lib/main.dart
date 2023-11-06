@@ -77,6 +77,31 @@ class _LoginState extends State<LoginUser> {
 
   GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
+
+  Future<http.Response> login() {
+    return http.post( Uri.parse('http://www.studiodoc.it/api/Login/LoginCheck'),
+      headers: <String, String>{
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({
+        "codiceUtente": username,
+        "password" : password
+      }),
+    );
+  }
+
+  Future<http.StreamedResponse> getToken() {
+
+    var request = http.Request('POST', Uri.parse('http://www.studiodoc.it/api/token'));
+    request.bodyFields = {
+      'username': 'super',
+      'password': 'super',
+      'grant_type': 'password'
+    };
+    return request.send();
+
+  }
+
   @override
   Widget build(BuildContext context) {
     mediaQueryData = MediaQuery.of(context);
@@ -138,9 +163,10 @@ class _LoginState extends State<LoginUser> {
                                       validator: (value) {
                                         if (value == null || value.isEmpty) {
                                           return 'Please enter some text';
-                                        }else if (!RegExp(r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+").hasMatch(value) ){
-                                          return 'Please enter a valid email';
                                         }
+                                        // else if (!RegExp(r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+").hasMatch(value) ){
+                                        //   return 'Please enter a valid email';
+                                        // }
                                         return null;
                                       },
                                       decoration: InputDecoration(
@@ -212,88 +238,41 @@ class _LoginState extends State<LoginUser> {
 
                                     try{
 
+                                      //chiamata per il login
+                                      http.Response response = await login();
+                                      final jsonData = jsonDecode(response.body) as Map<String, dynamic>;
 
+                                      if (jsonData["retCode"]!="-1") { //login andato a buon fine
 
+                                        //chiamata per il token
+                                        http.StreamedResponse response2 = await getToken();
+                                        final jsonData2 =  jsonDecode(await response2.stream.bytesToString()) as Map<String, dynamic>;
 
-                                      var request = http.Request('POST', Uri.parse('www.studiodoc.it/api/Login/LoginCheck'));
-                                      request.body = '''{\r\n    "codiceUtente": "MARRSI",\r\n\t"password" : "giove002"\r\n}''';
+                                        if (response2.statusCode == 200) {
+                                          //salva token ed entra
 
+                                          token= jsonData2["access_token"];
+                                          token_type= jsonData2["token_type"];
+                                          expiration= jsonData2["expires_in"];
 
-                                      http.StreamedResponse response = await request.send() ;
+                                          Navigator.of(context).push(
+                                            CustomPageRoute(
+                                                child: Messaggi(),
+                                                direction:AxisDirection.up
+                                            ),);
 
+                                        } else { print(response2.reasonPhrase);}
 
-                                      if (response.statusCode == 200) {
-                                        print(response.stream.bytesToString());
                                       }
-                                      else {
+                                      else if (jsonData["retCode"]=="-1"){
                                         print(response.reasonPhrase);
+                                        sbagliato=true;
                                       }
-
-                                      print("ciao");
-                                      // if (jsonData["retCode"]!="-1") {
-                                      //
-                                      //
-                                      //   request = http.Request('POST', Uri.parse('http://www.studiodoc.it/api/token'));
-                                      //   request.bodyFields = {
-                                      //     'username': 'super',
-                                      //     'password': 'super',
-                                      //     'grant_type': 'password'
-                                      //   };
-                                      //
-                                      //   http.Response response2 = (await request.send()) as http.Response;
-                                      //
-                                      //   final jsonData2 = jsonDecode(response2.body) as Map< String, dynamic>;
-                                      //
-                                      //
-                                      //   token = jsonData2["access_token"];
-                                      //   print(token);
-                                      //
-                                      //
-                                      //
-                                      //   if (response.statusCode == 200) {
-                                      //     Navigator.of(context).push(
-                                      //       CustomPageRoute(
-                                      //           child: Messaggi(),
-                                      //           direction:AxisDirection.up
-                                      //       ),);
-                                      //   }  else {
-                                      //     print(response.reasonPhrase);
-                                      //   }
-                                      //
-                                      //
-                                      //
-                                      //
-                                      //
-                                      // }
-                                      // else if (jsonData["retCode"]=="-1"){
-                                      //   print(response.reasonPhrase);
-                                      //   sbagliato=true;
-                                      // }
-                                      // else{
-                                      //   print(response.reasonPhrase);
-                                      //   sbagliato=true;
-                                      // }
-
-
-
                                     }catch(er){
                                       print(er);
                                     }
 
-
-
                                   }
-
-                                  //
-                                  //
-                                  // Navigator.of(context).push(
-                                  // CustomPageRoute(
-                                  // child: Messaggi(),
-                                  // direction:AxisDirection.up
-                                  // ),);
-                                  //
-
-
                                 },
                                 child: Text("Accedi", style: TextStyle(fontSize: 16),),
                                 style: ElevatedButton.styleFrom(
@@ -371,6 +350,9 @@ class _LoginState extends State<LoginUser> {
               ),
 
             )));
+
+
+
   }
 
 
@@ -399,6 +381,8 @@ class _LoginState extends State<LoginUser> {
     );
   }
 }
+
+
 
 
 
