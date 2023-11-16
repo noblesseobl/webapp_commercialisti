@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 
@@ -687,21 +688,29 @@ class MessaggiState extends State<Messaggi> {
   getMessaggi() async {
     var request = http.Request('POST', Uri.parse('http://www.studiodoc.it/api/Messaggio/MessaggioMsgGet'));
     String tt=modello.token!;
-    request.body = '''{\r\n    
-    "studioId": "1",\r\n    
-    "inviatoDaStudio" : "true",\r\n    
-    "dipendenteId": null,\r\n    
-    "clienteId": null,\r\n    
-    "ufficioId": null,\r\n    
-    "dataDal": "19000101",\r\n    
-    "dataAl": "19000101",\r\n    
-    "messaggioId": "1"\r\n}''';
+    request.bodyFields={
+
+        "studioId": modello!.studioId.toString(),
+        "inviatoDaStudio" : "true",  //<-- true / false
+        "dipendenteId": "null",        //<-- filtro se non null
+        "clienteId": "null",           //<-- filtro se non null
+        "ufficioId": "null",          // <-- filtro se non null
+        "dataDal": "20230801",       //<-- data nel formato YYYYMMDD
+        "dataAl": "19000101",       // <-- data nel formato YYYYMMDD
+        "messaggioId": "null"          //<-- filtro se non null
+
+
+      };
     request.headers['Authorization'] = 'Bearer $tt';
 
     http.StreamedResponse response = await request.send();
+    response.stream.asBroadcastStream();
+
+    var jsonData=  jsonDecode(await response.stream.bytesToString());
+
 
     if (response.statusCode == 200) {
-      print(await response.stream.bytesToString());
+      print(jsonData);
     }
     else {
       print(response.reasonPhrase);

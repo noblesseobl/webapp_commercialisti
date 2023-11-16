@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:sito_commercialisti/Dipendenti.dart';
 import 'package:sito_commercialisti/Clienti.dart';
 import 'package:sito_commercialisti/bacheca.dart';
-import 'package:sito_commercialisti/messaggi.dart';
+import 'package:sito_commercialisti/Messaggi.dart';
 import 'package:sito_commercialisti/profilo.dart';
 import 'package:sito_commercialisti/tools.dart';
 import 'package:sito_commercialisti/tools2.dart';

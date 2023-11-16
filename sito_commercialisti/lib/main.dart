@@ -1,12 +1,10 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:paged_datatable/paged_datatable.dart';
 import 'package:sito_commercialisti/AggiustaSize.dart';
-import 'package:sito_commercialisti/Clienti.dart';
 import 'package:sito_commercialisti/Modello.dart';
-import 'package:sito_commercialisti/messaggi.dart';
+import 'package:sito_commercialisti/Messaggi.dart';
 import 'package:sito_commercialisti/transition.dart';
 import 'package:http/http.dart' as http;
 import 'Post.dart';
@@ -17,16 +15,11 @@ void main() {
   runApp(MyHomePage());
 }
 
-
-
-
 class MyHomePage extends StatefulWidget {
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
 }
-
-
 
 class _MyHomePageState extends State<MyHomePage> {
 
@@ -67,9 +60,9 @@ class LoginUser extends StatefulWidget {
   State<LoginUser> createState() => _LoginState();
 }
 
+
+
 class _LoginState extends State<LoginUser> {
-
-
 
 
   String username="";
@@ -104,6 +97,20 @@ class _LoginState extends State<LoginUser> {
 
   }
 
+  Future<http.StreamedResponse> getDipendente(){
+
+    var request = http.Request('POST', Uri.parse('http://www.studiodoc.it/api/Dipendente/DipendenteListGet'));
+    String tt=modello!.token!;
+    request.bodyFields = {
+      "dipendenteId" : modello!.dipendenteId.toString(),
+      "ufficioId": "null"
+    };
+    request.headers['Authorization'] = 'Bearer $tt';
+
+
+    return request.send();
+  }
+
   @override
   Widget build(BuildContext context) {
     mediaQueryData = MediaQuery.of(context);
@@ -127,7 +134,7 @@ class _LoginState extends State<LoginUser> {
 
                               Padding(
                                   padding: getPadding(top: 11),
-                                  child: Text("Welcome!",
+                                  child: const Text("Welcome!",
                                       overflow: TextOverflow.ellipsis,
                                       textAlign: TextAlign.left,
                                       style: TextStyle(
@@ -137,7 +144,7 @@ class _LoginState extends State<LoginUser> {
 
                               Padding(
                                   padding: getPadding(top: 10),
-                                  child: Text("Login",
+                                  child: const Text("Login",
                                       overflow: TextOverflow.ellipsis,
                                       textAlign: TextAlign.left,
                                       style: TextStyle(
@@ -171,7 +178,7 @@ class _LoginState extends State<LoginUser> {
                                         // }
                                         return null;
                                       },
-                                      decoration: InputDecoration(
+                                      decoration: const InputDecoration(
                                           border: InputBorder.none,
                                           hintText: 'Username'
                                       ),
@@ -204,7 +211,7 @@ class _LoginState extends State<LoginUser> {
                                         }
                                         return null;
                                       },
-                                      decoration: InputDecoration(
+                                      decoration: const InputDecoration(
                                           border: InputBorder.none,
                                           hintText: 'Password'
                                       ),
@@ -218,7 +225,7 @@ class _LoginState extends State<LoginUser> {
 
                               Visibility(
                                 visible: sbagliato,
-                                child: Text("Username o password errati",
+                                child: const Text("Username o password errati",
                                     style: TextStyle(
                                         color: Colors.red,
                                         fontSize: 15,
@@ -246,10 +253,12 @@ class _LoginState extends State<LoginUser> {
 
                                       if (jsonData["retCode"]!="-1") { //login andato a buon fine
 
+                                        modello!.dipendenteId=jsonData["retCode"];
+                                        
                                         //chiamata per il token
                                         http.StreamedResponse response2 = await getToken();
                                         final jsonData2 =  jsonDecode(await response2.stream.bytesToString()) as Map<String, dynamic>;
-
+                                        response2.stream.asBroadcastStream();
                                         if (response2.statusCode == 200) {
                                           //salva token ed entra
 
@@ -257,11 +266,55 @@ class _LoginState extends State<LoginUser> {
                                           modello!.token_type= jsonData2["token_type"];
                                           modello!.expiration= jsonData2["expires_in"];
 
-                                          Navigator.of(context).push(
-                                            CustomPageRoute(
-                                                child: Messaggi(),
-                                                direction:AxisDirection.up
-                                            ),);
+
+                                          //chiamata per definire il ruolo e i dati del dipendente
+
+
+                                          http.StreamedResponse response3 = await getDipendente();
+
+                                          response3.stream.asBroadcastStream();
+                                          final jsonData3 =  jsonDecode(await response3.stream.bytesToString());
+
+                                          if (response3.statusCode == 200) {
+
+                                            for (var tizio in jsonData3){
+                                              if(modello!.dipendenteId==tizio["dipendenteId"]){
+                                                modello!.codiceUtente= tizio["codiceUtente"];
+                                                modello!.nome= tizio["dipendenteNome"];
+                                                modello!.cognome= tizio["dipendenteCognome"];
+                                                modello!.ufficioId= tizio["ufficioId"];
+                                                modello!.ufficioDescr= tizio["ufficioDescr"];
+                                                modello!.email= tizio["email"];
+                                                modello!.telefono= tizio["telefono"];
+                                                modello!.admin= tizio["amministratore"];
+                                                modello!.studioId= tizio["studioId"];
+                                                modello!.studioNome= tizio["studioNome"];
+
+                                              }
+                                            }
+
+                                            if(modello!.admin!){
+                                              Navigator.of(context).push(
+                                                CustomPageRoute(
+                                                    child: Messaggi(),
+                                                    direction:AxisDirection.up
+                                                ),);
+                                            }else{
+                                              Navigator.of(context).push(
+                                                CustomPageRoute(
+                                                    child: Messaggi(),
+                                                    direction:AxisDirection.up
+                                                ),);
+                                            }
+
+
+
+                                          }
+                                          else {
+                                            print(response3.reasonPhrase);
+                                          }
+
+
 
                                         } else { print(response2.reasonPhrase);}
 
@@ -292,7 +345,7 @@ class _LoginState extends State<LoginUser> {
 
                               Padding(
                                   padding: getPadding(top: 22),
-                                  child: Text("Non hai un account?",
+                                  child: const  Text("Non hai un account?",
                                       overflow: TextOverflow.ellipsis,
                                       textAlign: TextAlign.left,
                                       style: TextStyle(
@@ -300,28 +353,11 @@ class _LoginState extends State<LoginUser> {
                                       )
                                   )),
 
-                              // GestureDetector(
-                              //     onTap: () {
-                              //       Navigator.of(context).push(
-                              //         CustomPageRoute(
-                              //             child: SignIn(),
-                              //             direction:AxisDirection.up),);
-                              //       print("registrati");
-                              //     },
-                              //     child: Padding(
-                              //         padding: getPadding(top: 9),
-                              //         child: Text("Registrati",
-                              //             overflow: TextOverflow.ellipsis,
-                              //             textAlign: TextAlign.left,
-                              //             style: TextStyle(
-                              //                 color: Colors.deepPurple.shade600,
-                              //                 decoration: TextDecoration.underline)
-                              //         ))),
 
                               SizedBox(height: 20,),
                               Padding(
                                   padding: getPadding(top: 0),
-                                  child: Text("Password dimenticata?",
+                                  child: const Text("Password dimenticata?",
                                       overflow: TextOverflow.ellipsis,
                                       textAlign: TextAlign.left,
                                       style: TextStyle(
@@ -329,24 +365,6 @@ class _LoginState extends State<LoginUser> {
                                       )
                                   )),
 
-                              // GestureDetector(
-                              //   onTap: (){
-                              //     Navigator.of(context).push(
-                              //       CustomPageRoute(
-                              //           child: RecuperaPassword(),
-                              //           direction:AxisDirection.up),);
-                              //     print("Recupera");
-                              //   },
-                              //   child: Padding(
-                              //       padding: getPadding(top: 11),
-                              //       child: Text("Recupera password",
-                              //           overflow: TextOverflow.ellipsis,
-                              //           textAlign: TextAlign.left,
-                              //           style: TextStyle(
-                              //               color: Colors.deepPurple.shade600,
-                              //               decoration: TextDecoration.underline)
-                              //       )),
-                              // ),
 
                             ]))),
               ),
@@ -361,8 +379,8 @@ class _LoginState extends State<LoginUser> {
   Widget _divider() {
     return Container(
       margin: EdgeInsets.symmetric(vertical: 10),
-      child: Row(
-        children: <Widget>[
+      child:  const Row(
+        children:  <Widget>[
           SizedBox(
             width: 10,
           ),
@@ -388,3 +406,44 @@ class _LoginState extends State<LoginUser> {
 
 
 
+
+
+
+// GestureDetector(
+//   onTap: (){
+//     Navigator.of(context).push(
+//       CustomPageRoute(
+//           child: RecuperaPassword(),
+//           direction:AxisDirection.up),);
+//     print("Recupera");
+//   },
+//   child: Padding(
+//       padding: getPadding(top: 11),
+//       child: Text("Recupera password",
+//           overflow: TextOverflow.ellipsis,
+//           textAlign: TextAlign.left,
+//           style: TextStyle(
+//               color: Colors.deepPurple.shade600,
+//               decoration: TextDecoration.underline)
+//       )),
+// ),
+
+//****************************
+
+// GestureDetector(
+//     onTap: () {
+//       Navigator.of(context).push(
+//         CustomPageRoute(
+//             child: SignIn(),
+//             direction:AxisDirection.up),);
+//       print("registrati");
+//     },
+//     child: Padding(
+//         padding: getPadding(top: 9),
+//         child: Text("Registrati",
+//             overflow: TextOverflow.ellipsis,
+//             textAlign: TextAlign.left,
+//             style: TextStyle(
+//                 color: Colors.deepPurple.shade600,
+//                 decoration: TextDecoration.underline)
+//         ))),
