@@ -1,11 +1,15 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:sito_commercialisti/AggiustaSize.dart';
+import 'package:sito_commercialisti/Modello.dart';
 import 'package:sito_commercialisti/NavBar.dart';
 import 'package:paged_datatable/paged_datatable.dart';
 import 'package:intl/intl.dart';
 import 'Post.dart';
 
+import 'package:http/http.dart' as http;
 
 class Clienti extends StatefulWidget {
   Clienti();
@@ -22,9 +26,14 @@ class ClientiState extends State<Clienti> {
   PagedDataTableThemeData? theme;
 
 
+  Modello modello=Modello();
+
+
+
   @override
   Widget build(BuildContext context) {
 
+    getClienti();
 
     return Scaffold(
           drawer: NavBar(),
@@ -412,5 +421,33 @@ class ClientiState extends State<Clienti> {
       ];
 
   }
+
+
+  getClienti() async {
+
+    var request = http.Request('POST', Uri.parse('http://www.studiodoc.it/api/Cliente/ClienteListGet'));
+    String tt=modello.token!;
+    request.bodyFields={
+      "studioId": modello!.studioId.toString(),        //<-- filtro se non null
+      "clienteId": "null",
+      "tipologiaClienteId": "1"
+
+    };
+    request.headers['Authorization'] = 'Bearer $tt';
+
+    http.StreamedResponse response = await request.send();
+    response.stream.asBroadcastStream();
+
+    var jsonData=  jsonDecode(await response.stream.bytesToString());
+
+    if (response.statusCode == 200) {
+      print(jsonData);
+    }
+    else {
+      print(response.reasonPhrase);
+    }
+  }
+
+
 }
 

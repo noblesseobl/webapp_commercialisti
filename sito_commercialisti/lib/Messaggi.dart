@@ -1,7 +1,5 @@
 import 'dart:convert';
 import 'dart:io';
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:sito_commercialisti/AggiustaSize.dart';
@@ -688,6 +686,9 @@ class MessaggiState extends State<Messaggi> {
   getMessaggi() async {
     var request = http.Request('POST', Uri.parse('http://www.studiodoc.it/api/Messaggio/MessaggioMsgGet'));
     String tt=modello.token!;
+    DateTime now = new DateTime.now();
+    DateTime date = new DateTime(now.year, now.month, now.day);
+
     request.bodyFields={
 
         "studioId": modello!.studioId.toString(),
@@ -695,7 +696,7 @@ class MessaggiState extends State<Messaggi> {
         "dipendenteId": "null",        //<-- filtro se non null
         "clienteId": "null",           //<-- filtro se non null
         "ufficioId": "null",          // <-- filtro se non null
-        "dataDal": "20230801",       //<-- data nel formato YYYYMMDD
+        "dataDal": date.toString() ,       //<-- data nel formato YYYYMMDD
         "dataAl": "19000101",       // <-- data nel formato YYYYMMDD
         "messaggioId": "null"          //<-- filtro se non null
 

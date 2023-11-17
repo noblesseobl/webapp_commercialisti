@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:sito_commercialisti/Dipendenti.dart';
 import 'package:sito_commercialisti/Clienti.dart';
+import 'package:sito_commercialisti/Modello.dart';
 import 'package:sito_commercialisti/bacheca.dart';
 import 'package:sito_commercialisti/Messaggi.dart';
 import 'package:sito_commercialisti/profilo.dart';
@@ -10,10 +11,24 @@ import 'package:sito_commercialisti/transition.dart';
 
 
 
-class NavBar extends StatelessWidget {
+class NavBar extends StatefulWidget {
+
+
+  @override
+  State<NavBar> createState() => _NavBarState();
+}
+
+class _NavBarState extends State<NavBar> {
+  Modello modello=Modello();
+
+  bool admin=false;
 
   @override
   Widget build(BuildContext context) {
+
+    admin=modello!.admin!;
+
+
     return Drawer(
 
       child: ListView(
@@ -40,24 +55,28 @@ class NavBar extends StatelessWidget {
           ),
 
 
-
-
-
-          ListTile(
-            leading: Icon(
-              Icons.work_outlined,
-              color: Color(0xff9B63F8),
-            ),
-            title: Text('Dipendenti'),
+          Visibility(
+            visible: admin,
+            child: ListTile(
+              leading: Icon(
+                Icons.work_outlined,
+                color: Color(0xff9B63F8),
+              ),
+              title: Text('Dipendenti'),
               onTap: (){
                 Navigator.of(context).push(
                   CustomPageRoute(
-                    child: Dipendenti(),
-                    direction: AxisDirection.up
+                      child: Dipendenti(),
+                      direction: AxisDirection.up
                   ),
                 );
               },
+            ),
           ),
+
+
+
+
 
           ListTile(
             leading: Icon(
@@ -98,18 +117,25 @@ class NavBar extends StatelessWidget {
                 direction: AxisDirection.up),);},
           ),
 
-          ListTile(
-            leading: Icon(
-              Icons.chair,
-              color: Color(0xff9B63F8),
+
+          Visibility(
+            visible: admin,
+            child: ListTile(
+              leading: Icon(
+                Icons.chair,
+                color: Color(0xff9B63F8),
+              ),
+              title: Text('Tipologia Cliente'),
+              onTap: (){Navigator.of(context).push(CustomPageRoute(
+                  child: Tools(),
+                  direction: AxisDirection.up),);},
             ),
-            title: Text('Tipologia Cliente'),
-            onTap: (){Navigator.of(context).push(CustomPageRoute(
-                child: Tools(),
-                direction: AxisDirection.up),);},
           ),
 
-          ListTile(
+
+          Visibility(
+          visible: admin,
+          child:ListTile(
             leading: Icon(
               Icons.home_work,
               color: Color(0xff9B63F8),
@@ -118,23 +144,32 @@ class NavBar extends StatelessWidget {
             onTap: (){Navigator.of(context).push(CustomPageRoute(
                 child: Tools2(),
                 direction: AxisDirection.up),);},
+            ),
           ),
+
+
 
 
           Divider(),
 
-          ListTile(
-            leading: Icon(
-              Icons.person,
-              color: Color(0xff9B63F8),
+
+          Visibility(
+            visible: admin,
+            child: ListTile(
+              leading: Icon(
+                Icons.person,
+                color: Color(0xff9B63F8),
+              ),
+              title: Text('Profilo'),
+              onTap: () {
+                Navigator.of(context).push(CustomPageRoute(
+                    child: Profilo(),
+                    direction: AxisDirection.up),);
+              },
             ),
-            title: Text('Profilo'),
-            onTap: () {
-              Navigator.of(context).push(CustomPageRoute(
-                  child: Profilo(),
-                  direction: AxisDirection.up),);
-            },
           ),
+
+
 
           ListTile(
               leading: Icon(Icons.logout_rounded, color: Color(0xff9B63F8)),
