@@ -19,7 +19,7 @@ class Messaggi extends StatefulWidget {
   State<Messaggi> createState() => MessaggiState();
 }
 
-List list =["Ricevuti", "Inviati"];
+List tipoMessaggio =["Ricevuti", "Inviati"];
 List tipocliente=["Privato", "Aziendale"];
 
 class MessaggiState extends State<Messaggi> {
@@ -28,13 +28,17 @@ class MessaggiState extends State<Messaggi> {
   String? testo;
   File? file;
   String? titolo;
-  String? dropdownValue = list.first;
+  String? dropdownValue = tipoMessaggio.first;
   String? dropdownValue2 = tipocliente.first;
 
   String? get $dropdownValue => null;
   String? get $dropdownValue2 => null;
 
   Modello modello=Modello();
+  List<Messaggio> casella= List.empty();
+
+
+
 
   List<Map> categories = [
     {"name": "Mario Rossi", "isChecked": false},
@@ -48,7 +52,6 @@ class MessaggiState extends State<Messaggi> {
     {"name": "Gianluca Viola", "isChecked": false},
   ];
 
-  //late List<Map> categoriescombined= categories+categories2;
 
   final tableController = PagedDataTableController<String, int, Post>();
   PagedDataTableThemeData? theme;
@@ -106,6 +109,8 @@ class MessaggiState extends State<Messaggi> {
       body: Center(
         child: Stack(
           children:[
+
+            //tabella
             Container(
                 color: const Color.fromARGB(255, 208, 208, 208),
                 padding: const EdgeInsets.only(top:80, left: 3, right: 3),
@@ -128,6 +133,7 @@ class MessaggiState extends State<Messaggi> {
                       theme: theme,
                       idGetter: (post) => post.id,
                       controller: tableController,
+
                       fetchPage: (pageToken, pageSize, sortBy, filtering) async {
                         if (filtering.valueOrNull("authorName") == "error!") {
                           throw Exception("This is an unexpected error, wow!");
@@ -144,7 +150,9 @@ class MessaggiState extends State<Messaggi> {
                         return PaginationResult.items(
                             elements: result.items, nextPageToken: result.nextPageToken);
                       },
+
                       initialPage: "",
+
                       columns: [
                         LargeTextTableColumn(
                             title: "Titolo",
@@ -227,6 +235,9 @@ class MessaggiState extends State<Messaggi> {
                               ]),
                         ),
                       ],
+
+
+
                       filters: [
                         TextTableFilter(
                             id: "authorName",
@@ -258,6 +269,8 @@ class MessaggiState extends State<Messaggi> {
           ),
 
             //*******************************************************
+
+            //barra in alto
             Padding(
                 padding: EdgeInsets.only(top: 5),
                 child: Card(
@@ -279,6 +292,8 @@ class MessaggiState extends State<Messaggi> {
                         Text("Messaggi",style: TextStyle(fontSize: 30, fontWeight: FontWeight.w600, color: Colors.grey.shade700) ),
                         Spacer(),
 
+
+                        //drop down
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 20),
                           child: Container(
@@ -291,7 +306,7 @@ class MessaggiState extends State<Messaggi> {
                               padding: const EdgeInsets.only(left: 10, right: 10),
                               child:  DropdownButtonHideUnderline(
                                 child: DropdownButton(
-                                    items: list!.map<DropdownMenuItem<String>>(
+                                    items: tipoMessaggio!.map<DropdownMenuItem<String>>(
                                             (dynamic value) {
                                           return DropdownMenuItem<String>(
                                             child: Text(value),
@@ -320,7 +335,8 @@ class MessaggiState extends State<Messaggi> {
                               ),
                           ),
                         ),
-                        //qui il drop down
+
+                        //bottone scrivi messaggio
                         ElevatedButton(
 
                           style: ElevatedButton.styleFrom(
@@ -620,30 +636,7 @@ class MessaggiState extends State<Messaggi> {
 
                                                         onPressed: () async {
 
-                                                          if (_formKey.currentState!.validate()) {
-
-                                                            var request = http.Request('POST', Uri.parse('http://www.studiodoc.it/api/Messaggio/MessaggioMsgMng'));
-                                                            request.body = '''{\r\n    
-                                                            "studioId" : "1",
-                                                            \r\n    "titolo": $titolo,
-                                                            \r\n    "testo" : $testo,
-                                                            \r\n    "inviatoDaStudio" : "true",
-                                                            \r\n    "dipendenteId" : null,
-                                                            \r\n    "clienteIds" :  "3",
-                                                            \r\n    "utenteInvioMsgId": "3",
-                                                            \r\n    "allegatoFileNames": $file,
-                                                            \r\n    "tipoOperazione" : "I"\r\n}\r\n''';
-
-                                                            http.StreamedResponse response = await request.send();
-
-                                                            if (response.statusCode == 200) {
-                                                              print(await response.stream.bytesToString());
-                                                            }
-                                                            else {
-                                                              print(response.reasonPhrase);
-                                                            }
-
-                                                          }
+                                                          if (_formKey.currentState!.validate()){}
                                                         },
                                                       ),
                                                     )
@@ -668,6 +661,7 @@ class MessaggiState extends State<Messaggi> {
                             weight: 15,
                           ),
                         ),
+
                       ],
                     ),
                   ),
@@ -701,7 +695,7 @@ class MessaggiState extends State<Messaggi> {
         "messaggioId": "null"          //<-- filtro se non null
 
 
-      };
+    };
     request.headers['Authorization'] = 'Bearer $tt';
 
     http.StreamedResponse response = await request.send();
@@ -712,6 +706,11 @@ class MessaggiState extends State<Messaggi> {
 
     if (response.statusCode == 200) {
       print(jsonData);
+
+      for(var mex in jsonData){
+        casella.add(Messaggio(mex["titolo"], mex["messaggio"]));
+      }
+
     }
     else {
       print(response.reasonPhrase);
@@ -720,6 +719,33 @@ class MessaggiState extends State<Messaggi> {
 
 
 }
+
+
+
+class Messaggio {
+
+  String titolo;
+  String messaggio;
+  Messaggio(this.titolo, this.messaggio);
+
+
+  // "messaggioId": 0,
+  // "dipendenteId": 2,
+  // "dipendenteCognome": "Rossi",
+  // "dipendenteNome": "Mario",
+  // "clienteId": 1,
+  // "clienteCognome": "Sasso",
+  // "clienteNome": "Marco",
+  // "titolo": "WEB_Titolo nuovo messaggio",
+  // "testo": "WEB_Questo è il messaggio",
+  // "inviatoDaStudio": true,
+  // "ufficioId": 1,
+  // "ufficioDescr": "Segreteria",
+  // "numeroAllegati": 2,
+  // "dataLetturaMessaggio": "2023-09-25T00:00:00"
+
+}
+
 
 
 

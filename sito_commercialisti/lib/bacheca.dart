@@ -1,8 +1,11 @@
+import 'dart:convert';
 import 'dart:math';
 
+import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:sito_commercialisti/AggiustaSize.dart';
+import 'package:sito_commercialisti/Modello.dart';
 import 'package:sito_commercialisti/NavBar.dart';
 import 'package:paged_datatable/paged_datatable.dart';
 import 'package:intl/intl.dart';
@@ -21,13 +24,20 @@ class BachecaState extends State<Bacheca> {
   String? testo;
 
 
+
+  Modello modello=Modello();
   final tableController = PagedDataTableController<String, int, Post>();
   PagedDataTableThemeData? theme;
+
+
+  List<MexBacheca> bacheca= List.empty();
 
   @override
   Widget build(BuildContext context) {
 
 
+    getBacheca();
+    
 
     return Scaffold(
       drawer: NavBar(),
@@ -98,7 +108,7 @@ class BachecaState extends State<Bacheca> {
                       child: Container(
 
                         margin: EdgeInsets.symmetric(vertical: 5, horizontal: 20),
-                        child: PagedDataTable<String, int, Post>(
+                        child: PagedDataTable<String, int, Post>( //metti Messaggio
                           rowsSelectable: true,
                           theme: theme,
                           idGetter: (post) => post.id,
@@ -247,24 +257,13 @@ class BachecaState extends State<Bacheca> {
                                   ]),
                             ),
                           ],
+
                           filters: [
                             TextTableFilter(
                                 id: "authorName",
                                 title: "Author's name",
                                 chipFormatter: (text) => "By $text"),
-                            /* DropdownTableFilter<Gender>(
-                              id: "gender",
-                              title: "Gender",
-                              defaultValue: Gender.male,
-                              chipFormatter: (gender) =>
-                              'Only ${gender.name.toLowerCase()} posts',
-                              items: const [
-                                DropdownMenuItem(value: Gender.male, child: Text("Male")),
-                                DropdownMenuItem(value: Gender.female, child: Text("Female")),
-                                DropdownMenuItem(
-                                    value: Gender.unespecified, child: Text("Unspecified")),
-                              ]),
-                    */
+
                             DatePickerTableFilter(
                               id: "date",
                               title: "Date",
@@ -281,12 +280,7 @@ class BachecaState extends State<Bacheca> {
                               lastDate: DateTime.now(),
                             )
                           ],
-                          /*
-                  footer: TextButton(
-                    onPressed: () {},
-                    child: const Text("Im a footer button"),
-                  ),
-                   */
+
 
                           menu: PagedDataTableFilterBarMenu(items: [
                             FilterMenuItem(
@@ -435,7 +429,7 @@ class BachecaState extends State<Bacheca> {
   }
 
 
-AlertDialog popUp(){
+  AlertDialog popUp(){
   return AlertDialog(
     backgroundColor: Colors.deepPurple.shade100,
     scrollable: true,
@@ -548,9 +542,56 @@ AlertDialog popUp(){
       ),
     ),
   );
+
 }
 
 
+  getBacheca() async {
+    var request = http.Request('POST', Uri.parse('http://localhost:51868/Bacheca/BachecaMessageListGet'));
+    String tt=modello.token!;
+    request.bodyFields={
+      "studioId": modello!.studioId.toString(),        //<-- filtro se non null
+      "numMsg": "20",
+      "messaggioId": "null"
+    };
+    request.headers['Authorization'] = 'Bearer $tt';
+
+    http.StreamedResponse response = await request.send();
+    response.stream.asBroadcastStream();
+    var jsonData=  jsonDecode(await response.stream.bytesToString());
+
+
+
+    if (response.statusCode == 200) {
+      print(jsonData);
+
+      for(var mex in jsonData){
+        bacheca.add(MexBacheca(mex["titolo"], mex["messaggio"], mex["linkAllegato"]));
+      }
+    }
+    else {
+      print(response.reasonPhrase);
+    }
+
+
+  }
+
+
+}
+
+
+
+class MexBacheca {
+
+  String titolo;
+  String messaggio;
+  String linkAllegato;
+
+  MexBacheca(this.titolo, this.messaggio, this.linkAllegato);
+
+  //data insert
+  //data ultimo edit
+  //id mex?
 
 }
 

@@ -1,12 +1,15 @@
+import 'dart:convert';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:sito_commercialisti/AggiustaSize.dart';
+import 'package:sito_commercialisti/Modello.dart';
 import 'package:sito_commercialisti/NavBar.dart';
 import 'package:paged_datatable/paged_datatable.dart';
 import 'package:intl/intl.dart';
 import 'Post.dart';
+import 'package:http/http.dart' as http;
 
 class Dipendenti extends StatefulWidget {
   Dipendenti();
@@ -21,10 +24,13 @@ class DipendentiState extends State<Dipendenti> {
   final tableController = PagedDataTableController<String, int, Post>();
   PagedDataTableThemeData? theme;
 
+  Modello modello=Modello();
+
 
   @override
   Widget build(BuildContext context) {
 
+    getDipendenti();
 
     return Scaffold(
 
@@ -347,9 +353,268 @@ class DipendentiState extends State<Dipendenti> {
                             showDialog(
                                 context: context,
                                 builder: (BuildContext context) {
+
+                                  bool isChecked=false;
+                                  String? username=null;
+                                  String? nome=null;
+                                  String? cognome=null;
+                                  String? telefono=null;
+                                  String? email=null;
+
                                   return StatefulBuilder(
                                       builder: (BuildContext context, StateSetter setState) {
-                                        return popUp();
+                                        return AlertDialog(
+                                          backgroundColor: Colors.deepPurple.shade100,
+                                          scrollable: true,
+                                          content: Form(
+                                            key: _formKey,
+                                            child: Column(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: <Widget>[
+
+                                                Text("Inserisci un nuovo dipendente",
+                                                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600, color: Colors.grey.shade700) ),
+
+                                                SizedBox(height: 30),
+                                                //username
+                                                Padding(
+                                                  padding: const EdgeInsets.symmetric(horizontal: 2.0),
+                                                  child: Container(
+                                                    decoration:BoxDecoration(
+                                                        color: Colors.blueGrey.shade50,
+                                                        borderRadius: BorderRadius.circular(15),
+                                                        border: Border.all(color: Colors.deepPurple.shade400)
+                                                    ),
+                                                    child:Padding(
+                                                      padding: const EdgeInsets.only(left: 12),
+
+                                                      child: TextFormField(
+                                                        onChanged: (String value) {
+                                                          username=value;
+                                                        },
+                                                        validator: (value) {
+                                                          if (value == null || value.isEmpty) {
+                                                            return 'Please enter some text';
+                                                          }
+                                                          return null;
+                                                        },
+                                                        decoration: InputDecoration(
+                                                            border: InputBorder.none,
+                                                            hintText: 'Inserisci username'
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                                SizedBox(height: 15,),
+                                                //nome
+                                                Padding(
+                                                  padding: const EdgeInsets.symmetric(horizontal: 2.0),
+                                                  child: Container(
+                                                    decoration:BoxDecoration(
+                                                        color: Colors.blueGrey.shade50,
+                                                        borderRadius: BorderRadius.circular(15),
+                                                        border: Border.all(color: Colors.deepPurple.shade400)
+                                                    ),
+                                                    child:Padding(
+                                                      padding: const EdgeInsets.only(left: 12),
+
+                                                      child: TextFormField(
+                                                        onChanged: (String value) {
+                                                          nome=value;
+                                                        },
+                                                        validator: (value) {
+                                                          if (value == null || value.isEmpty) {
+                                                            return 'Please enter some text';
+                                                          }
+                                                          return null;
+                                                        },
+                                                        decoration: InputDecoration(
+                                                            border: InputBorder.none,
+                                                            hintText: 'Inserisci nome'
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                                SizedBox(height: 15,),
+                                                //cognome
+                                                Padding(
+                                                  padding: const EdgeInsets.symmetric(horizontal: 2.0),
+                                                  child: Container(
+                                                    decoration:BoxDecoration(
+                                                        color: Colors.blueGrey.shade50,
+                                                        borderRadius: BorderRadius.circular(15),
+                                                        border: Border.all(color: Colors.deepPurple.shade400)
+                                                    ),
+                                                    child:Padding(
+                                                      padding: const EdgeInsets.only(left: 12),
+
+                                                      child: TextFormField(
+                                                        onChanged: (String value) {
+                                                          cognome=value;
+                                                        },
+                                                        validator: (value) {
+                                                          if (value == null || value.isEmpty) {
+                                                            return 'Please enter some text';
+                                                          }
+                                                          return null;
+                                                        },
+                                                        decoration: InputDecoration(
+                                                            border: InputBorder.none,
+                                                            hintText: 'Inserisci cognome'
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                                SizedBox(height: 15,),
+                                                //email
+                                                Padding(
+                                                  padding: const EdgeInsets.symmetric(horizontal: 2.0),
+                                                  child: Container(
+                                                    decoration:BoxDecoration(
+                                                        color: Colors.blueGrey.shade50,
+                                                        borderRadius: BorderRadius.circular(15),
+                                                        border: Border.all(color: Colors.deepPurple.shade400)
+                                                    ),
+                                                    child:Padding(
+                                                      padding: const EdgeInsets.only(left: 12),
+
+                                                      child: TextFormField(
+                                                        onChanged: (String value) {
+                                                          email=value;
+                                                        },
+                                                        validator: (value) {
+                                                          if (value == null || value.isEmpty) {
+                                                            return 'Please enter some text';
+                                                          }
+                                                           else if (!RegExp(r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+").hasMatch(value) ){
+                                                             return 'Please enter a valid email';
+                                                          }
+                                                          return null;
+                                                        },
+                                                        decoration: InputDecoration(
+                                                            border: InputBorder.none,
+                                                            hintText: 'Inserisci email'
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                                SizedBox(height: 15,),
+                                                //telefono
+                                                Padding(
+                                                  padding: const EdgeInsets.symmetric(horizontal: 2.0),
+                                                  child: Container(
+                                                    decoration:BoxDecoration(
+                                                        color: Colors.blueGrey.shade50,
+                                                        borderRadius: BorderRadius.circular(15),
+                                                        border: Border.all(color: Colors.deepPurple.shade400)
+                                                    ),
+                                                    child:Padding(
+                                                      padding: const EdgeInsets.only(left: 12),
+
+                                                      child: TextFormField(
+                                                        onChanged: (String value) {
+                                                          telefono=value;
+                                                        },
+                                                        validator: (value) {
+                                                          if (value == null || value.isEmpty) {
+                                                            return 'Please enter some text';
+                                                          }
+                                                          return null;
+                                                        },
+                                                        decoration: InputDecoration(
+                                                            border: InputBorder.none,
+                                                            hintText: 'Inserisci numero di telefono'
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                                SizedBox(height: 30,),
+
+                                                Row(
+                                                  mainAxisAlignment: MainAxisAlignment.start,
+                                                  children: [
+
+                                                    Padding(
+                                                        padding: const EdgeInsets.all(8.0),
+                                                        child: Switch(
+                                                          value: isChecked,
+                                                          activeColor: Colors.green,
+                                                          onChanged: (bool value) {
+                                                            setState(() {
+                                                              isChecked = value;
+                                                            });
+                                                          },
+                                                        )
+                                                    ),
+                                                    Text("Admin"),
+                                                    SizedBox(width: 60),
+
+                                                    Padding(
+                                                      padding: const EdgeInsets.all(8.0),
+                                                      child: ElevatedButton(
+                                                        style: ElevatedButton.styleFrom(
+                                                          primary: Colors.deepPurple.shade400, // Background color
+                                                          shape: RoundedRectangleBorder(
+                                                              borderRadius: BorderRadius.circular(20.0)
+                                                          ),
+                                                        ),
+                                                        child: Text("Inserisci"),
+
+                                                        onPressed: () async{
+                                                          if (_formKey.currentState!.validate()) {
+                                                            _formKey.currentState!.save();
+
+                                                            //qui fai la insert e ricordati di fare la get dipendenti.
+
+                                                            String tt=modello.token!;
+                                                            var request = http.Request('POST', Uri.parse('http://www.studiodoc.it/api/Dipendente/DipendenteMng'));
+                                                            request.bodyFields= {
+                                                              "codiceUtente":username!,
+                                                              "studioId": modello!.studioId.toString(),
+                                                              "dipendenteNome" : nome!,
+                                                              "dipendenteCognome" : cognome!,
+                                                              "ufficioId": modello!.ufficioId.toString(), //sistemare!!!!!
+                                                              "email" : email!,
+                                                              "telefono": telefono!,
+                                                              "amministratore": isChecked.toString(),
+                                                              "tipoOperazione":"I",
+                                                              "utenteId": "331"                     //sistemare!!!!!!
+                                                            };
+                                                            request.headers['Authorization'] = 'Bearer $tt';
+
+
+                                                            http.StreamedResponse response = await request.send();
+                                                            response.stream.asBroadcastStream();
+
+                                                            var jsonData=  jsonDecode(await response.stream.bytesToString());
+
+
+                                                            if (response.statusCode == 200) {
+                                                              print(jsonData);
+
+
+
+                                                            }
+                                                            else {
+                                                              print(response.reasonPhrase);
+                                                            }
+
+                                                          }
+                                                        },
+                                                      ),
+                                                    )
+                                                  ],
+                                                ),
+                                                SizedBox(height: 10,),
+                                              ],
+                                            ),
+                                          ),
+                                        );
                                       }
                                   );
                                 });
@@ -374,111 +639,41 @@ class DipendentiState extends State<Dipendenti> {
 
   }
 
-  AlertDialog popUp(){
-    return AlertDialog(
-      backgroundColor: Colors.deepPurple.shade100,
-      scrollable: true,
-      content: Form(
-        key: _formKey,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
 
-            Text("Credenziali accesso web",style: TextStyle(fontSize: 25, fontWeight: FontWeight.w600, color: Colors.grey.shade700) ),
 
-            SizedBox(height: 30),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 2.0),
-              child: Container(
-                decoration:BoxDecoration(
-                    color: Colors.blueGrey.shade50,
-                    borderRadius: BorderRadius.circular(15),
-                    border: Border.all(color: Colors.deepPurple.shade400)
-                ),
-                child:Padding(
-                  padding: const EdgeInsets.only(left: 12),
+  getDipendenti() async {
 
-                  child: TextFormField(
-                    decoration: InputDecoration(
-                        border: InputBorder.none,
-                        hintText: 'Inserisci codice utente'
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            SizedBox(height: 10,),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 2.0),
-              child: Container(
-                decoration:BoxDecoration(
-                    color: Colors.blueGrey.shade50,
-                    borderRadius: BorderRadius.circular(15),
-                    border: Border.all(color: Colors.deepPurple.shade400)
-                ),
-                child:Padding(
-                  padding: const EdgeInsets.only(left: 12),
+    var request = http.Request('POST', Uri.parse('http://www.studiodoc.it/api/Dipendente/DipendenteListGet'));
+    String tt=modello.token!;
 
-                  child: TextFormField(
+    request.bodyFields={
+      "dipendenteId" : "null",
+      "ufficioId": modello!.ufficioId.toString()
+    };
 
-                    obscureText: true,
-                    decoration: InputDecoration(
-                        border: InputBorder.none,
-                        hintText: 'Inserisci password'
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            SizedBox(height: 30,),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Padding(
+    request.headers['Authorization'] = 'Bearer $tt';
 
-                  padding: const EdgeInsets.all(1.0),
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      primary: Colors.deepPurple.shade400, // Background color
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20.0)
-                      ),
-                    ),
-                    child: Icon(Icons.upload_rounded),
+    http.StreamedResponse response = await request.send();
 
-                    onPressed: () {
-                      if (_formKey.currentState!.validate()) {
-                        _formKey.currentState!.save();
-                      }
-                    },
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      primary: Colors.deepPurple.shade400, // Background color
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20.0)
-                      ),
-                    ),
-                    child: Text("Submit"),
+    response.stream.asBroadcastStream();
 
-                    onPressed: () {
-                      if (_formKey.currentState!.validate()) {
-                        _formKey.currentState!.save();
-                      }
-                    },
-                  ),
-                )
-              ],
-            ),
-            SizedBox(height: 10,),
-          ],
-        ),
-      ),
-    );
+    var jsonData=  jsonDecode(await response.stream.bytesToString());
+
+
+
+    if (response.statusCode == 200) {
+      print(jsonData);
+    }
+    else {
+      print(response.reasonPhrase);
+    }
+
   }
+
+
+
+
+
 
   List<BaseTableColumn<Post>> colonne(){
     return [

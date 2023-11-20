@@ -25,7 +25,7 @@ class Modello {
   String? ufficioDescr=null;
   String? email=null;
   String? telefono=null;
-  bool? admin=null;
+  bool? admin=true;
   int? studioId=null;
   String? studioNome=null;
    //le faccio statiche ???

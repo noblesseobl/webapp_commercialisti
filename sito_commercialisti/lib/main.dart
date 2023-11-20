@@ -286,7 +286,7 @@ class _LoginState extends State<LoginUser> {
                                                 modello!.ufficioDescr= tizio["ufficioDescr"];
                                                 modello!.email= tizio["email"];
                                                 modello!.telefono= tizio["telefono"];
-                                                modello!.admin= tizio["amministratore"];
+                                                //modello!.admin= tizio["amministratore"];
                                                 modello!.studioId= tizio["studioId"];
                                                 modello!.studioNome= tizio["studioNome"];
 
