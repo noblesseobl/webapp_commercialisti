@@ -42,7 +42,8 @@ class _NavBarState extends State<NavBar> {
                   child: Image.asset(
                 '',
                 fit: BoxFit.cover,
-              )),
+              )
+              ),
             ),
             decoration: BoxDecoration(
               color: Color(0xff9B63F8),

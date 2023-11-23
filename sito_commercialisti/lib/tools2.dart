@@ -1,12 +1,16 @@
+import 'dart:convert';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:sito_commercialisti/AggiustaSize.dart';
+import 'package:sito_commercialisti/Modello.dart';
 import 'package:sito_commercialisti/NavBar.dart';
 import 'package:paged_datatable/paged_datatable.dart';
 import 'package:intl/intl.dart';
 import 'Post.dart';
+
+import 'package:http/http.dart' as http;
 
 class Tools2 extends StatefulWidget {
   Tools2();
@@ -18,19 +22,20 @@ class Tools2 extends StatefulWidget {
 class Tools2State extends State<Tools2> {
 
   final _formKey = GlobalKey<FormState>();
-  String? testo;
 
 
+
+  Modello modello=Modello();
 
   final tableController = PagedDataTableController<String, int, Post>();
   PagedDataTableThemeData? theme;
 
-
-
+  List<Ufficio> uffici= List.empty();
 
   @override
   Widget build(BuildContext context) {
 
+    getUffici();
 
     return Scaffold(
       drawer: NavBar(),
@@ -401,10 +406,106 @@ class Tools2State extends State<Tools2> {
                                 showDialog(
                                     context: context,
                                     builder: (BuildContext context) {
+                                      String? nomeUfficio=null;
                                       return StatefulBuilder(
                                           builder: (BuildContext context, StateSetter setState) {
-                                            return popUp();
+                                            return AlertDialog(
+                                              backgroundColor: Colors.deepPurple.shade100,
+                                              scrollable: true,
+                                              content: Form(
+                                                key: _formKey,
+                                                child: Column(
+                                                  mainAxisSize: MainAxisSize.min,
+                                                  children: <Widget>[
+
+                                                    Text("Aggiungi un nuovo ufficio",style: TextStyle(fontSize: 25, fontWeight: FontWeight.w600, color: Colors.grey.shade700) ),
+
+                                                    SizedBox(height: 30),
+                                                    Padding(
+                                                      padding: const EdgeInsets.symmetric(horizontal: 2.0),
+                                                      child: Container(
+                                                        decoration:BoxDecoration(
+                                                            color: Colors.blueGrey.shade50,
+                                                            borderRadius: BorderRadius.circular(15),
+                                                            border: Border.all(color: Colors.deepPurple.shade400)
+                                                        ),
+                                                        child:Padding(
+                                                          padding: const EdgeInsets.only(left: 12),
+
+                                                          child: TextFormField(
+                                                            onChanged: (String value) {
+                                                              nomeUfficio=value;
+                                                            },
+                                                            validator: (value) {
+                                                              if (value == null || value.isEmpty) {
+                                                                return 'Please enter some text';
+                                                              }
+                                                              return null;
+                                                            },
+                                                            decoration: InputDecoration(
+                                                                border: InputBorder.none,
+                                                                hintText: 'Inserisci il nome dell\'ufficio'
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                    SizedBox(height: 30,),
+                                                    Row(
+                                                      mainAxisAlignment: MainAxisAlignment.end,
+                                                      children: [
+                                                        Padding(
+                                                          padding: const EdgeInsets.all(8.0),
+                                                          child: ElevatedButton(
+                                                            style: ElevatedButton.styleFrom(
+                                                              primary: Colors.deepPurple.shade400, // Background color
+                                                              shape: RoundedRectangleBorder(
+                                                                  borderRadius: BorderRadius.circular(20.0)
+                                                              ),
+                                                            ),
+                                                            child: Text("Aggiungi"),
+
+                                                            onPressed: () async{
+                                                              if (_formKey.currentState!.validate()) {
+                                                                _formKey.currentState!.save();
+
+                                                                String tt=modello.token!;
+                                                                var request = http.Request('POST', Uri.parse('http://www.studiodoc.it/api/Tools/UfficioMng'));
+                                                                request.bodyFields= {
+                                                                  "studioId": modello.studioId.toString(),
+                                                                  "ufficioId": "null",
+                                                                  "ufficioDescr": nomeUfficio!,
+                                                                  "tipoOperazione": "I",
+                                                                  "utenteId": modello.dipendenteId.toString(),
+                                                                };
+                                                                request.headers['Authorization'] = 'Bearer $tt';
+
+                                                                http.StreamedResponse response = await request.send();
+                                                                response.stream.asBroadcastStream();
+
+                                                                var jsonData=  jsonDecode(await response.stream.bytesToString());
+
+                                                                if (response.statusCode == 200) {
+                                                                  print(jsonData);
+                                                                }
+                                                                else {
+                                                                  print(response.reasonPhrase);
+                                                                }
+                                                                return;
+
+                                                              }
+                                                            },
+                                                          ),
+                                                        )
+                                                      ],
+                                                    ),
+                                                    SizedBox(height: 10,),
+                                                  ],
+                                                ),
+                                              ),
+                                            );
                                           }
+
                                       );
                                     });
                               },
@@ -427,117 +528,52 @@ class Tools2State extends State<Tools2> {
     );
   }
 
+  getUffici() async {
+      String tt=modello.token!;
 
-  AlertDialog popUp(){
-    return AlertDialog(
-      backgroundColor: Colors.deepPurple.shade100,
-      scrollable: true,
-      content: Form(
-        key: _formKey,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
+      var request = http.Request('POST', Uri.parse('http://www.studiodoc.it/api/Tools/UfficioListGet'));
+      request.bodyFields= {
+        "studioId": modello!.studioId.toString(),
+        "ufficioId": "null"
+      };
 
-            Text("Credenziali accesso app",style: TextStyle(fontSize: 25, fontWeight: FontWeight.w600, color: Colors.grey.shade700) ),
 
-            SizedBox(height: 30),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 2.0),
-              child: Container(
-                decoration:BoxDecoration(
-                    color: Colors.blueGrey.shade50,
-                    borderRadius: BorderRadius.circular(15),
-                    border: Border.all(color: Colors.deepPurple.shade400)
-                ),
-                child:Padding(
-                  padding: const EdgeInsets.only(left: 12),
+      request.headers['Authorization'] = 'Bearer $tt';
 
-                  child: TextFormField(
-                    decoration: InputDecoration(
-                        border: InputBorder.none,
-                        hintText: 'Inserisci codice utente'
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            SizedBox(height: 10,),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 2.0),
-              child: Container(
-                decoration:BoxDecoration(
-                    color: Colors.blueGrey.shade50,
-                    borderRadius: BorderRadius.circular(15),
-                    border: Border.all(color: Colors.deepPurple.shade400)
-                ),
-                child:Padding(
-                  padding: const EdgeInsets.only(left: 12),
+      http.StreamedResponse response = await request.send();
+      response.stream.asBroadcastStream();
 
-                  child: TextFormField(
 
-                    obscureText: true,
-                    decoration: InputDecoration(
-                        border: InputBorder.none,
-                        hintText: 'Inserisci password'
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            SizedBox(height: 30,),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Padding(
+      var jsonData=  jsonDecode(await response.stream.bytesToString());
 
-                  padding: const EdgeInsets.all(1.0),
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      primary: Colors.deepPurple.shade400, // Background color
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20.0)
-                      ),
-                    ),
-                    child: Icon(Icons.upload_rounded),
+      if (response.statusCode == 200) {
+        print(jsonData);
+        for(var uff in jsonData){
+          uffici.add(Ufficio(uff["ufficioDescr"], uff["ufficioId"]));
+        }
+      }
+      else {
+        print(response.reasonPhrase);
+      }
 
-                    onPressed: () {
-                      if (_formKey.currentState!.validate()) {
-                        _formKey.currentState!.save();
-                      }
-                    },
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      primary: Colors.deepPurple.shade400, // Background color
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20.0)
-                      ),
-                    ),
-                    child: Text("Submit"),
-
-                    onPressed: () {
-                      if (_formKey.currentState!.validate()) {
-                        _formKey.currentState!.save();
-                      }
-                    },
-                  ),
-                )
-              ],
-            ),
-            SizedBox(height: 10,),
-          ],
-        ),
-      ),
-    );
   }
+
 
 
 
 }
 
+
+
+class Ufficio {
+
+  String nome;
+  int idUfficio;
+  //ultima modifica data
+
+  Ufficio(this.nome, this.idUfficio);
+
+}
 
 
 

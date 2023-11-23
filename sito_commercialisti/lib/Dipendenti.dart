@@ -569,7 +569,7 @@ class DipendentiState extends State<Dipendenti> {
                                                           if (_formKey.currentState!.validate()) {
                                                             _formKey.currentState!.save();
 
-                                                            //qui fai la insert e ricordati di fare la get dipendenti.
+                                                            //qui fai la insert e ricordati di fare la get uffici.
 
                                                             String tt=modello.token!;
                                                             var request = http.Request('POST', Uri.parse('http://www.studiodoc.it/api/Dipendente/DipendenteMng'));
@@ -587,18 +587,13 @@ class DipendentiState extends State<Dipendenti> {
                                                             };
                                                             request.headers['Authorization'] = 'Bearer $tt';
 
-
                                                             http.StreamedResponse response = await request.send();
                                                             response.stream.asBroadcastStream();
 
                                                             var jsonData=  jsonDecode(await response.stream.bytesToString());
 
-
                                                             if (response.statusCode == 200) {
                                                               print(jsonData);
-
-
-
                                                             }
                                                             else {
                                                               print(response.reasonPhrase);
@@ -658,8 +653,6 @@ class DipendentiState extends State<Dipendenti> {
     response.stream.asBroadcastStream();
 
     var jsonData=  jsonDecode(await response.stream.bytesToString());
-
-
 
     if (response.statusCode == 200) {
       print(jsonData);
