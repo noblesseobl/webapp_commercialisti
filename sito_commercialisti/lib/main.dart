@@ -85,6 +85,7 @@ class _LoginState extends State<LoginUser> {
     );
   }
 
+
   Future<http.StreamedResponse> getToken() {
 
     var request = http.Request('POST', Uri.parse('http://www.studiodoc.it/api/token'));
@@ -240,21 +241,26 @@ class _LoginState extends State<LoginUser> {
 
                                   if (_formKey.currentState!.validate()) {
 
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(content: Text('Processing Data')),
-                                    );
-
 
                                     try{
 
                                       //chiamata per il login
                                       http.Response response = await login();
+
+                                      print(response.body);
                                       final jsonData = jsonDecode(response.body) as Map<String, dynamic>;
 
-                                      if (jsonData["retCode"]!="-1") { //login andato a buon fine
+                                      if (jsonData["retCode"]==-1) {
+                                        print(jsonData["retDescr"]);
+                                        sbagliato=true;
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          const SnackBar(content: Text('Utente non trovato, la password o l\'username potrebbero essere sbagliati')),
+                                        );
+                                      }
+                                      else { //login andato a buon fine
 
                                         modello!.dipendenteId=jsonData["retCode"];
-                                        
+
                                         //chiamata per il token
                                         http.StreamedResponse response2 = await getToken();
                                         final jsonData2 =  jsonDecode(await response2.stream.bytesToString()) as Map<String, dynamic>;
@@ -318,10 +324,6 @@ class _LoginState extends State<LoginUser> {
 
                                         } else { print(response2.reasonPhrase);}
 
-                                      }
-                                      else if (jsonData["retCode"]=="-1"){
-                                        print(response.reasonPhrase);
-                                        sbagliato=true;
                                       }
                                     }catch(er){
                                       print(er);

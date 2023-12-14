@@ -40,7 +40,7 @@ class _NavBarState extends State<NavBar> {
             currentAccountPicture: CircleAvatar(
               child: ClipOval(
                   child: Image.asset(
-                '',
+                'account.png',
                 fit: BoxFit.cover,
               )
               ),

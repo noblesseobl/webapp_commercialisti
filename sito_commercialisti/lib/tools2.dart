@@ -1,16 +1,12 @@
 import 'dart:convert';
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:sito_commercialisti/AggiustaSize.dart';
 import 'package:sito_commercialisti/Modello.dart';
 import 'package:sito_commercialisti/NavBar.dart';
 import 'package:paged_datatable/paged_datatable.dart';
-import 'package:intl/intl.dart';
-import 'Post.dart';
-
 import 'package:http/http.dart' as http;
+
 
 class Tools2 extends StatefulWidget {
   Tools2();
@@ -22,20 +18,18 @@ class Tools2 extends StatefulWidget {
 class Tools2State extends State<Tools2> {
 
   final _formKey = GlobalKey<FormState>();
-
-
+  final _formKey2 = GlobalKey<FormState>();
 
   Modello modello=Modello();
 
-  final tableController = PagedDataTableController<String, int, Post>();
-  PagedDataTableThemeData? theme;
+  final tableController = PagedDataTableController<String, int, Ufficio>();
 
-  List<Ufficio> uffici= List.empty();
+  List<Ufficio> uffici= [];
+
+
 
   @override
   Widget build(BuildContext context) {
-
-    getUffici();
 
     return Scaffold(
       drawer: NavBar(),
@@ -104,270 +98,185 @@ class Tools2State extends State<Tools2> {
                       shadowColor: Colors.black26,
                       color: Colors.white,
 
-
-
                       child: Container(
 
                         margin: EdgeInsets.symmetric(vertical: 5, horizontal: 20),
 
-                        child: PagedDataTable<String, int, Post>(
-                          rowsSelectable: true,
-                          theme: theme,
-                          idGetter: (post) => post.id,
-                          controller: tableController,
+                        child: PagedDataTable<String, int, Ufficio>(
+
+                          idGetter: (ufficio) => ufficio.idUfficio,
                           fetchPage: (pageToken, pageSize, sortBy, filtering) async {
-                            if (filtering.valueOrNull("authorName") == "error!") {
-                              throw Exception("This is an unexpected error, wow!");
+
+                            uffici=[];
+                            String tt=modello.token!;
+
+                            var request = http.Request('POST', Uri.parse('http://www.studiodoc.it/api/Tools/UfficioListGet'));
+                            request.bodyFields= {
+                              "studioId": modello!.studioId.toString(),
+                              "ufficioId": "null"
+                            };
+
+
+                            request.headers['Authorization'] = 'Bearer $tt';
+
+                            http.StreamedResponse response = await request.send();
+                            response.stream.asBroadcastStream();
+
+
+                            var jsonData=  jsonDecode(await response.stream.bytesToString());
+
+                            if (response.statusCode == 200) {
+                              print(jsonData);
+
+                              for(var uff in jsonData){
+                                String ufficioDescr=uff["ufficioDescr"].toString();
+                                int ufficioId= uff["ufficioId"];
+                                String ultimaModifica=uff["dataUltimaModifica"].toString();
+                                uffici?.add(Ufficio(ufficioDescr, ufficioId, ultimaModifica) );
+                              }
+                            }
+                            else {
+                              print(response.reasonPhrase);
                             }
 
-                            var result = await PostsRepository.getPosts(
-                                pageSize: pageSize,
-                                pageToken: pageToken,
-                                sortBy: sortBy?.columnId,
-                                sortDescending: sortBy?.descending ?? false,
-                                gender: filtering.valueOrNullAs<Gender>("gender"),
-                                authorName: filtering.valueOrNullAs<String>("authorName"),
-                                between: filtering.valueOrNullAs<DateTimeRange>("betweenDate"));
-                            return PaginationResult.items(
-                                elements: result.items, nextPageToken: result.nextPageToken);
+                            return PaginationResult.items(elements: uffici);
                           },
-                          initialPage: "",
-                          columns: [
+                          initialPage:"",
+                          columns:[
                             TableColumn(
-                              title: "Codice",
-                              cellBuilder: (item) => Text(item.id.toString()),
+                                title: "Nome ufficio",
+                                cellBuilder: (item) => Text(item.nome)
                             ),
-                            LargeTextTableColumn(
-                                title: "Descrizione",
-                                getter: (post) => post.author,
-                                setter: (post, newContent, rowIndex) async {
-                                  await Future.delayed(const Duration(seconds: 1));
-                                  post.content = newContent;
-                                  return true;
-                                },
-                                sizeFactor: .5),
                             TableColumn(
-                              title: "              ",
-                              sizeFactor: null,
-                              cellBuilder: (item) => Row(
-                                  children: [
-                                    Flexible(child:IconButton(onPressed: (){
-                                      //print(item.content);
-                                      showDialog(
-                                          context: context,
-                                          builder: (BuildContext context) {
-                                            return StatefulBuilder(
-                                                builder: (BuildContext context, StateSetter setState) {
-                                                  return AlertDialog(
-                                                    backgroundColor: Colors.deepPurple.shade100,
-                                                    scrollable: true,
-                                                    content: Form(
-                                                      key: _formKey,
-                                                      child: Column(
-                                                        mainAxisSize: MainAxisSize.min,
-                                                        children: <Widget>[
-                                                          Padding(
-                                                            padding: const EdgeInsets.symmetric(horizontal: 2.0),
-                                                            child: Container(
-                                                              decoration:BoxDecoration(
-                                                                  color: Colors.blueGrey.shade50,
-                                                                  borderRadius: BorderRadius.circular(15),
-                                                                  border: Border.all(color: Colors.deepPurple.shade400)
-                                                              ),
-                                                              child:Padding(
-                                                                  padding: const EdgeInsets.only(left: 12, right: 12),
+                               title: "              ",
+                               sizeFactor: null,
+                               cellBuilder: (item)=> Row(
+                                 children: [
 
-                                                                  child: Text("${item.id}")
-                                                              ),
-                                                            ),
-                                                          ),
-                                                          SizedBox(height: 10,),
-                                                          Padding(
-                                                            padding: const EdgeInsets.symmetric(horizontal: 2.0),
-                                                            child: Container(
-                                                              decoration:BoxDecoration(
-                                                                  color: Colors.blueGrey.shade50,
-                                                                  borderRadius: BorderRadius.circular(15),
-                                                                  border: Border.all(color: Colors.deepPurple.shade400)
-                                                              ),
-                                                              child:Padding(
-                                                                  padding: const EdgeInsets.only(left: 12, right: 12),
-                                                                  child: Text(item.author)
+                                   Flexible(
+                                       child:IconButton(
+                                           onPressed: (){
+                                             showDialog(
+                                                 context: context,
+                                                 builder: (BuildContext context) {
+                                                   return StatefulBuilder(
+                                                       builder: (BuildContext context, StateSetter setState) {
 
-                                                              ),
-                                                            ),
-                                                          ),
+                                                         String nuovoNomeUfficio=item.nome;
+                                                         return AlertDialog(
+                                                           backgroundColor: Colors.deepPurple.shade100,
+                                                           scrollable: true,
+                                                           content: Form(
+                                                             key: _formKey2,
+                                                             child: Column(
+                                                               mainAxisSize: MainAxisSize.min,
+                                                               mainAxisAlignment: MainAxisAlignment.start,
+                                                               crossAxisAlignment: CrossAxisAlignment.start,
+                                                               children: <Widget>[
+                                                                 Text("Codice id", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22)),
+                                                                 Text("${item.idUfficio}"),
+                                                                 SizedBox(height: 20,),
+                                                                 Text("Descrizione", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22)),
+                                                                 TextFormField(
+                                                                   onChanged: (String value) {
+                                                                     nuovoNomeUfficio=value;
+                                                                   },
+                                                                   validator: (value) {
+                                                                     if (value == null || value.isEmpty) {
+                                                                       return 'Please enter some text';
+                                                                     }
+                                                                     return null;
+                                                                   },
+                                                                   decoration: InputDecoration(
+                                                                       border: InputBorder.none,
+                                                                       hintText: '${item.nome}',
+                                                                       hintStyle: TextStyle(
+                                                                         color: Colors.black
+                                                                       ),
+                                                                   ),
+                                                                 ),
+                                                                 SizedBox(height: 20,),
+                                                                 Text("Ultima modifica", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22)),
+                                                                 Text("${item.ultimaModifica}"),
+                                                                 SizedBox(height: 20,),
+                                                                 Row(
+                                                                   children: [
+                                                                     ElevatedButton(
+                                                                       onPressed:() async {
 
-                                                        ],
-                                                      ),
-                                                    ),
-                                                  );
-                                                }
-                                            );
-                                          });
-                                    }, icon: Icon(Icons.edit, color: Colors.deepPurple.shade400))),
-                                    Flexible(child:IconButton(onPressed: (){showDialog(
-                                        context: context,
-                                        builder: (BuildContext context) {
-                                          return StatefulBuilder(
-                                              builder: (BuildContext context, StateSetter setState) {
-                                                return AlertDialog(
-                                                  backgroundColor: Colors.deepPurple.shade100,
-                                                  scrollable: true,
-                                                  content: Form(
-                                                    key: _formKey,
-                                                    child: Column(
-                                                      mainAxisSize: MainAxisSize.min,
-                                                      mainAxisAlignment: MainAxisAlignment.start,
-                                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                                      children: <Widget>[
-                                                        Text("Codice", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22)),
-                                                        Text("${item.id}"),
-                                                        SizedBox(height: 20,),
-                                                        Text("Descrizione", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22)),
-                                                        Text("${item.author}"),
-                                                        SizedBox(height: 20,),
+                                                                         var request = http.Request('POST', Uri.parse('www.studiodoc.it/api/Tools/UfficioMng'));
+                                                                         String tt=modello.token!;
+                                                                         int Utid=modello.dipendenteId!;
+                                                                         int uffid=item.idUfficio!;
 
-                                                      ],
-                                                    ),
-                                                  ),
-                                                );
-                                              }
-                                          );
-                                        });}, icon: Icon(Icons.remove_red_eye, color: Colors.deepPurple.shade400))),
-                                    Flexible(child:IconButton(onPressed: (){
-                                      print(item.id);
-                                      tableController.removeRow(item.id);
-                                    }, icon: Icon(Icons.delete, color: Colors.deepPurple.shade400)))
-                                  ]),
-                            ),
+                                                                         request.bodyFields = {
+                                                                           "ufficioId": "$uffid",
+                                                                           "ufficioDescr": "$nuovoNomeUfficio",
+                                                                           "tipoOperazione": "U",
+                                                                           "utenteId": "$Utid"
+                                                                         };
+                                                                         request.headers['Authorization'] = 'Bearer $tt';
+
+                                                                         http.StreamedResponse response = await request.send();
+                                                                         response.stream.asBroadcastStream();
+
+                                                                         var jsonData=  jsonDecode(await response.stream.bytesToString());
+
+                                                                         if (response.statusCode == 200) {
+                                                                           print(jsonData);
+                                                                         }
+                                                                         else {
+                                                                           print(response.reasonPhrase);
+                                                                         }
+                                                                         return;
+
+                                                                       },
+                                                                       style: ElevatedButton.styleFrom(
+                                                                         primary: Colors.deepPurple.shade400, // Background color
+                                                                         shape: RoundedRectangleBorder(
+                                                                             borderRadius: BorderRadius.circular(20.0)
+                                                                         ),
+                                                                       ),
+                                                                       child: Text("Modifica"),
+                                                                     ),
+                                                                     Icon(Icons.edit)
+                                                                   ],
+                                                                 )//update del nome
+
+
+                                                               ],
+                                                             ),
+                                                           ),
+                                                         );
+                                                       }
+                                                   );
+                                                 }
+                                             );
+                                           },
+                                           icon: Icon(Icons.remove_red_eye, color: Colors.deepPurple.shade400))),
+
+
+                                   Flexible(
+                                       child:IconButton(
+                                           onPressed: (){
+                                             //print(item.id);
+                                             //tableController.removeRow(item.id);
+                                           },
+                                           icon: Icon(Icons.delete, color: Colors.deepPurple.shade400)
+                                       )
+                                   )
+
+                                 ],
+                               )
+                             ),
                           ],
-                          filters: [
-                            TextTableFilter(
-                                id: "authorName",
-                                title: "Author's name",
-                                chipFormatter: (text) => "By $text"),
-                            /* DropdownTableFilter<Gender>(
-                            id: "gender",
-                            title: "Gender",
-                            defaultValue: Gender.male,
-                            chipFormatter: (gender) =>
-                            'Only ${gender.name.toLowerCase()} posts',
-                            items: const [
-                              DropdownMenuItem(value: Gender.male, child: Text("Male")),
-                              DropdownMenuItem(value: Gender.female, child: Text("Female")),
-                              DropdownMenuItem(
-                                  value: Gender.unespecified, child: Text("Unspecified")),
-                            ]),
-                    */
-                            DatePickerTableFilter(
-                              id: "date",
-                              title: "Date",
-                              chipFormatter: (date) => 'Only on ${DateFormat.yMd().format(date)}',
-                              firstDate: DateTime(2000, 1, 1),
-                              lastDate: DateTime.now(),
-                            ),
-                            DateRangePickerTableFilter(
-                              id: "betweenDate",
-                              title: "Between",
-                              chipFormatter: (date) =>
-                              'Between ${DateFormat.yMd().format(date.start)} and ${DateFormat.yMd().format(date.end)}',
-                              firstDate: DateTime(2000, 1, 1),
-                              lastDate: DateTime.now(),
-                            )
-                          ],
-                          /*
-                  footer: TextButton(
-                    onPressed: () {},
-                    child: const Text("Im a footer button"),
-                  ),
-                   */
 
-                          menu: PagedDataTableFilterBarMenu(items: [
-                            FilterMenuItem(
-                              title: const Text("Apply new theme"),
-                              onTap: () {
-                                setState(() {
-                                  if (theme == null) {
-                                    theme = kCustomPagedDataTableTheme;
-                                  } else {
-                                    theme = null;
-                                  }
-                                });
-                              },
-                            ),
-                            const FilterMenuDivider(),
-                            FilterMenuItem(
-                              title: const Text("Remove row"),
-                              onTap: () {
-                                tableController.removeRow(tableController.currentDataset.first.id);
-                              },
-                            ),
-                            FilterMenuItem(
-                              title: const Text("Remove filters"),
-                              onTap: () {
-                                tableController.removeFilters();
-                              },
-                            ),
-                            FilterMenuItem(
-                                title: const Text("Add filter"),
-                                onTap: () {
-                                  tableController.setFilter("gender", Gender.male);
-                                }),
-                            const FilterMenuDivider(),
-                            FilterMenuItem(
-                                title: const Text("Print selected rows"),
-                                onTap: () {
-                                  var selectedPosts = tableController.getSelectedRows();
-                                  debugPrint("SELECTED ROWS ----------------------------");
-                                  debugPrint(selectedPosts
-                                      .map((e) =>
-                                  "Id [${e.id}] Author [${e.author}] Gender [${e.authorGender.name}]")
-                                      .join("\n"));
-                                  debugPrint("------------------------------------------");
-                                }),
-                            FilterMenuItem(
-                                title: const Text("Unselect all rows"),
-                                onTap: () {
-                                  tableController.unselectAllRows();
-                                }),
-                            FilterMenuItem(
-                                title: const Text("Select random row"),
-                                onTap: () {
-                                  final random = Random.secure();
-                                  tableController.selectRow(tableController
-                                      .currentDataset[random.nextInt(tableController.currentDataset.length)].id);
-                                }),
-                            const FilterMenuDivider(),
-                            FilterMenuItem(
-                                title: const Text("Update first row's gender and number"),
-                                onTap: () {
-                                  tableController.modifyRowValue(1, (item) {
-                                    item.authorGender = Gender.male;
-                                    item.number = 1;
-                                    item.author = "Tomas";
-                                    item.content = "empty content";
-                                  });
-                                }),
-                            const FilterMenuDivider(),
-                            FilterMenuItem(
-                              title: const Text("Refresh cache"),
-                              onTap: () {
-                                tableController.refresh(currentDataset: false);
-                              },
-                            ),
-                            FilterMenuItem(
-                              title: const Text("Refresh current dataset"),
-                              onTap: () {
-                                tableController.refresh();
-                              },
-                            ),
-                          ]),
+
+
                         ),
                       ),
                     ),
                   ),
-
 
 
 
@@ -399,16 +308,18 @@ class Tools2State extends State<Tools2> {
                               style: ElevatedButton.styleFrom(
                                 padding: EdgeInsets.all(20),
                                 backgroundColor: Colors.purple.shade200,
-                                shape: CircleBorder( ),
+                                shape: CircleBorder(),
                               ),
 
                               onPressed: () {
                                 showDialog(
                                     context: context,
                                     builder: (BuildContext context) {
-                                      String? nomeUfficio=null;
+
                                       return StatefulBuilder(
                                           builder: (BuildContext context, StateSetter setState) {
+
+                                            String? nuovoNomeUfficio=null;
                                             return AlertDialog(
                                               backgroundColor: Colors.deepPurple.shade100,
                                               scrollable: true,
@@ -434,7 +345,7 @@ class Tools2State extends State<Tools2> {
 
                                                           child: TextFormField(
                                                             onChanged: (String value) {
-                                                              nomeUfficio=value;
+                                                              nuovoNomeUfficio=value;
                                                             },
                                                             validator: (value) {
                                                               if (value == null || value.isEmpty) {
@@ -474,7 +385,7 @@ class Tools2State extends State<Tools2> {
                                                                 request.bodyFields= {
                                                                   "studioId": modello.studioId.toString(),
                                                                   "ufficioId": "null",
-                                                                  "ufficioDescr": nomeUfficio!,
+                                                                  "ufficioDescr": nuovoNomeUfficio!,
                                                                   "tipoOperazione": "I",
                                                                   "utenteId": modello.dipendenteId.toString(),
                                                                 };
@@ -491,6 +402,7 @@ class Tools2State extends State<Tools2> {
                                                                 else {
                                                                   print(response.reasonPhrase);
                                                                 }
+                                                                nuovoNomeUfficio=null;
                                                                 return;
 
                                                               }
@@ -528,39 +440,6 @@ class Tools2State extends State<Tools2> {
     );
   }
 
-  getUffici() async {
-      String tt=modello.token!;
-
-      var request = http.Request('POST', Uri.parse('http://www.studiodoc.it/api/Tools/UfficioListGet'));
-      request.bodyFields= {
-        "studioId": modello!.studioId.toString(),
-        "ufficioId": "null"
-      };
-
-
-      request.headers['Authorization'] = 'Bearer $tt';
-
-      http.StreamedResponse response = await request.send();
-      response.stream.asBroadcastStream();
-
-
-      var jsonData=  jsonDecode(await response.stream.bytesToString());
-
-      if (response.statusCode == 200) {
-        print(jsonData);
-        for(var uff in jsonData){
-          uffici.add(Ufficio(uff["ufficioDescr"], uff["ufficioId"]));
-        }
-      }
-      else {
-        print(response.reasonPhrase);
-      }
-
-  }
-
-
-
-
 }
 
 
@@ -569,33 +448,14 @@ class Ufficio {
 
   String nome;
   int idUfficio;
-  //ultima modifica data
-
-  Ufficio(this.nome, this.idUfficio);
+  String ultimaModifica;
+  Ufficio(this.nome, this.idUfficio, this.ultimaModifica);
 
 }
 
 
+//banner per aggiunta (inerito con successo/fallimento)
+//aggiorna lista dopo aggiunta
+//eliminazione
 
 
-const kCustomPagedDataTableTheme = PagedDataTableThemeData(
-    rowColors: [
-      Color(0xFFC4E6E3),
-      Color(0xFFE5EFEE),
-    ],
-    backgroundColor: Color(0xFFE0F2F1),
-    headerBackgroundColor: Color(0xFF80CBC4),
-    filtersHeaderBackgroundColor: Color(0xFF80CBC4),
-    footerBackgroundColor: Color(0xFF80CBC4),
-    footerTextStyle: TextStyle(color: Colors.white),
-    textStyle: TextStyle(fontWeight: FontWeight.normal),
-    buttonsColor: Colors.white,
-    chipTheme: ChipThemeData(
-        backgroundColor: Colors.teal,
-        labelStyle: TextStyle(color: Colors.white),
-        deleteIconColor: Colors.white),
-    configuration: PagedDataTableConfiguration(
-        footer: PagedDataTableFooterConfiguration(footerVisible: true),
-        allowRefresh: true,
-        pageSizes: [50, 75, 100],
-        initialPageSize: 50));
