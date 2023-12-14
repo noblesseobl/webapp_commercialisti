@@ -115,7 +115,6 @@ class _LoginState extends State<LoginUser> {
   @override
   Widget build(BuildContext context) {
     mediaQueryData = MediaQuery.of(context);
-    bool sbagliato=false;
 
     return Scaffold(
         backgroundColor: Colors.purple.shade100,
@@ -224,15 +223,6 @@ class _LoginState extends State<LoginUser> {
                               SizedBox(height: 25,),
 
 
-                              Visibility(
-                                visible: sbagliato,
-                                child: const Text("Username o password errati",
-                                    style: TextStyle(
-                                        color: Colors.red,
-                                        fontSize: 15,
-                                        backgroundColor: Colors.white70,
-                                        fontWeight: FontWeight.bold)),
-                              ),
 
                               SizedBox(height: 25,),
 
@@ -250,12 +240,15 @@ class _LoginState extends State<LoginUser> {
                                       print(response.body);
                                       final jsonData = jsonDecode(response.body) as Map<String, dynamic>;
 
-                                      if (jsonData["retCode"]==-1) {
-                                        print(jsonData["retDescr"]);
-                                        sbagliato=true;
-                                        ScaffoldMessenger.of(context).showSnackBar(
-                                          const SnackBar(content: Text('Utente non trovato, la password o l\'username potrebbero essere sbagliati')),
-                                        );
+                                      if (jsonData["retCode"]==-1 || response.statusCode != 200) {
+                                        if (response.statusCode !=200){
+                                          print(response.reasonPhrase);
+                                        }else{
+                                          print(jsonData["retDescr"]);
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            const SnackBar(content: Text('Utente non trovato, la password o l\'username potrebbero essere sbagliati')),
+                                          );
+                                        }
                                       }
                                       else { //login andato a buon fine
 
@@ -265,6 +258,7 @@ class _LoginState extends State<LoginUser> {
                                         http.StreamedResponse response2 = await getToken();
                                         final jsonData2 =  jsonDecode(await response2.stream.bytesToString()) as Map<String, dynamic>;
                                         response2.stream.asBroadcastStream();
+
                                         if (response2.statusCode == 200) {
                                           //salva token ed entra
 
@@ -322,11 +316,17 @@ class _LoginState extends State<LoginUser> {
 
 
 
-                                        } else { print(response2.reasonPhrase);}
+                                        } else {
+                                          print(response2.reasonPhrase);
+                                        }
 
                                       }
+
                                     }catch(er){
                                       print(er);
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        const SnackBar(content: Text('Errore del Server!')),
+                                      );
                                     }
 
                                   }

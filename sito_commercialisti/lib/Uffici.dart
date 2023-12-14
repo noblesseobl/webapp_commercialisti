@@ -26,6 +26,21 @@ class Tools2State extends State<Tools2> {
 
   List<Ufficio> uffici= [];
 
+  Future<http.StreamedResponse> deleteUfficio(int idUff) async {
+
+    var request= http.Request('POST',Uri.parse('http://www.studiodoc.it/api/Tools/UfficioMng'));
+    String tt=modello!.token!;
+    request.bodyFields = {
+      "ufficioId": idUff.toString(),
+      "tipoOperazione": "D",
+      "utenteId": modello!.codiceUtente!
+    };
+    request.headers['Authorization'] = 'Bearer $tt';
+
+    return request.send();
+
+  }
+
 
 
   @override
@@ -145,23 +160,24 @@ class Tools2State extends State<Tools2> {
                           columns:[
                             TableColumn(
                                 title: "Nome ufficio",
-                                cellBuilder: (item) => Text(item.nome)
+                                sizeFactor: 0.3,
+                                cellBuilder: (item) => Text(item.nome, style: TextStyle(fontSize: 15, overflow: TextOverflow.visible),)
                             ),
                             TableColumn(
                                title: "              ",
                                sizeFactor: null,
                                cellBuilder: (item)=> Row(
+                                 //mainAxisAlignment: MainAxisAlignment.end,
                                  children: [
 
                                    Flexible(
                                        child:IconButton(
-                                           onPressed: (){
+                                           onPressed:(){
                                              showDialog(
                                                  context: context,
                                                  builder: (BuildContext context) {
                                                    return StatefulBuilder(
                                                        builder: (BuildContext context, StateSetter setState) {
-
                                                          String nuovoNomeUfficio=item.nome;
                                                          return AlertDialog(
                                                            backgroundColor: Colors.deepPurple.shade100,
@@ -174,25 +190,36 @@ class Tools2State extends State<Tools2> {
                                                                crossAxisAlignment: CrossAxisAlignment.start,
                                                                children: <Widget>[
                                                                  Text("Codice id", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22)),
+                                                                 SizedBox(height: 5),
                                                                  Text("${item.idUfficio}"),
                                                                  SizedBox(height: 20,),
                                                                  Text("Descrizione", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22)),
-                                                                 TextFormField(
-                                                                   onChanged: (String value) {
-                                                                     nuovoNomeUfficio=value;
-                                                                   },
-                                                                   validator: (value) {
-                                                                     if (value == null || value.isEmpty) {
-                                                                       return 'Please enter some text';
-                                                                     }
-                                                                     return null;
-                                                                   },
-                                                                   decoration: InputDecoration(
-                                                                       border: InputBorder.none,
-                                                                       hintText: '${item.nome}',
-                                                                       hintStyle: TextStyle(
-                                                                         color: Colors.black
+                                                                 Container(
+                                                                   decoration:BoxDecoration(
+                                                                       color: Colors.blueGrey.shade50,
+                                                                       borderRadius: BorderRadius.circular(10),
+                                                                       border: Border.all(color: Colors.black)
+                                                                   ),
+                                                                   child: Padding(
+                                                                     padding: const EdgeInsets.only(left: 10),
+                                                                     child: TextFormField(
+                                                                       onChanged: (String value) {
+                                                                         nuovoNomeUfficio=value;
+                                                                       },
+                                                                       validator: (value) {
+                                                                         if (value == null || value.isEmpty) {
+                                                                           return 'Please enter some text';
+                                                                         }
+                                                                         return null;
+                                                                       },
+                                                                       decoration: InputDecoration(
+                                                                           border: InputBorder.none,
+                                                                           hintText: '${item.nome}',
+                                                                           hintStyle: TextStyle(
+                                                                             color: Colors.black
+                                                                           ),
                                                                        ),
+                                                                     ),
                                                                    ),
                                                                  ),
                                                                  SizedBox(height: 20,),
@@ -203,33 +230,46 @@ class Tools2State extends State<Tools2> {
                                                                    children: [
                                                                      ElevatedButton(
                                                                        onPressed:() async {
+                                                                         try{
 
-                                                                         var request = http.Request('POST', Uri.parse('www.studiodoc.it/api/Tools/UfficioMng'));
-                                                                         String tt=modello.token!;
-                                                                         int Utid=modello.dipendenteId!;
-                                                                         int uffid=item.idUfficio!;
+                                                                           var request = http.Request('POST', Uri.parse('http://www.studiodoc.it/api/Tools/UfficioMng'));
+                                                                           String tt=modello.token!;
+                                                                           int Utid=modello.dipendenteId!;
+                                                                           int uffid=item.idUfficio!;
 
-                                                                         request.bodyFields = {
-                                                                           "ufficioId": "$uffid",
-                                                                           "ufficioDescr": "$nuovoNomeUfficio",
-                                                                           "tipoOperazione": "U",
-                                                                           "utenteId": "$Utid"
-                                                                         };
-                                                                         request.headers['Authorization'] = 'Bearer $tt';
+                                                                           request.bodyFields = {
+                                                                             "ufficioId": "$uffid",
+                                                                             "ufficioDescr": "$nuovoNomeUfficio",
+                                                                             "tipoOperazione": "U",
+                                                                             "utenteId": "$Utid"
+                                                                           };
+                                                                           request.headers['Authorization'] = 'Bearer $tt';
 
-                                                                         http.StreamedResponse response = await request.send();
-                                                                         response.stream.asBroadcastStream();
+                                                                           http.StreamedResponse response = await request.send();
+                                                                           response.stream.asBroadcastStream();
+                                                                           var jsonData=  jsonDecode(await response.stream.bytesToString());
 
-                                                                         var jsonData=  jsonDecode(await response.stream.bytesToString());
+                                                                           item.nome= nuovoNomeUfficio;
 
-                                                                         if (response.statusCode == 200) {
-                                                                           print(jsonData);
+                                                                           if (jsonData["retCode"]==0) {
+                                                                             print(jsonData);
+                                                                             ScaffoldMessenger.of(context).showSnackBar(
+                                                                               SnackBar(content: Text(jsonData["retDescr"].toString())),
+                                                                             );
+                                                                           }
+                                                                           else {
+                                                                             ScaffoldMessenger.of(context).showSnackBar(
+                                                                               SnackBar(content: Text("Qualcosa è andato storto durante l'update!")),
+                                                                             );
+                                                                           }
+                                                                           Navigator.of(context).pop();
+
+                                                                         }catch(er){
+                                                                           print(er);
+                                                                           ScaffoldMessenger.of(context).showSnackBar(
+                                                                             const SnackBar(content: Text('Errore del Server!')),
+                                                                           );
                                                                          }
-                                                                         else {
-                                                                           print(response.reasonPhrase);
-                                                                         }
-                                                                         return;
-
                                                                        },
                                                                        style: ElevatedButton.styleFrom(
                                                                          primary: Colors.deepPurple.shade400, // Background color
@@ -237,9 +277,15 @@ class Tools2State extends State<Tools2> {
                                                                              borderRadius: BorderRadius.circular(20.0)
                                                                          ),
                                                                        ),
-                                                                       child: Text("Modifica"),
+                                                                       child: Row(
+                                                                         children: [
+                                                                           Text("Modifica"),
+                                                                           SizedBox(width: 10,),
+                                                                           Icon(Icons.edit)
+                                                                         ],
+                                                                       ),
                                                                      ),
-                                                                     Icon(Icons.edit)
+
                                                                    ],
                                                                  )//update del nome
 
@@ -259,6 +305,92 @@ class Tools2State extends State<Tools2> {
                                    Flexible(
                                        child:IconButton(
                                            onPressed: (){
+                                             showDialog(
+                                                 context: context,
+                                                 builder: (BuildContext context) {
+                                                   return
+                                                     StatefulBuilder(
+                                                         builder: (BuildContext context, StateSetter setState) {
+                                                           return AlertDialog(
+                                                             backgroundColor: Colors.deepPurple.shade100,
+                                                             content: Form(
+                                                               key: _formKey,
+                                                               child: Column(
+                                                                 mainAxisSize: MainAxisSize.min,
+                                                                 children: <Widget>[
+
+                                                                   Text("Sei sicuro di voler eliminare questa categoria?",style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600, color: Colors.grey.shade700) ),
+
+                                                                   SizedBox(height: 40),
+                                                                   Row(
+                                                                     mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                                                     children: [
+
+
+                                                                       Padding(
+                                                                         padding: const EdgeInsets.all(10.0),
+                                                                         child: ElevatedButton(
+                                                                           style: ElevatedButton.styleFrom(
+                                                                             primary: Colors.grey.shade100, // Background color
+                                                                             shape: RoundedRectangleBorder(
+                                                                                 borderRadius: BorderRadius.circular(20.0)
+                                                                             ),
+                                                                           ),
+                                                                           child: Text("Annulla", style: TextStyle(color: Colors.black, fontWeight: FontWeight.w600),),
+
+                                                                           onPressed: () {
+                                                                             Navigator.of(context).pop();
+                                                                           },
+                                                                         ),
+                                                                       ),
+
+
+
+                                                                       Padding(
+                                                                         padding: const EdgeInsets.all(10.0),
+                                                                         child: ElevatedButton(
+                                                                           style: ElevatedButton.styleFrom(
+                                                                             primary: Colors.deepPurple.shade400, // Background color
+                                                                             shape: RoundedRectangleBorder(
+                                                                                 borderRadius: BorderRadius.circular(20.0)
+                                                                             ),
+                                                                           ),
+                                                                           child: Text("Elimina", style: TextStyle(color: Colors.black, fontWeight: FontWeight.w600),),
+
+                                                                           onPressed: () async {
+
+                                                                             http.StreamedResponse response = await deleteUfficio(item.idUfficio);
+                                                                             final jsonData3 =  jsonDecode(await response.stream.bytesToString());
+
+                                                                             uffici.remove(item);
+                                                                             if(jsonData3["retCode"]==0){
+                                                                               ScaffoldMessenger.of(context).showSnackBar(
+                                                                                 SnackBar(content: Text(jsonData3["retDescr"].toString())),
+                                                                               );
+                                                                             }else{
+                                                                               ScaffoldMessenger.of(context).showSnackBar(
+                                                                                 SnackBar(content: Text("Qualcosa è andato storto durante la cancellazione!")),
+                                                                               );
+                                                                             }
+                                                                             Navigator.of(context).pop();
+
+
+                                                                           },
+                                                                         ),
+                                                                       )
+                                                                     ],
+                                                                   ),
+                                                                   SizedBox(height: 10,),
+                                                                 ],
+                                                               ),
+                                                             ),
+                                                           );
+                                                         }
+
+                                                     );
+                                                 });
+
+
                                              //print(item.id);
                                              //tableController.removeRow(item.id);
                                            },
@@ -329,7 +461,7 @@ class Tools2State extends State<Tools2> {
                                                   mainAxisSize: MainAxisSize.min,
                                                   children: <Widget>[
 
-                                                    Text("Aggiungi un nuovo ufficio",style: TextStyle(fontSize: 25, fontWeight: FontWeight.w600, color: Colors.grey.shade700) ),
+                                                    Text("Aggiungi un nuovo ufficio",style: TextStyle(fontSize: 25, fontWeight: FontWeight.w600, color: Colors.black) ),
 
                                                     SizedBox(height: 30),
                                                     Padding(
@@ -366,7 +498,7 @@ class Tools2State extends State<Tools2> {
                                                       mainAxisAlignment: MainAxisAlignment.end,
                                                       children: [
                                                         Padding(
-                                                          padding: const EdgeInsets.all(8.0),
+                                                          padding: const EdgeInsets.all(10.0),
                                                           child: ElevatedButton(
                                                             style: ElevatedButton.styleFrom(
                                                               primary: Colors.deepPurple.shade400, // Background color
@@ -397,6 +529,10 @@ class Tools2State extends State<Tools2> {
                                                                 var jsonData=  jsonDecode(await response.stream.bytesToString());
 
                                                                 if (response.statusCode == 200) {
+                                                                  Navigator.of(context).pop();
+                                                                  ScaffoldMessenger.of(context).showSnackBar(
+                                                                    SnackBar(content: Text(jsonData["retDescr"].toString())),
+                                                                  );
                                                                   print(jsonData);
                                                                 }
                                                                 else {
