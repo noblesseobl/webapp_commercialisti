@@ -21,23 +21,20 @@ class Bacheca extends StatefulWidget {
 class BachecaState extends State<Bacheca> {
 
   final _formKey = GlobalKey<FormState>();
+
   String? testo;
 
-
-
   Modello modello=Modello();
-  final tableController = PagedDataTableController<String, int, Post>();
-  PagedDataTableThemeData? theme;
 
+  final tableController = PagedDataTableController<String, int, MexBacheca>();
 
-  List<MexBacheca> bacheca= List.empty();
+  //PagedDataTableThemeData? theme;
+
+  List<MexBacheca> bacheca= [];
 
   @override
   Widget build(BuildContext context) {
 
-
-    getBacheca();
-    
 
     return Scaffold(
       drawer: NavBar(),
@@ -87,7 +84,6 @@ class BachecaState extends State<Bacheca> {
         child: Stack(
                 children: [
 
-
                   Container(
 
                     color: const Color.fromARGB(255, 208, 208, 208),
@@ -108,260 +104,241 @@ class BachecaState extends State<Bacheca> {
                       child: Container(
 
                         margin: EdgeInsets.symmetric(vertical: 5, horizontal: 20),
-                        child: PagedDataTable<String, int, Post>( //metti Messaggio
-                          rowsSelectable: true,
-                          theme: theme,
-                          idGetter: (post) => post.id,
+
+                        child: PagedDataTable<String, int, MexBacheca>( //metti Messaggio
+                          //rowsSelectable: true,
+                          //theme: theme,
+                          idGetter: (messaggio) => messaggio.idMex,
+
                           controller: tableController,
+
                           fetchPage: (pageToken, pageSize, sortBy, filtering) async {
-                            if (filtering.valueOrNull("authorName") == "error!") {
-                              throw Exception("This is an unexpected error, wow!");
+
+                            bacheca=[];
+                            String tt=modello.token!;
+
+                            var request = http.Request('POST', Uri.parse('http://www.studiodoc.it/api/Bacheca/BachecaMessageListGet'));
+                            request.bodyFields={
+                              "studioId": modello!.studioId.toString(),        //<-- filtro se non null
+                              "numMsg": "20",
+                              "messaggioId": "null"
+                            };
+                            request.headers['Authorization'] = 'Bearer $tt';
+
+                            http.StreamedResponse response = await request.send();
+                            response.stream.asBroadcastStream();
+                            var jsonData=  jsonDecode(await response.stream.bytesToString());
+
+                            if (response.statusCode == 200) {
+                              print(jsonData);
+                              for(var mex in jsonData){
+                                bacheca.add(MexBacheca(mex["titolo"], mex["messaggio"], mex["linkAllegato"], mex["messaggioId"], mex["dataInserimento"], mex["dataUltimaModifica"]));
+                              }
+                            }
+                            else {
+                              print(response.reasonPhrase);
                             }
 
-                            var result = await PostsRepository.getPosts(
-                                pageSize: pageSize,
-                                pageToken: pageToken,
-                                sortBy: sortBy?.columnId,
-                                sortDescending: sortBy?.descending ?? false,
-                                gender: filtering.valueOrNullAs<Gender>("gender"),
-                                authorName: filtering.valueOrNullAs<String>("authorName"),
-                                between: filtering.valueOrNullAs<DateTimeRange>("betweenDate"));
-                            return PaginationResult.items(
-                                elements: result.items, nextPageToken: result.nextPageToken);
+                            return PaginationResult.items(elements: bacheca);
+
+                            // if (filtering.valueOrNull("authorName") == "error!") {
+                            //   throw Exception("This is an unexpected error, wow!");
+                            // }
+                            //
+                            // var result = await PostsRepository.getPosts(
+                            //     pageSize: pageSize,
+                            //     pageToken: pageToken,
+                            //     sortBy: sortBy?.columnId,
+                            //     sortDescending: sortBy?.descending ?? false,
+                            //     gender: filtering.valueOrNullAs<Gender>("gender"),
+                            //     authorName: filtering.valueOrNullAs<String>("authorName"),
+                            //     between: filtering.valueOrNullAs<DateTimeRange>("betweenDate"));
+                            // return PaginationResult.items(
+                            //     elements: result.items, nextPageToken: result.nextPageToken);
                           },
+
                           initialPage: "",
-                          columns: [
+
+                          columns:  [
                             LargeTextTableColumn(
                                 title: "Titolo",
-                                getter: (post) => post.content,
+                                getter: (post) => post.titolo,
                                 setter: (post, newContent, rowIndex) async {
                                   await Future.delayed(const Duration(seconds: 1));
-                                  post.content = newContent;
+                                  post.titolo = newContent;
                                   return true;
                                 },
                                 sizeFactor: .3),
                             LargeTextTableColumn(
                                 title: "Descrizione",
-                                getter: (post) => post.content,
+                                getter: (post) => post.messaggio,
                                 setter: (post, newContent, rowIndex) async {
                                   await Future.delayed(const Duration(seconds: 1));
-                                  post.content = newContent;
+                                  post.messaggio = newContent;
                                   return true;
                                 },
                                 sizeFactor: .3),
                             TableColumn(
-                                id: "createdAt",
                                 title: "Data caricamento",
-                                sortable: true,
-                                cellBuilder: (item) =>
-                                    Text(DateFormat.yMd().format(item.createdAt))),
+                                sortable: false, //true? --> da gestire
+                                cellBuilder: (item) =>  Text(item.dataInserimento)),
+
                             TableColumn(
                               title: "              ",
                               sizeFactor: null,
                               cellBuilder: (item) => Row(
                                   children: [
-                                    Flexible(child:IconButton(onPressed: (){
-                                      print(item.id);
-                                    }, icon: Icon(Icons.download, color: Colors.deepPurple.shade400))),
-                                    Flexible(child:IconButton(onPressed: (){
-                                      //print(item.content);
-                                      showDialog(
-                                          context: context,
-                                          builder: (BuildContext context) {
-                                            return StatefulBuilder(
-                                                builder: (BuildContext context, StateSetter setState) {
-                                                  return AlertDialog(
-                                                    backgroundColor: Colors.deepPurple.shade100,
-                                                    scrollable: true,
-                                                    content: Form(
-                                                      key: _formKey,
-                                                      child: Column(
-                                                        mainAxisSize: MainAxisSize.min,
-                                                        children: <Widget>[
-                                                          Padding(
-                                                            padding: const EdgeInsets.symmetric(horizontal: 2.0),
-                                                            child: Container(
-                                                              decoration:BoxDecoration(
-                                                                  color: Colors.blueGrey.shade50,
-                                                                  borderRadius: BorderRadius.circular(15),
-                                                                  border: Border.all(color: Colors.deepPurple.shade400)
-                                                              ),
-                                                              child:Padding(
-                                                                  padding: const EdgeInsets.only(left: 12, right: 12),
+                                    Flexible(
+                                        child:IconButton(
+                                            onPressed: (){
+                                              print(item.id);
+                                              },
+                                            icon: Icon(Icons.download, color: Colors.deepPurple.shade400)
+                                        )
+                                    ),
 
-                                                                  child: Text(item.content)
+                                    Flexible(
+                                      child: IconButton(
+                                          onPressed: (){
+                                            //print(item.content);
+                                            showDialog(
+                                                context: context,
+                                                builder: (BuildContext context) {
+                                                  return StatefulBuilder(
+                                                    builder: (BuildContext context, StateSetter setState) {
+                                                      return AlertDialog(
+                                                        backgroundColor: Colors.deepPurple.shade100,
+                                                        scrollable: true,
+                                                        content: Form(
+                                                          key: _formKey,
+                                                          child: Column(
+                                                            mainAxisSize: MainAxisSize.min,
+                                                            children: <Widget>[
+                                                              Padding(
+                                                                padding: const EdgeInsets.symmetric(horizontal: 2.0),
+                                                                child: Container(
+                                                                  decoration:BoxDecoration(
+                                                                      color: Colors.blueGrey.shade50,
+                                                                      borderRadius: BorderRadius.circular(15),
+                                                                      border: Border.all(color: Colors.deepPurple.shade400)
+                                                                  ),
+                                                                  child:Padding(
+                                                                      padding: const EdgeInsets.only(left: 12, right: 12),
+
+                                                                      child: Text(item.content)
+                                                                  ),
+                                                                ),
                                                               ),
-                                                            ),
+                                                              SizedBox(height: 10,),
+                                                              Padding(
+                                                                padding: const EdgeInsets.symmetric(horizontal: 2.0),
+                                                                child: Container(
+                                                                  height: 170,
+                                                                  decoration:BoxDecoration(
+                                                                      color: Colors.blueGrey.shade50,
+                                                                      borderRadius: BorderRadius.circular(15),
+                                                                      border: Border.all(color: Colors.deepPurple.shade400)
+                                                                  ),
+                                                                  child:Padding(
+                                                                      padding: const EdgeInsets.only(left: 12, right: 12),
+                                                                      child: Text(item.content)
+
+                                                                  ),
+                                                                ),
+                                                              ),
+
+                                                              SizedBox(height: 30,),
+
+                                                            ],
                                                           ),
-                                                          SizedBox(height: 10,),
-                                                          Padding(
-                                                            padding: const EdgeInsets.symmetric(horizontal: 2.0),
-                                                            child: Container(
-                                                              height: 170,
-                                                              decoration:BoxDecoration(
-                                                                  color: Colors.blueGrey.shade50,
-                                                                  borderRadius: BorderRadius.circular(15),
-                                                                  border: Border.all(color: Colors.deepPurple.shade400)
-                                                              ),
-                                                              child:Padding(
-                                                                  padding: const EdgeInsets.only(left: 12, right: 12),
-                                                                  child: Text(item.content)
+                                                        ),
+                                                      );
+                                                    }
+                                                );
+                                                }
 
-                                                              ),
-                                                            ),
+                                            );
+                                          },
+                                          icon: Icon(Icons.edit, color: Colors.deepPurple.shade400)
+                                      ),
+                                    ),
+
+                                    Flexible(
+                                      child: IconButton(
+                                          onPressed: (){
+                                            showDialog(
+                                                context: context,
+                                                builder: (BuildContext context) {
+                                                  return StatefulBuilder(
+                                                    builder: (BuildContext context, StateSetter setState) {
+                                                      return AlertDialog(
+                                                        backgroundColor: Colors.deepPurple.shade100,
+                                                        scrollable: true,
+                                                        content: Form(
+                                                          key: _formKey,
+                                                          child: Column(
+                                                            mainAxisSize: MainAxisSize.min,
+                                                            mainAxisAlignment: MainAxisAlignment.start,
+                                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                                            children: <Widget>[
+                                                              Text("Titolo", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22)),
+                                                              Text("${item.content}"),
+                                                              SizedBox(height: 20,),
+                                                              Text("Descrizione", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22)),
+                                                              Text("${item.content}"),
+                                                              SizedBox(height: 20,),
+
+                                                            ],
                                                           ),
-
-                                                          SizedBox(height: 30,),
-
-                                                        ],
-                                                      ),
-                                                    ),
+                                                        ),
+                                                      );
+                                                    }
                                                   );
                                                 }
                                             );
-                                          });
-                                    }, icon: Icon(Icons.edit, color: Colors.deepPurple.shade400)),),
-                                    Flexible(child: IconButton(onPressed: (){showDialog(
-                                        context: context,
-                                        builder: (BuildContext context) {
-                                          return StatefulBuilder(
-                                              builder: (BuildContext context, StateSetter setState) {
-                                                return AlertDialog(
-                                                  backgroundColor: Colors.deepPurple.shade100,
-                                                  scrollable: true,
-                                                  content: Form(
-                                                    key: _formKey,
-                                                    child: Column(
-                                                      mainAxisSize: MainAxisSize.min,
-                                                      mainAxisAlignment: MainAxisAlignment.start,
-                                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                                      children: <Widget>[
-                                                        Text("Titolo", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22)),
-                                                        Text("${item.content}"),
-                                                        SizedBox(height: 20,),
-                                                        Text("Descrizione", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22)),
-                                                        Text("${item.content}"),
-                                                        SizedBox(height: 20,),
+                                          },
+                                          icon: Icon(Icons.remove_red_eye, color: Colors.deepPurple.shade400)
+                                      ),
+                                    ),
 
-                                                      ],
-                                                    ),
-                                                  ),
-                                                );
-                                              }
-                                          );
-                                        });}, icon: Icon(Icons.remove_red_eye, color: Colors.deepPurple.shade400)),),
-                                    Flexible(child:IconButton(onPressed: (){
-                                      print(item.id);
-                                      tableController.removeRow(item.id);
-                                    }, icon: Icon(Icons.delete, color: Colors.deepPurple.shade400)))
+                                    Flexible(
+                                        child:IconButton(
+                                            onPressed: (){
+                                              print(item.id);
+                                              tableController.removeRow(item.id);
+                                            },
+                                            icon: Icon(Icons.delete, color: Colors.deepPurple.shade400)
+                                        )
+                                    )
+
                                   ]),
                             ),
                           ],
 
                           filters: [
                             TextTableFilter(
-                                id: "authorName",
-                                title: "Author's name",
+                                id: "titolo",
+                                title: "Titolo",
                                 chipFormatter: (text) => "By $text"),
 
                             DatePickerTableFilter(
-                              id: "date",
-                              title: "Date",
-                              chipFormatter: (date) => 'Only on ${DateFormat.yMd().format(date)}',
+                              id: "data",
+                              title: "Data",
+                              chipFormatter: (date) => 'Solo il giorno: ${DateFormat.yMd().format(date)}',
                               firstDate: DateTime(2000, 1, 1),
                               lastDate: DateTime.now(),
                             ),
                             DateRangePickerTableFilter(
-                              id: "betweenDate",
-                              title: "Between",
+                              id: "periodo",
+                              title: "Periodo",
                               chipFormatter: (date) =>
-                              'Between ${DateFormat.yMd().format(date.start)} and ${DateFormat.yMd().format(date.end)}',
+                              'Tra il ${DateFormat.yMd().format(date.start)} e il ${DateFormat.yMd().format(date.end)}',
                               firstDate: DateTime(2000, 1, 1),
                               lastDate: DateTime.now(),
                             )
+
                           ],
 
-
-                          menu: PagedDataTableFilterBarMenu(items: [
-                            FilterMenuItem(
-                              title: const Text("Apply new theme"),
-                              onTap: () {
-                                setState(() {
-                                  if (theme == null) {
-                                    theme = kCustomPagedDataTableTheme;
-                                  } else {
-                                    theme = null;
-                                  }
-                                });
-                              },
-                            ),
-                            const FilterMenuDivider(),
-                            FilterMenuItem(
-                              title: const Text("Remove row"),
-                              onTap: () {
-                                tableController.removeRow(tableController.currentDataset.first.id);
-                              },
-                            ),
-                            FilterMenuItem(
-                              title: const Text("Remove filters"),
-                              onTap: () {
-                                tableController.removeFilters();
-                              },
-                            ),
-                            FilterMenuItem(
-                                title: const Text("Add filter"),
-                                onTap: () {
-                                  tableController.setFilter("gender", Gender.male);
-                                }),
-                            const FilterMenuDivider(),
-                            FilterMenuItem(
-                                title: const Text("Print selected rows"),
-                                onTap: () {
-                                  var selectedPosts = tableController.getSelectedRows();
-                                  debugPrint("SELECTED ROWS ----------------------------");
-                                  debugPrint(selectedPosts
-                                      .map((e) =>
-                                  "Id [${e.id}] Author [${e.author}] Gender [${e.authorGender.name}]")
-                                      .join("\n"));
-                                  debugPrint("------------------------------------------");
-                                }),
-                            FilterMenuItem(
-                                title: const Text("Unselect all rows"),
-                                onTap: () {
-                                  tableController.unselectAllRows();
-                                }),
-                            FilterMenuItem(
-                                title: const Text("Select random row"),
-                                onTap: () {
-                                  final random = Random.secure();
-                                  tableController.selectRow(tableController
-                                      .currentDataset[random.nextInt(tableController.currentDataset.length)].id);
-                                }),
-                            const FilterMenuDivider(),
-                            FilterMenuItem(
-                                title: const Text("Update first row's gender and number"),
-                                onTap: () {
-                                  tableController.modifyRowValue(1, (item) {
-                                    item.authorGender = Gender.male;
-                                    item.number = 1;
-                                    item.author = "Tomas";
-                                    item.content = "empty content";
-                                  });
-                                }),
-                            const FilterMenuDivider(),
-                            FilterMenuItem(
-                              title: const Text("Refresh cache"),
-                              onTap: () {
-                                tableController.refresh(currentDataset: false);
-                              },
-                            ),
-                            FilterMenuItem(
-                              title: const Text("Refresh current dataset"),
-                              onTap: () {
-                                tableController.refresh();
-                              },
-                            ),
-                          ]),
                         )
                       ),
                     ),
@@ -404,7 +381,7 @@ class BachecaState extends State<Bacheca> {
                                     builder: (BuildContext context) {
                                       return StatefulBuilder(
                                           builder: (BuildContext context, StateSetter setState) {
-                                            return popUp();
+                                            //return popUp();
                                           }
                                       );
                                     });
@@ -546,37 +523,6 @@ class BachecaState extends State<Bacheca> {
 }
 
 
-  getBacheca() async {
-    var request = http.Request('POST', Uri.parse('http://localhost:51868/Bacheca/BachecaMessageListGet'));
-    String tt=modello.token!;
-    request.bodyFields={
-      "studioId": modello!.studioId.toString(),        //<-- filtro se non null
-      "numMsg": "20",
-      "messaggioId": "null"
-    };
-    request.headers['Authorization'] = 'Bearer $tt';
-
-    http.StreamedResponse response = await request.send();
-    response.stream.asBroadcastStream();
-    var jsonData=  jsonDecode(await response.stream.bytesToString());
-
-
-
-    if (response.statusCode == 200) {
-      print(jsonData);
-
-      for(var mex in jsonData){
-        bacheca.add(MexBacheca(mex["titolo"], mex["messaggio"], mex["linkAllegato"]));
-      }
-    }
-    else {
-      print(response.reasonPhrase);
-    }
-
-
-  }
-
-
 }
 
 
@@ -585,40 +531,37 @@ class MexBacheca {
 
   String titolo;
   String messaggio;
-  String linkAllegato;
+  String? linkAllegato;
+  int idMex;
+  String dataInserimento;
+  String dataUltimaModifica;
 
-  MexBacheca(this.titolo, this.messaggio, this.linkAllegato);
-
-  //data insert
-  //data ultimo edit
-  //id mex?
+  MexBacheca(this.titolo, this.messaggio, this.linkAllegato, this.idMex,
+      this.dataInserimento, this.dataUltimaModifica);
 
 }
 
 
 
+// const kCustomPagedDataTableTheme = PagedDataTableThemeData(
+//     rowColors: [
+//       Color(0xFFC4E6E3),
+//       Color(0xFFE5EFEE),
+//     ],
+//     backgroundColor: Color(0xFFE0F2F1),
+//     headerBackgroundColor: Color(0xFF80CBC4),
+//     filtersHeaderBackgroundColor: Color(0xFF80CBC4),
+//     footerBackgroundColor: Color(0xFF80CBC4),
+//     footerTextStyle: TextStyle(color: Colors.white),
+//     textStyle: TextStyle(fontWeight: FontWeight.normal),
+//     buttonsColor: Colors.white,
+//     chipTheme: ChipThemeData(
+//         backgroundColor: Colors.teal,
+//         labelStyle: TextStyle(color: Colors.white),
+//         deleteIconColor: Colors.white),
+//     configuration: PagedDataTableConfiguration(
+//         footer: PagedDataTableFooterConfiguration(footerVisible: true),
+//         allowRefresh: true,
+//         pageSizes: [50, 75, 100],
+//         initialPageSize: 10));
 
-
-
-
-const kCustomPagedDataTableTheme = PagedDataTableThemeData(
-    rowColors: [
-      Color(0xFFC4E6E3),
-      Color(0xFFE5EFEE),
-    ],
-    backgroundColor: Color(0xFFE0F2F1),
-    headerBackgroundColor: Color(0xFF80CBC4),
-    filtersHeaderBackgroundColor: Color(0xFF80CBC4),
-    footerBackgroundColor: Color(0xFF80CBC4),
-    footerTextStyle: TextStyle(color: Colors.white),
-    textStyle: TextStyle(fontWeight: FontWeight.normal),
-    buttonsColor: Colors.white,
-    chipTheme: ChipThemeData(
-        backgroundColor: Colors.teal,
-        labelStyle: TextStyle(color: Colors.white),
-        deleteIconColor: Colors.white),
-    configuration: PagedDataTableConfiguration(
-        footer: PagedDataTableFooterConfiguration(footerVisible: true),
-        allowRefresh: true,
-        pageSizes: [50, 75, 100],
-        initialPageSize: 10));

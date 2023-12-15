@@ -42,7 +42,6 @@ class Tools2State extends State<Tools2> {
   }
 
 
-
   @override
   Widget build(BuildContext context) {
 
@@ -403,9 +402,6 @@ class Tools2State extends State<Tools2> {
                              ),
                           ],
 
-
-
-
                         ),
                       ),
                     ),
@@ -414,7 +410,6 @@ class Tools2State extends State<Tools2> {
                   Padding(
                     padding: EdgeInsets.only(top: 5),
                     child: Card(
-
                       elevation: 5,
                       shape: RoundedRectangleBorder(
                           side: BorderSide(
