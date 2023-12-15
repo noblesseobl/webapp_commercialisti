@@ -5,7 +5,7 @@ import 'package:sito_commercialisti/Modello.dart';
 import 'package:sito_commercialisti/bacheca.dart';
 import 'package:sito_commercialisti/Messaggi.dart';
 import 'package:sito_commercialisti/profilo.dart';
-import 'package:sito_commercialisti/tools.dart';
+import 'package:sito_commercialisti/TipologiaCliente.dart';
 import 'package:sito_commercialisti/Uffici.dart';
 import 'package:sito_commercialisti/transition.dart';
 

@@ -97,7 +97,6 @@ class Tools2State extends State<Tools2> {
 
                   Container(
 
-
                     color: const Color.fromARGB(255, 208, 208, 208),
                     padding: const EdgeInsets.only(top:80, left: 3, right: 3),
 
@@ -300,8 +299,6 @@ class Tools2State extends State<Tools2> {
                                              );
                                            },
                                            icon: Icon(Icons.remove_red_eye, color: Colors.deepPurple.shade400))),
-
-
                                    Flexible(
                                        child:IconButton(
                                            onPressed: (){
@@ -343,8 +340,6 @@ class Tools2State extends State<Tools2> {
                                                                            },
                                                                          ),
                                                                        ),
-
-
 
                                                                        Padding(
                                                                          padding: const EdgeInsets.all(10.0),
@@ -409,8 +404,6 @@ class Tools2State extends State<Tools2> {
                       ),
                     ),
                   ),
-
-
 
                   Padding(
                     padding: EdgeInsets.only(top: 5),
@@ -572,7 +565,6 @@ class Tools2State extends State<Tools2> {
                 ],
               ),
             )
-
     );
   }
 
