@@ -118,6 +118,7 @@ class Tools2State extends State<Tools2> {
 
                         child: PagedDataTable<String, int, Ufficio>(
 
+                          controller: tableController,
                           idGetter: (ufficio) => ufficio.idUfficio,
                           fetchPage: (pageToken, pageSize, sortBy, filtering) async {
 
@@ -262,7 +263,9 @@ class Tools2State extends State<Tools2> {
                                                                              );
                                                                            }
                                                                            Navigator.of(context).pop();
-
+                                                                           setState((){
+                                                                             tableController.refresh();
+                                                                           });
                                                                          }catch(er){
                                                                            print(er);
                                                                            ScaffoldMessenger.of(context).showSnackBar(
@@ -368,7 +371,9 @@ class Tools2State extends State<Tools2> {
                                                                                );
                                                                              }
                                                                              Navigator.of(context).pop();
-
+                                                                             setState((){
+                                                                               tableController.refresh();
+                                                                             });
 
                                                                            },
                                                                          ),
@@ -397,6 +402,7 @@ class Tools2State extends State<Tools2> {
                                )
                              ),
                           ],
+
 
 
 
@@ -526,6 +532,9 @@ class Tools2State extends State<Tools2> {
                                                                   ScaffoldMessenger.of(context).showSnackBar(
                                                                     SnackBar(content: Text(jsonData["retDescr"].toString())),
                                                                   );
+                                                                  setState((){
+                                                                    tableController.refresh();
+                                                                  });
                                                                   print(jsonData);
                                                                 }
                                                                 else {

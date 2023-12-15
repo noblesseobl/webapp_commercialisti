@@ -621,4 +621,4 @@ const kCustomPagedDataTableTheme = PagedDataTableThemeData(
         footer: PagedDataTableFooterConfiguration(footerVisible: true),
         allowRefresh: true,
         pageSizes: [50, 75, 100],
-        initialPageSize: 50));
+        initialPageSize: 10));

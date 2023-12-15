@@ -120,6 +120,7 @@ class ToolsState extends State<Tools> {
                         margin: EdgeInsets.symmetric(vertical: 5, horizontal: 20),
                         child: PagedDataTable<String, int, Tipologia>(
 
+                          controller: tableController,
                           idGetter: (tipologia) => tipologia.idTipologia,
 
                           fetchPage: (pageToken, pageSize, sortBy, filtering) async {
@@ -268,7 +269,9 @@ class ToolsState extends State<Tools> {
                                                                               );
                                                                             }
                                                                             Navigator.of(context).pop();
-
+                                                                            setState((){
+                                                                              tableController.refresh();
+                                                                            });
                                                                           }catch(er){
                                                                             print(er);
                                                                             ScaffoldMessenger.of(context).showSnackBar(
@@ -377,7 +380,9 @@ class ToolsState extends State<Tools> {
                                                                               }
                                                                               Navigator.of(context).pop();
 
-
+                                                                              setState((){
+                                                                                tableController.refresh();
+                                                                              });
                                                                             },
                                                                           ),
                                                                         )
@@ -538,6 +543,9 @@ class ToolsState extends State<Tools> {
                                                                 else {
                                                                   print(response.reasonPhrase);
                                                                 }
+                                                                setState((){
+                                                                  tableController.refresh();
+                                                                });
                                                                 nuovoNomeTipologia=null;
                                                                 return;
 
