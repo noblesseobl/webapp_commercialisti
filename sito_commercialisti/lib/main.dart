@@ -48,12 +48,14 @@ class _MyHomePageState extends State<MyHomePage> {
             popupMenuTheme: PopupMenuThemeData(
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(30)))),
+
     );
   }
 
 }
 
 class LoginUser extends StatefulWidget {
+
   LoginUser();
 
   @override
@@ -84,7 +86,6 @@ class _LoginState extends State<LoginUser> {
       }),
     );
   }
-
 
   Future<http.StreamedResponse> getToken() {
 
@@ -223,7 +224,6 @@ class _LoginState extends State<LoginUser> {
                               SizedBox(height: 25,),
 
 
-
                               SizedBox(height: 25,),
 
                               ElevatedButton(
@@ -251,6 +251,7 @@ class _LoginState extends State<LoginUser> {
                                         }
                                       }
                                       else { //login andato a buon fine
+
 
                                         modello!.dipendenteId=jsonData["retCode"];
 
@@ -292,6 +293,7 @@ class _LoginState extends State<LoginUser> {
 
                                               }
                                             }
+
 
                                             if(modello!.admin!){
                                               Navigator.of(context).push(
@@ -372,9 +374,6 @@ class _LoginState extends State<LoginUser> {
               ),
 
             )));
-
-
-
   }
 
 

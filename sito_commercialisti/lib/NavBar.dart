@@ -4,6 +4,7 @@ import 'package:sito_commercialisti/Clienti.dart';
 import 'package:sito_commercialisti/Modello.dart';
 import 'package:sito_commercialisti/bacheca.dart';
 import 'package:sito_commercialisti/Messaggi.dart';
+import 'package:sito_commercialisti/main.dart';
 import 'package:sito_commercialisti/profilo.dart';
 import 'package:sito_commercialisti/TipologiaCliente.dart';
 import 'package:sito_commercialisti/Uffici.dart';
@@ -206,6 +207,11 @@ Future<Future<ConfirmAction?>> _asyncConfirmDialog(BuildContext context) async {
             child: const Text('Logout'),
             onPressed: () {
               //cancellare il modello e pop until...
+              Modello().dispose();
+
+
+              Navigator.of(context).popUntil((route) => route.isFirst);
+
             },
           )
         ],
