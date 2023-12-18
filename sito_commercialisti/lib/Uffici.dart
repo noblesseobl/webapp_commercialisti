@@ -36,9 +36,7 @@ class Tools2State extends State<Tools2> {
       "utenteId": modello!.codiceUtente!
     };
     request.headers['Authorization'] = 'Bearer $tt';
-
     return request.send();
-
   }
 
 
@@ -336,7 +334,6 @@ class Tools2State extends State<Tools2> {
                                                                              ),
                                                                            ),
                                                                            child: Text("Annulla", style: TextStyle(color: Colors.black, fontWeight: FontWeight.w600),),
-
                                                                            onPressed: () {
                                                                              Navigator.of(context).pop();
                                                                            },
@@ -385,7 +382,6 @@ class Tools2State extends State<Tools2> {
                                                              ),
                                                            );
                                                          }
-
                                                      );
                                                  });
 

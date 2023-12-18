@@ -193,11 +193,11 @@ Future<Future<ConfirmAction?>> _asyncConfirmDialog(BuildContext context) async {
     barrierDismissible: false, // user must tap button for close dialog!
     builder: (BuildContext context) {
       return AlertDialog(
-        title: Text('Delete This Contact?'),
-        content: const Text('This will delete the contact from your device.'),
+        title: Text('Vuoi abbandonare la sessione?'),
+        content: const Text(''),
         actions: <Widget>[
           TextButton(
-            child: const Text('Cancel'),
+            child: const Text('Annulla'),
             onPressed: () {
               Navigator.of(context).pop(ConfirmAction.Cancel);
             },
@@ -205,8 +205,7 @@ Future<Future<ConfirmAction?>> _asyncConfirmDialog(BuildContext context) async {
           ElevatedButton(
             child: const Text('Logout'),
             onPressed: () {
-              Navigator.of(context).pop(ConfirmAction.Accept);//CAPIRE BENE COME FUNZIONA
-
+              //cancellare il modello e pop until...
             },
           )
         ],

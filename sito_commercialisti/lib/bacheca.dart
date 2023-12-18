@@ -1,6 +1,4 @@
 import 'dart:convert';
-import 'dart:math';
-
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -9,7 +7,6 @@ import 'package:sito_commercialisti/Modello.dart';
 import 'package:sito_commercialisti/NavBar.dart';
 import 'package:paged_datatable/paged_datatable.dart';
 import 'package:intl/intl.dart';
-import 'Post.dart';
 
 class Bacheca extends StatefulWidget {
   Bacheca();
@@ -21,6 +18,7 @@ class Bacheca extends StatefulWidget {
 class BachecaState extends State<Bacheca> {
 
   final _formKey = GlobalKey<FormState>();
+  final _formKey2 = GlobalKey<FormState>();
 
   String? testo;
 
@@ -28,13 +26,27 @@ class BachecaState extends State<Bacheca> {
 
   final tableController = PagedDataTableController<String, int, MexBacheca>();
 
-  //PagedDataTableThemeData? theme;
-
   List<MexBacheca> bacheca= [];
+
+  Future<http.StreamedResponse> deletePost(int idPost) async{
+
+    var request = http.Request('POST', Uri.parse('http://www.studiodoc.it/api/Bacheca/BachecaMsgMng'));
+    String tt=modello!.token!;
+
+    request.bodyFields = {
+        "messaggioId": idPost.toString(),
+        "tipoOperazione" : "D",
+        "utenteId" :  modello!.codiceUtente!
+
+    };
+    request.headers['Authorization'] = 'Bearer $tt';
+
+    return request.send();
+
+  }
 
   @override
   Widget build(BuildContext context) {
-
 
     return Scaffold(
       drawer: NavBar(),
@@ -105,9 +117,8 @@ class BachecaState extends State<Bacheca> {
 
                         margin: EdgeInsets.symmetric(vertical: 5, horizontal: 20),
 
-                        child: PagedDataTable<String, int, MexBacheca>( //metti Messaggio
-                          //rowsSelectable: true,
-                          //theme: theme,
+                        child: PagedDataTable<String, int, MexBacheca>(
+
                           idGetter: (messaggio) => messaggio.idMex,
 
                           controller: tableController,
@@ -120,7 +131,7 @@ class BachecaState extends State<Bacheca> {
                             var request = http.Request('POST', Uri.parse('http://www.studiodoc.it/api/Bacheca/BachecaMessageListGet'));
                             request.bodyFields={
                               "studioId": modello!.studioId.toString(),        //<-- filtro se non null
-                              "numMsg": "20",
+                              "numMsg": "100",
                               "messaggioId": "null"
                             };
                             request.headers['Authorization'] = 'Bearer $tt';
@@ -141,113 +152,248 @@ class BachecaState extends State<Bacheca> {
 
                             return PaginationResult.items(elements: bacheca);
 
-                            // if (filtering.valueOrNull("authorName") == "error!") {
-                            //   throw Exception("This is an unexpected error, wow!");
-                            // }
-                            //
-                            // var result = await PostsRepository.getPosts(
-                            //     pageSize: pageSize,
-                            //     pageToken: pageToken,
-                            //     sortBy: sortBy?.columnId,
-                            //     sortDescending: sortBy?.descending ?? false,
-                            //     gender: filtering.valueOrNullAs<Gender>("gender"),
-                            //     authorName: filtering.valueOrNullAs<String>("authorName"),
-                            //     between: filtering.valueOrNullAs<DateTimeRange>("betweenDate"));
-                            // return PaginationResult.items(
-                            //     elements: result.items, nextPageToken: result.nextPageToken);
+
                           },
 
                           initialPage: "",
 
                           columns:  [
-                            LargeTextTableColumn(
+                            TableColumn(
                                 title: "Titolo",
-                                getter: (post) => post.titolo,
-                                setter: (post, newContent, rowIndex) async {
-                                  await Future.delayed(const Duration(seconds: 1));
-                                  post.titolo = newContent;
-                                  return true;
-                                },
-                                sizeFactor: .3),
-                            LargeTextTableColumn(
+                                cellBuilder: (item) =>  Text(item.titolo,  style: TextStyle(overflow: TextOverflow.ellipsis)),
+                                sizeFactor: .2),
+                            TableColumn(
+                                cellBuilder: (item) =>  Text(item.messaggio, overflow: TextOverflow.ellipsis, maxLines: 2,),
                                 title: "Descrizione",
-                                getter: (post) => post.messaggio,
-                                setter: (post, newContent, rowIndex) async {
-                                  await Future.delayed(const Duration(seconds: 1));
-                                  post.messaggio = newContent;
-                                  return true;
-                                },
                                 sizeFactor: .3),
                             TableColumn(
                                 title: "Data caricamento",
-                                sortable: false, //true? --> da gestire
+                                sizeFactor: 0.2,
+                                sortable: false,  //true? --> da gestire
                                 cellBuilder: (item) =>  Text(item.dataInserimento)),
-
                             TableColumn(
                               title: "              ",
                               sizeFactor: null,
                               cellBuilder: (item) => Row(
                                   children: [
                                     Flexible(
-                                        child:IconButton(
-                                            onPressed: (){
-                                              print(item.id);
-                                              },
-                                            icon: Icon(Icons.download, color: Colors.deepPurple.shade400)
-                                        )
-                                    ),
+                                        child: Icon(Icons.download, color:  Colors.deepPurple.shade400)  //se c'è un allegato viola, se non c'è allora icona grigia
+                                    ),    //download
 
                                     Flexible(
                                       child: IconButton(
                                           onPressed: (){
-                                            //print(item.content);
+
                                             showDialog(
                                                 context: context,
                                                 builder: (BuildContext context) {
                                                   return StatefulBuilder(
                                                     builder: (BuildContext context, StateSetter setState) {
+                                                      String nuovoTitolo=item.titolo;
+                                                      String nuovoMessaggio=item.messaggio;
                                                       return AlertDialog(
                                                         backgroundColor: Colors.deepPurple.shade100,
                                                         scrollable: true,
                                                         content: Form(
-                                                          key: _formKey,
+                                                          key: _formKey2,
                                                           child: Column(
                                                             mainAxisSize: MainAxisSize.min,
+                                                            mainAxisAlignment: MainAxisAlignment.start,
+                                                            crossAxisAlignment: CrossAxisAlignment.start,
                                                             children: <Widget>[
-                                                              Padding(
-                                                                padding: const EdgeInsets.symmetric(horizontal: 2.0),
-                                                                child: Container(
-                                                                  decoration:BoxDecoration(
-                                                                      color: Colors.blueGrey.shade50,
-                                                                      borderRadius: BorderRadius.circular(15),
-                                                                      border: Border.all(color: Colors.deepPurple.shade400)
-                                                                  ),
-                                                                  child:Padding(
-                                                                      padding: const EdgeInsets.only(left: 12, right: 12),
+                                                              Row(
+                                                                mainAxisAlignment: MainAxisAlignment.center,
+                                                                children: [
+                                                                  Text("Modifica", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22)),
+                                                                ],
+                                                              ),
+                                                              Row(
+                                                                children: [
+                                                                  Text("Codice id: ", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
 
-                                                                      child: Text(item.content)
+                                                                  Text("${item.idMex}",  style: TextStyle(fontSize: 12)),
+                                                                ],
+                                                              ),
+                                                              SizedBox(height: 20,),
+                                                              Text("Titolo: ", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                                                              SizedBox(height: 5),
+                                                              Container(
+                                                                decoration:BoxDecoration(
+                                                                    color: Colors.blueGrey.shade50,
+                                                                    borderRadius: BorderRadius.circular(5),
+                                                                    border: Border.all(color: Colors.deepPurple.shade400)
+                                                                ),
+                                                                child:Padding(
+                                                                  padding: const EdgeInsets.only(left: 12),
+
+                                                                  child: TextFormField(
+                                                                    initialValue: item.titolo,
+                                                                    decoration: InputDecoration(
+                                                                        border: InputBorder.none,
+                                                                        hintText: item.titolo
+                                                                    ),
+                                                                    onChanged: (String value) {
+                                                                      nuovoTitolo=value;
+                                                                    },
+                                                                    validator: (value) {
+                                                                      if (value == null || value.isEmpty) {
+                                                                        return 'Please enter some text';
+                                                                      }
+                                                                      return null;
+                                                                    },
                                                                   ),
                                                                 ),
+                                                              ),
+                                                              SizedBox(height: 20,),
+
+                                                              Text("Messaggio: ", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                                                              SizedBox(height: 5),
+                                                              Container(
+                                                                height: 170,
+                                                                width: 500,
+                                                                decoration:BoxDecoration(
+                                                                    color: Colors.blueGrey.shade50,
+                                                                    borderRadius: BorderRadius.circular(5),
+                                                                    border: Border.all(color: Colors.deepPurple.shade400)
+                                                                ),
+                                                                child:TextFormField(
+                                                                  initialValue: item.messaggio,
+                                                                  decoration: InputDecoration(
+                                                                    hintText: item.messaggio,
+                                                                    border: InputBorder.none,
+                                                                    filled: true,
+                                                                  ),
+                                                                  keyboardType: TextInputType.multiline,
+                                                                  expands: true,
+                                                                  maxLines: null,
+                                                                  onChanged: (String value) {
+                                                                    nuovoMessaggio=value;
+                                                                  },
+                                                                  validator: (value) {
+                                                                    if (value == null || value.isEmpty) {
+                                                                      return 'Please enter some text';
+                                                                    }
+                                                                    return null;
+                                                                  },
+                                                                ),
+                                                              ),
+                                                              SizedBox(height: 20),
+
+                                                              Row(
+                                                                children: [
+                                                                  Text("Pubblicato il: ", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                                                                  Text("${item.dataInserimento}", style: TextStyle(fontSize: 12)),
+                                                                ],
                                                               ),
                                                               SizedBox(height: 10,),
-                                                              Padding(
-                                                                padding: const EdgeInsets.symmetric(horizontal: 2.0),
-                                                                child: Container(
-                                                                  height: 170,
-                                                                  decoration:BoxDecoration(
-                                                                      color: Colors.blueGrey.shade50,
-                                                                      borderRadius: BorderRadius.circular(15),
-                                                                      border: Border.all(color: Colors.deepPurple.shade400)
-                                                                  ),
-                                                                  child:Padding(
-                                                                      padding: const EdgeInsets.only(left: 12, right: 12),
-                                                                      child: Text(item.content)
 
+                                                              Row(
+
+                                                                children: [
+                                                                  Text("Ultima modifica: ", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                                                                  Text("${item.dataUltimaModifica}", style: TextStyle(fontSize: 12)),
+                                                                  Spacer(),
+                                                                  ElevatedButton(
+                                                                    onPressed:(){
+                                                                      //gestione upload nuovo file
+                                                                    },
+                                                                    style: ElevatedButton.styleFrom(
+                                                                      primary: Colors.deepPurple.shade400, // Background color
+                                                                      shape: RoundedRectangleBorder(
+                                                                          borderRadius: BorderRadius.circular(20.0)
+                                                                      ),
+                                                                    ),
+                                                                    child: Padding(
+                                                                      padding: const EdgeInsets.all(10.0),
+                                                                      child: Row(
+                                                                        children: [
+                                                                          Text("Seleziona \nnuovo file"),
+                                                                          SizedBox(width: 10),
+                                                                          Icon(Icons.upload_rounded)
+                                                                        ],
+                                                                      ),
+                                                                    ),
                                                                   ),
-                                                                ),
+                                                                ],
                                                               ),
+                                                              SizedBox(height: 20,),
+                                                              Row(
+                                                                mainAxisAlignment: MainAxisAlignment.start,
+                                                                children: [
+                                                                  Padding(
+                                                                    padding: const EdgeInsets.all(5.0),
+                                                                    child: ElevatedButton(
 
-                                                              SizedBox(height: 30,),
+                                                                      onPressed:() async {
+                                                                        try{
+
+                                                                          var request = http.Request('POST', Uri.parse('http://www.studiodoc.it/api/Bacheca/BachecaMsgMng'));
+                                                                          String tt=modello.token!;
+
+                                                                          int mexId=item.idMex!;
+                                                                          int usId=modello.dipendenteId!;
+
+                                                                          request.bodyFields = {
+                                                                            "messaggioId": mexId.toString(),
+                                                                            "titolo": nuovoTitolo,
+                                                                            "messaggio" : nuovoMessaggio,
+                                                                            "linkAllegato" : "null",
+                                                                            "tipoOperazione" : "U",
+                                                                            "utenteId" :  usId.toString()
+                                                                          };
+                                                                          request.headers['Authorization'] = 'Bearer $tt';
+
+                                                                          http.StreamedResponse response = await request.send();
+                                                                          response.stream.asBroadcastStream();
+                                                                          var jsonData=  jsonDecode(await response.stream.bytesToString());
+
+                                                                          item.titolo= nuovoTitolo;
+                                                                          item.messaggio= nuovoMessaggio;
+
+
+                                                                          if (jsonData["retCode"]==0) {
+                                                                            print(jsonData);
+                                                                            ScaffoldMessenger.of(context).showSnackBar(
+                                                                              SnackBar(content: Text(jsonData["retDescr"].toString())),
+                                                                            );
+                                                                          }
+                                                                          else {
+                                                                            ScaffoldMessenger.of(context).showSnackBar(
+                                                                              SnackBar(content: Text("Qualcosa è andato storto durante l'update!")),
+                                                                            );
+                                                                          }
+                                                                          Navigator.of(context).pop();
+                                                                          setState((){
+                                                                            tableController.refresh();
+                                                                          });
+                                                                        }catch(er){
+                                                                          print(er);
+                                                                          ScaffoldMessenger.of(context).showSnackBar(
+                                                                            const SnackBar(content: Text('Errore del Server!')),
+                                                                          );
+                                                                        }
+                                                                      },
+                                                                      style: ElevatedButton.styleFrom(
+                                                                        primary: Colors.deepPurple.shade400,
+                                                                        shape: RoundedRectangleBorder(
+                                                                            borderRadius: BorderRadius.circular(20.0)
+                                                                        ),
+                                                                      ),
+                                                                      child: Row(
+                                                                        children: [
+                                                                          Text("Invio"),
+                                                                          SizedBox(width: 10,),
+                                                                          Icon(Icons.edit)
+                                                                        ],
+                                                                      ),
+                                                                    ),
+                                                                  ),
+
+
+
+                                                                ],
+                                                              )//update del nome
+
 
                                                             ],
                                                           ),
@@ -261,7 +407,7 @@ class BachecaState extends State<Bacheca> {
                                           },
                                           icon: Icon(Icons.edit, color: Colors.deepPurple.shade400)
                                       ),
-                                    ),
+                                    ),    //update
 
                                     Flexible(
                                       child: IconButton(
@@ -276,18 +422,71 @@ class BachecaState extends State<Bacheca> {
                                                         scrollable: true,
                                                         content: Form(
                                                           key: _formKey,
-                                                          child: Column(
-                                                            mainAxisSize: MainAxisSize.min,
-                                                            mainAxisAlignment: MainAxisAlignment.start,
-                                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                                            children: <Widget>[
-                                                              Text("Titolo", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22)),
-                                                              Text("${item.content}"),
-                                                              SizedBox(height: 20,),
-                                                              Text("Descrizione", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22)),
-                                                              Text("${item.content}"),
-                                                              SizedBox(height: 20,),
+                                                          child: Row(
+                                                            children: [
+                                                              SizedBox(width: 20),
+                                                              Column(
+                                                                mainAxisSize: MainAxisSize.min,
+                                                                mainAxisAlignment: MainAxisAlignment.start,
+                                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                                children: <Widget>[
+                                                                  SizedBox(height: 20,),
+                                                                  Text("Titolo:", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22)),
+                                                                  SizedBox(height: 10),
+                                                                  Text("${item.titolo}"),
+                                                                  SizedBox(height: 30,),
+                                                                  Text("Messaggio:", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22)),
+                                                                  SizedBox(height: 10,),
+                                                                  Text("${item.messaggio}"),
 
+                                                                  SizedBox(height: 20,),
+                                                                  Row(
+                                                                    children: [
+                                                                      Text("Scritta il: ", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                                                                      Text("${item.dataInserimento}", style: TextStyle(fontSize: 12)),
+                                                                    ],
+                                                                  ),
+                                                                  SizedBox(height: 10,),
+                                                                  Row(
+                                                                    children: [
+                                                                      Text("Ultima modifica: ", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                                                                      Text("${item.dataUltimaModifica}",  style: TextStyle( fontSize: 12)),
+                                                                    ],
+                                                                  ),
+
+                                                                  SizedBox(height: 15,),
+
+                                                                  Row(
+
+                                                                    children: [
+                                                                      ElevatedButton(
+                                                                        onPressed:(){
+                                                                          //gestione download nuovo file
+                                                                        },
+                                                                        style: ElevatedButton.styleFrom(
+                                                                          primary: Colors.deepPurple.shade400,
+                                                                          shape: RoundedRectangleBorder(
+                                                                              borderRadius: BorderRadius.circular(20.0)
+                                                                          ),
+                                                                        ),
+                                                                        child: Padding(
+                                                                          padding: const EdgeInsets.all(10.0),
+                                                                          child: Row(
+                                                                            children: [
+                                                                              Text("Download"),
+                                                                              SizedBox(width: 10),
+                                                                              Icon(Icons.download_rounded)
+                                                                            ],
+                                                                          ),
+                                                                        ),
+                                                                      ),
+                                                                    ],
+                                                                  ),
+                                                                  SizedBox(height: 20,),
+
+                                                                ],
+                                                              ),
+                                                              SizedBox(width: 20),
                                                             ],
                                                           ),
                                                         ),
@@ -299,17 +498,101 @@ class BachecaState extends State<Bacheca> {
                                           },
                                           icon: Icon(Icons.remove_red_eye, color: Colors.deepPurple.shade400)
                                       ),
-                                    ),
+                                    ),    //read
 
                                     Flexible(
-                                        child:IconButton(
-                                            onPressed: (){
-                                              print(item.id);
-                                              tableController.removeRow(item.id);
-                                            },
-                                            icon: Icon(Icons.delete, color: Colors.deepPurple.shade400)
-                                        )
-                                    )
+
+                                      child:IconButton(
+                                          onPressed: (){
+                                            showDialog(
+                                                context: context,
+                                                builder: (BuildContext context) {
+                                                  return
+                                                    StatefulBuilder(
+                                                        builder: (BuildContext context, StateSetter setState) {
+                                                          return AlertDialog(
+                                                            backgroundColor: Colors.deepPurple.shade100,
+                                                            content: Form(
+                                                              key: _formKey,
+                                                              child: Column(
+                                                                mainAxisSize: MainAxisSize.min,
+                                                                children: <Widget>[
+
+                                                                  Text("Sei sicuro di voler eliminare questo post?",style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600, color: Colors.grey.shade700) ),
+
+                                                                  SizedBox(height: 40),
+                                                                  Row(
+                                                                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                                                    children: [
+
+
+                                                                      Padding(
+                                                                        padding: const EdgeInsets.all(10.0),
+                                                                        child: ElevatedButton(
+                                                                          style: ElevatedButton.styleFrom(
+                                                                            primary: Colors.grey.shade100, // Background color
+                                                                            shape: RoundedRectangleBorder(
+                                                                                borderRadius: BorderRadius.circular(20.0)
+                                                                            ),
+                                                                          ),
+                                                                          child: Text("Annulla", style: TextStyle(color: Colors.black, fontWeight: FontWeight.w600),),
+
+                                                                          onPressed: () {
+                                                                            Navigator.of(context).pop();
+                                                                          },
+                                                                        ),
+                                                                      ),
+
+                                                                      Padding(
+                                                                        padding: const EdgeInsets.all(10.0),
+                                                                        child: ElevatedButton(
+                                                                          style: ElevatedButton.styleFrom(
+                                                                            primary: Colors.deepPurple.shade400,
+                                                                            shape: RoundedRectangleBorder(
+                                                                                borderRadius: BorderRadius.circular(20.0)
+                                                                            ),
+                                                                          ),
+                                                                          child: Text("Elimina", style: TextStyle(color: Colors.black, fontWeight: FontWeight.w600),),
+
+                                                                          onPressed: () async {
+                                                                            http.StreamedResponse response=await deletePost(item.idMex);
+                                                                            final jsonData = jsonDecode(await response.stream.bytesToString());
+                                                                            bacheca.remove(item);
+
+                                                                            if(jsonData["retCode"]==0){
+                                                                              ScaffoldMessenger.of(context).showSnackBar(
+                                                                                SnackBar(content: Text(jsonData["retDescr"].toString())),
+                                                                              );
+                                                                            }else{
+                                                                              ScaffoldMessenger.of(context).showSnackBar(
+                                                                                SnackBar(content: Text("Qualcosa è andato storto durante la cancellazione!")),
+                                                                              );
+                                                                            }
+                                                                            Navigator.of(context).pop();
+                                                                            setState((){
+                                                                              tableController.refresh();
+                                                                            });
+
+                                                                          },
+                                                                        ),
+                                                                      )
+                                                                    ],
+                                                                  ),
+                                                                  SizedBox(height: 10,),
+                                                                ],
+                                                              ),
+                                                            ),
+                                                          );
+                                                        }
+
+                                                    );
+                                                });
+
+
+                                          },
+                                          icon: Icon(Icons.delete, color: Colors.deepPurple.shade400)
+                                      )
+                                    )      //delete
 
                                   ]),
                             ),
@@ -319,7 +602,7 @@ class BachecaState extends State<Bacheca> {
                             TextTableFilter(
                                 id: "titolo",
                                 title: "Titolo",
-                                chipFormatter: (text) => "By $text"),
+                                chipFormatter: (text) => "$text"),
 
                             DatePickerTableFilter(
                               id: "data",
@@ -372,7 +655,7 @@ class BachecaState extends State<Bacheca> {
                               style: ElevatedButton.styleFrom(
                                 padding: EdgeInsets.all(20),
                                 backgroundColor: Colors.purple.shade200,
-                                shape: CircleBorder( ),
+                                shape: CircleBorder(),
                               ),
 
                               onPressed: () {
@@ -381,7 +664,173 @@ class BachecaState extends State<Bacheca> {
                                     builder: (BuildContext context) {
                                       return StatefulBuilder(
                                           builder: (BuildContext context, StateSetter setState) {
-                                            //return popUp();
+                                            String? nuovoTitolo=null;
+                                            String? nuovoMessaggio=null;
+
+                                            return AlertDialog(
+                                              backgroundColor: Colors.deepPurple.shade100,
+                                              scrollable: true,
+                                              content: Form(
+                                                key: _formKey,
+                                                child: Column(
+                                                  mainAxisSize: MainAxisSize.min,
+                                                  children: <Widget>[
+
+                                                    Text("Aggiungi un nuovo post", style:TextStyle(fontSize: 25, fontWeight: FontWeight.w600, color: Colors.black)),
+                                                    SizedBox(height: 30),
+                                                    Padding(
+                                                      padding: const EdgeInsets.symmetric(horizontal: 5.0),
+                                                      child: Container(
+                                                        decoration:BoxDecoration(
+                                                            color: Colors.blueGrey.shade50,
+                                                            borderRadius: BorderRadius.circular(5),
+                                                            border: Border.all(color: Colors.deepPurple.shade400)
+                                                        ),
+                                                        child:Padding(
+                                                          padding: const EdgeInsets.only(left: 12),
+
+                                                          child: TextFormField(
+                                                            decoration: InputDecoration(
+                                                                border: InputBorder.none,
+                                                                hintText: 'Inserisci titolo'
+                                                            ),
+                                                            onChanged: (String value) {
+                                                              nuovoTitolo=value;
+                                                            },
+                                                            validator: (value) {
+                                                              if (value == null || value.isEmpty) {
+                                                                return 'Please enter some text';
+                                                              }
+                                                              return null;
+                                                            },
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                    SizedBox(height: 10),
+                                                    Padding(
+                                                      padding: const EdgeInsets.all( 5.0),
+                                                      child: Container(
+                                                        height: 170,
+                                                        width: 500,
+                                                        decoration:BoxDecoration(
+                                                            color: Colors.blueGrey.shade50,
+                                                            borderRadius: BorderRadius.circular(5),
+                                                            border: Border.all(color: Colors.deepPurple.shade400)
+                                                        ),
+                                                        child:TextFormField(
+
+                                                          decoration: InputDecoration(
+                                                            hintText: 'Inserisci descrizione',
+                                                            border: InputBorder.none,
+                                                            filled: true,
+                                                          ),
+                                                          keyboardType: TextInputType.multiline,
+                                                          expands: true,
+                                                          maxLines: null,
+                                                          onChanged: (String value) {
+                                                            nuovoMessaggio=value;
+                                                          },
+                                                          validator: (value) {
+                                                            if (value == null || value.isEmpty) {
+                                                              return 'Please enter some text';
+                                                            }
+                                                            return null;
+                                                          },
+                                                        ),
+                                                      ),
+                                                    ),
+
+                                                    SizedBox(height: 30),
+                                                    Row(
+                                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                      children: [
+                                                        Padding(
+                                                          padding: const EdgeInsets.all(1.0),
+                                                          child: ElevatedButton(
+                                                            style: ElevatedButton.styleFrom(
+                                                              primary: Colors.deepPurple.shade400, // Background color
+                                                              shape: RoundedRectangleBorder(
+                                                                  borderRadius: BorderRadius.circular(20.0)
+                                                              ),
+                                                            ),
+                                                            child: Icon(Icons.upload_rounded),
+                                                            onPressed: () {
+                                                              if (_formKey.currentState!.validate()) {
+                                                                _formKey.currentState!.save();
+
+                                                                //qui gestire i file e il file picker
+                                                              }
+                                                            },
+                                                          ),
+                                                        ),
+                                                        Padding(
+                                                          padding: const EdgeInsets.all(8.0),
+                                                          child: ElevatedButton(
+                                                            style: ElevatedButton.styleFrom(
+                                                              primary: Colors.deepPurple.shade400,
+                                                              shape: RoundedRectangleBorder(
+                                                                  borderRadius: BorderRadius.circular(20.0)
+                                                              ),
+                                                            ),
+                                                            child: Text("Pubblica"),
+
+                                                            onPressed: () async {
+                                                              try {
+                                                                if (_formKey.currentState!.validate()) {
+                                                                  _formKey.currentState!.save();
+                                                                }
+
+                                                                String tt=modello.token!;
+                                                                var request = http.Request('POST', Uri.parse('http://www.studiodoc.it/api/Bacheca/BachecaMsgMng'));
+                                                                request.bodyFields = {
+                                                                  "studioId" : modello.studioId.toString(),
+                                                                  "titolo": nuovoTitolo!,
+                                                                  "messaggio" : nuovoMessaggio!,
+                                                                  "linkAllegato" : "null",            //da sistemare il file da mandare.
+                                                                  "tipoOperazione" : "I",
+                                                                  "utenteId" :  modello.codiceUtente.toString()
+                                                                };
+                                                                request.headers['Authorization'] = 'Bearer $tt';
+                                                                http.StreamedResponse response = await request.send();
+                                                                response.stream.asBroadcastStream();
+                                                                var jsonData=  jsonDecode(await response.stream.bytesToString());
+
+
+                                                                if (response.statusCode == 200) {
+                                                                  Navigator.of(context).pop();
+                                                                  ScaffoldMessenger.of(context).showSnackBar(
+                                                                    SnackBar(content: Text(jsonData["retDescr"].toString())),
+                                                                  );
+                                                                  setState((){
+                                                                    tableController.refresh();
+                                                                  });
+                                                                  print(jsonData);
+
+                                                                  nuovoMessaggio=null;
+                                                                  nuovoTitolo=null;
+                                                                }
+                                                                else {
+                                                                  print(response.reasonPhrase);
+                                                                }
+
+                                                              }catch(e){
+                                                                ScaffoldMessenger.of(context).showSnackBar(
+                                                                  const SnackBar(content: Text('Errore!')),
+                                                                );
+                                                                print(e);
+                                                              }
+                                                            },
+                                                          ),
+                                                        )
+                                                      ],
+                                                    ),
+
+                                                    SizedBox(height: 10,),
+                                                  ],
+                                                ),
+                                              ),
+                                            );
                                           }
                                       );
                                     });
@@ -405,124 +854,6 @@ class BachecaState extends State<Bacheca> {
     );
   }
 
-
-  AlertDialog popUp(){
-  return AlertDialog(
-    backgroundColor: Colors.deepPurple.shade100,
-    scrollable: true,
-    content: Form(
-      key: _formKey,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 5.0),
-            child: Container(
-              decoration:BoxDecoration(
-                  color: Colors.blueGrey.shade50,
-                  borderRadius: BorderRadius.circular(5),
-                  border: Border.all(color: Colors.deepPurple.shade400)
-              ),
-              child:Padding(
-                padding: const EdgeInsets.only(left: 12),
-
-                child: TextFormField(
-                  decoration: InputDecoration(
-                      border: InputBorder.none,
-                      hintText: 'Inserisci titolo'
-                  ),
-                ),
-              ),
-            ),
-          ),
-          SizedBox(height: 10,),
-          Padding(
-            padding: const EdgeInsets.all( 5.0),
-            child: Container(
-              height: 170,
-              width: 500,
-              decoration:BoxDecoration(
-                  color: Colors.blueGrey.shade50,
-                  borderRadius: BorderRadius.circular(5),
-                  border: Border.all(color: Colors.deepPurple.shade400)
-              ),
-              child:TextFormField(
-
-                decoration: InputDecoration(
-                  hintText: 'Inserisci descrizione',
-                  border: InputBorder.none,
-                  filled: true,
-                ),
-                keyboardType: TextInputType.multiline,
-                expands: true,
-                maxLines: null,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Inserisci testo!';
-                  }
-                  testo=value;
-                  return null;
-                },
-              ),
-            ),
-          ),
-
-          SizedBox(height: 30,),
-
-
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Padding(
-
-                padding: const EdgeInsets.all(1.0),
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    primary: Colors.deepPurple.shade400, // Background color
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20.0)
-                    ),
-                  ),
-                  child: Icon(Icons.upload_rounded),
-
-                  onPressed: () {
-                    if (_formKey.currentState!.validate()) {
-                      _formKey.currentState!.save();
-                    }
-                  },
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    primary: Colors.deepPurple.shade400, // Background color
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20.0)
-                    ),
-                  ),
-                  child: Text("Submit"),
-
-                  onPressed: () {
-                    if (_formKey.currentState!.validate()) {
-                      _formKey.currentState!.save();
-                    }
-                  },
-                ),
-              )
-            ],
-          ),
-
-
-          SizedBox(height: 10,),
-        ],
-      ),
-    ),
-  );
-
-}
-
-
 }
 
 
@@ -541,27 +872,4 @@ class MexBacheca {
 
 }
 
-
-
-// const kCustomPagedDataTableTheme = PagedDataTableThemeData(
-//     rowColors: [
-//       Color(0xFFC4E6E3),
-//       Color(0xFFE5EFEE),
-//     ],
-//     backgroundColor: Color(0xFFE0F2F1),
-//     headerBackgroundColor: Color(0xFF80CBC4),
-//     filtersHeaderBackgroundColor: Color(0xFF80CBC4),
-//     footerBackgroundColor: Color(0xFF80CBC4),
-//     footerTextStyle: TextStyle(color: Colors.white),
-//     textStyle: TextStyle(fontWeight: FontWeight.normal),
-//     buttonsColor: Colors.white,
-//     chipTheme: ChipThemeData(
-//         backgroundColor: Colors.teal,
-//         labelStyle: TextStyle(color: Colors.white),
-//         deleteIconColor: Colors.white),
-//     configuration: PagedDataTableConfiguration(
-//         footer: PagedDataTableFooterConfiguration(footerVisible: true),
-//         allowRefresh: true,
-//         pageSizes: [50, 75, 100],
-//         initialPageSize: 10));
 
