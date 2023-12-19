@@ -139,7 +139,6 @@ class BachecaState extends State<Bacheca> {
                             response.stream.asBroadcastStream();
                             var jsonData=  jsonDecode(await response.stream.bytesToString());
 
-
                             if (response.statusCode == 200) {
                               print(jsonData);
                               for(var mex in jsonData){

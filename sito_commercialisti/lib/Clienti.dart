@@ -103,12 +103,14 @@ class ClientiState extends State<Clienti> {
                       child: PagedDataTable<String, int, Cliente>(
 
                         idGetter: (post) => post.clienteId,
+
                         controller: tableController,
 
 
                         fetchPage: (pageToken, pageSize, sortBy, filtering) async {
 
 
+                          clienti=[];
                           String tt=modello.token!;
 
 
@@ -123,11 +125,12 @@ class ClientiState extends State<Clienti> {
                           http.StreamedResponse response = await request.send();
                           response.stream.asBroadcastStream();
                           var jsonData=  jsonDecode(await response.stream.bytesToString());
+                          var inspect = jsonData['Cliente'];
 
                           if (response.statusCode == 200) {
                             print(jsonData);
-                            for(var client in jsonData){
-
+                            for(var client in inspect){
+                              clienti.add(Cliente(client["clienteId"], client["codiceCliente"], client["studioId"], client["clienteNome"], client["clienteCognome"], client["email"], client["telefono"], client["tipologiaClienteId"],client["tipologiaClienteDescr"] ));
                             }
                           }
                           else {
@@ -137,105 +140,96 @@ class ClientiState extends State<Clienti> {
 
                           //Gestione dei filtri fratm'
 
+
+
+                          return PaginationResult.items(elements: clienti);
+
                         },
                         initialPage: "",
 
-                        // columns: [
-                        //   TableColumn(
-                        //     title: "Identificator",
-                        //     cellBuilder: (item) => Text(item.clienteId.toString()),
-                        //     sizeFactor: .05,
-                        //   ),
-                        //   TableColumn(
-                        //       title: "Author", cellBuilder: (item) => Text(item.author)),
-                        //   LargeTextTableColumn(
-                        //       title: "Content",
-                        //       getter: (post) => post.content,
-                        //       setter: (post, newContent, rowIndex) async {
-                        //         await Future.delayed(const Duration(seconds: 1));
-                        //         post.content = newContent;
-                        //         return true;
-                        //       },
-                        //       sizeFactor: .3),
-                        //   TableColumn(
-                        //       id: "createdAt",
-                        //       title: "Created At",
-                        //       sortable: true,
-                        //       cellBuilder: (item) =>
-                        //           Text(DateFormat.yMd().format(item.createdAt))),
-                        //   DropdownTableColumn<Post, Gender>(
-                        //     title: "Gender",
-                        //     sizeFactor: null,
-                        //     getter: (post) => post.authorGender,
-                        //     setter: (post, newGender, rowIndex) async {
-                        //       post.authorGender = newGender;
-                        //       await Future.delayed(const Duration(seconds: 1));
-                        //       return true;
-                        //     },
-                        //     items: const [
-                        //       DropdownMenuItem(value: Gender.male, child: Text("Male")),
-                        //       DropdownMenuItem(value: Gender.female, child: Text("Female")),
-                        //       DropdownMenuItem(
-                        //           value: Gender.unespecified, child: Text("Unspecified")),
-                        //     ],
-                        //   ),
-                        //   TableColumn(
-                        //       title: "Enabled",
-                        //       sizeFactor: null,
-                        //       cellBuilder: (item) => IconButton(onPressed: (){print("ciao");}, icon: Icon(Icons.add))),
-                        //   TextTableColumn(
-                        //       title: "Number",
-                        //       id: "number",
-                        //       sortable: true,
-                        //       sizeFactor: .05,
-                        //       isNumeric: true,
-                        //       getter: (post) => post.number.toString(),
-                        //       setter: (post, newValue, rowIndex) async {
-                        //         await Future.delayed(const Duration(seconds: 1));
-                        //         int? number = int.tryParse(newValue);
-                        //         if (number == null) {
-                        //           return false;
-                        //         }
-                        //         post.number = number;
-                        //         // if you want to do this too, dont forget to call refreshRow
-                        //         post.author = "empty content haha";
-                        //         tableController.refreshRow(rowIndex);
-                        //         return true;
-                        //       }),
-                        //
-                        // ],
-                        filters: [
-                          TextTableFilter(
-                              id: "authorName",
-                              title: "Author's name",
-                              chipFormatter: (text) => "By $text"),
-                          DropdownTableFilter<Gender>(
-                              id: "gender",
-                              title: "Gender",
-                              defaultValue: Gender.male,
-                              chipFormatter: (gender) =>
-                              'Only ${gender.name.toLowerCase()} posts',
-                              items: const [
-                                DropdownMenuItem(value: Gender.male, child: Text("Male")),
-                                DropdownMenuItem(value: Gender.female, child: Text("Female")),
-                                DropdownMenuItem(value: Gender.unespecified, child: Text("Unspecified")),
-                              ]),
-                          DatePickerTableFilter(
-                            id: "date",
-                            title: "Date",
-                            chipFormatter: (date) => 'Only on ${DateFormat.yMd().format(date)}',
-                            firstDate: DateTime(2000, 1, 1),
-                            lastDate: DateTime.now(),
+                        columns: [
+
+                          TableColumn(
+                              id: "Id Cliente",
+                              title: "Id Cliente",
+                              cellBuilder: (item) => Text(item.codiceCliente),
+                              sizeFactor: .1
                           ),
-                          DateRangePickerTableFilter(
-                            id: "betweenDate",
-                            title: "Between",
-                            chipFormatter: (date) =>
-                            'Between ${DateFormat.yMd().format(date.start)} and ${DateFormat.yMd().format(date.end)}',
-                            firstDate: DateTime(2000, 1, 1),
-                            lastDate: DateTime.now(),
-                          )
+
+                          TableColumn(
+                              id: "Nome",
+                              title: "Nome",
+                              cellBuilder: (item)=> Text(item.clienteNome),
+                              sizeFactor: .1
+                          ),
+
+                          TableColumn(
+                            id: "Cognome",
+                            title: "Cognome",
+                            cellBuilder: (item)=> Text(item.clienteCognome),
+                            sizeFactor: .12
+                          ),
+
+                          TableColumn(
+                            id: "email",
+                            title: "Email",
+                            cellBuilder: (item)=> Text(item.email),
+                            sizeFactor: .2
+                          ),
+
+
+                          TableColumn(
+                            id: "telefono",
+                            title: "Telefono",
+                            cellBuilder: (item)=> Text(item.telefono),
+                            sizeFactor: .12
+                          ),
+
+
+                          TableColumn(
+                            id: "tipologia",
+                            title: "Tipologia",
+                            cellBuilder: (item)=> Text(item.tipologiaClienteDescr),
+                            sizeFactor: .15
+                          ),
+
+
                         ],
+
+
+
+                        // filters: [
+                        //   TextTableFilter(
+                        //       id: "authorName",
+                        //       title: "Author's name",
+                        //       chipFormatter: (text) => "By $text"),
+                        //   DropdownTableFilter<Gender>(
+                        //       id: "gender",
+                        //       title: "Gender",
+                        //       defaultValue: Gender.male,
+                        //       chipFormatter: (gender) =>
+                        //       'Only ${gender.name.toLowerCase()} posts',
+                        //       items: const [
+                        //         DropdownMenuItem(value: Gender.male, child: Text("Male")),
+                        //         DropdownMenuItem(value: Gender.female, child: Text("Female")),
+                        //         DropdownMenuItem(value: Gender.unespecified, child: Text("Unspecified")),
+                        //       ]),
+                        //   DatePickerTableFilter(
+                        //     id: "date",
+                        //     title: "Date",
+                        //     chipFormatter: (date) => 'Only on ${DateFormat.yMd().format(date)}',
+                        //     firstDate: DateTime(2000, 1, 1),
+                        //     lastDate: DateTime.now(),
+                        //   ),
+                        //   DateRangePickerTableFilter(
+                        //     id: "betweenDate",
+                        //     title: "Between",
+                        //     chipFormatter: (date) =>
+                        //     'Between ${DateFormat.yMd().format(date.start)} and ${DateFormat.yMd().format(date.end)}',
+                        //     firstDate: DateTime(2000, 1, 1),
+                        //     lastDate: DateTime.now(),
+                        //   )
+                        // ],
 
 
                       ),
