@@ -112,7 +112,6 @@ class BachecaState extends State<Bacheca> {
                       shadowColor: Colors.black26,
                       color: Colors.white,
 
-
                       child: Container(
 
                         margin: EdgeInsets.symmetric(vertical: 5, horizontal: 20),
@@ -140,18 +139,51 @@ class BachecaState extends State<Bacheca> {
                             response.stream.asBroadcastStream();
                             var jsonData=  jsonDecode(await response.stream.bytesToString());
 
+
                             if (response.statusCode == 200) {
                               print(jsonData);
                               for(var mex in jsonData){
-                                bacheca.add(MexBacheca(mex["titolo"], mex["messaggio"], mex["linkAllegato"], mex["messaggioId"], mex["dataInserimento"], mex["dataUltimaModifica"]));
+                                DateTime dataInsert= formatoData(mex["dataInserimento"]);
+                                DateTime dataLastUpdate=formatoData(mex["dataUltimaModifica"]);
+                                bacheca.add(MexBacheca(mex["titolo"], mex["messaggio"], mex["linkAllegato"], mex["messaggioId"], dataInsert, dataLastUpdate));
                               }
                             }
                             else {
                               print(response.reasonPhrase);
                             }
 
-                            return PaginationResult.items(elements: bacheca);
 
+                            String? filtroTitolo=filtering.valueOrNullAs<String>("titolo");
+
+                            if(filtroTitolo!=null){
+                              for(MexBacheca mex in bacheca){
+                                if(mex.titolo.toLowerCase().contains(filtroTitolo.toLowerCase())){
+
+                                }else{
+                                  bacheca.remove(mex);
+                                }
+                              }
+                            }
+                            //non so perchè il for each non funziona correttamente,
+                            // lascia sempre un po' di elementi in più nella lista
+
+
+                            DateTimeRange? between= filtering.valueOrNullAs<DateTimeRange>("periodo");
+
+                            if (between != null) {
+                              for(MexBacheca mex in bacheca) {
+                                if (between.start.isBefore(mex.dataInserimento) &&
+                                    between.end.isAfter(mex.dataInserimento)) {
+                                }else{
+                                  bacheca.remove(mex);
+                                }
+                              }
+                            }
+                            //non so perchè il for each non funziona correttamente,
+                            //toglie qualche elemento di troppo dalla lista
+
+
+                            return PaginationResult.items(elements: bacheca);
 
                           },
 
@@ -170,7 +202,9 @@ class BachecaState extends State<Bacheca> {
                                 title: "Data caricamento",
                                 sizeFactor: 0.2,
                                 sortable: false,  //true? --> da gestire
-                                cellBuilder: (item) =>  Text(item.dataInserimento)),
+                                cellBuilder: (item) =>  Text(item.dataInserimento.day.toString()+"/"+item.dataInserimento.month.toString()+"/"+item.dataInserimento.year.toString()+" alle "+
+                                    item.dataInserimento.hour.toString()+":"+item.dataInserimento.minute.toString()+":"+item.dataInserimento.second.toString() )
+                            ),
                             TableColumn(
                               title: "              ",
                               sizeFactor: null,
@@ -604,13 +638,6 @@ class BachecaState extends State<Bacheca> {
                                 title: "Titolo",
                                 chipFormatter: (text) => "$text"),
 
-                            DatePickerTableFilter(
-                              id: "data",
-                              title: "Data",
-                              chipFormatter: (date) => 'Solo il giorno: ${DateFormat.yMd().format(date)}',
-                              firstDate: DateTime(2000, 1, 1),
-                              lastDate: DateTime.now(),
-                            ),
                             DateRangePickerTableFilter(
                               id: "periodo",
                               title: "Periodo",
@@ -854,6 +881,28 @@ class BachecaState extends State<Bacheca> {
     );
   }
 
+  DateTime formatoData(String data){
+    //gestione date
+    //2023-12-18T12:43:07.57
+
+    int year= int.parse(data.substring(0,4));
+    int month= int.parse(data.substring(5,7));
+    int day= int.parse(data.substring(8,10));
+    int hour= int.parse(data.substring(11,13));
+    int minute= int.parse(data.substring(14,16));
+    int second= int.parse(data.substring(17,19));
+
+    print (year);
+    print (month);
+    print (day);
+    print (hour);
+    print (minute);
+    print (second);
+
+    return DateTime(year, month, day, hour, minute, second);
+  }
+
+
 }
 
 
@@ -864,8 +913,8 @@ class MexBacheca {
   String messaggio;
   String? linkAllegato;
   int idMex;
-  String dataInserimento;
-  String dataUltimaModifica;
+  DateTime dataInserimento;
+  DateTime dataUltimaModifica;
 
   MexBacheca(this.titolo, this.messaggio, this.linkAllegato, this.idMex,
       this.dataInserimento, this.dataUltimaModifica);

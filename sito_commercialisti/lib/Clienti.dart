@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:sito_commercialisti/AggiustaSize.dart';
@@ -7,8 +6,6 @@ import 'package:sito_commercialisti/Modello.dart';
 import 'package:sito_commercialisti/NavBar.dart';
 import 'package:paged_datatable/paged_datatable.dart';
 import 'package:intl/intl.dart';
-import 'Post.dart';
-
 import 'package:http/http.dart' as http;
 
 class Clienti extends StatefulWidget {
@@ -22,9 +19,10 @@ class Clienti extends StatefulWidget {
 class ClientiState extends State<Clienti> {
 
   final _formKey = GlobalKey<FormState>();
-  final tableController = PagedDataTableController<String, int, Post>();
+  final tableController = PagedDataTableController<String, int, Cliente>();
   PagedDataTableThemeData? theme;
 
+  List<Cliente> clienti=[];
 
   Modello modello=Modello();
 
@@ -33,7 +31,7 @@ class ClientiState extends State<Clienti> {
   @override
   Widget build(BuildContext context) {
 
-    getClienti();
+
 
     return Scaffold(
           drawer: NavBar(),
@@ -102,30 +100,110 @@ class ClientiState extends State<Clienti> {
                     child: Container(
 
                       margin: EdgeInsets.symmetric(vertical: 5, horizontal: 20),
-                      child: PagedDataTable<String, int, Post>(
+                      child: PagedDataTable<String, int, Cliente>(
 
-                        rowsSelectable: true,
-                        theme: theme,
-                        idGetter: (post) => post.id,
+                        idGetter: (post) => post.clienteId,
                         controller: tableController,
+
+
                         fetchPage: (pageToken, pageSize, sortBy, filtering) async {
-                          if (filtering.valueOrNull("authorName") == "error!") {
-                            throw Exception("This is an unexpected error, wow!");
+
+
+                          String tt=modello.token!;
+
+
+                          var request = http.Request('POST', Uri.parse('http://www.studiodoc.it/api/Cliente/ClienteListGet'));
+                          request.bodyFields={
+                            "studioId": modello!.studioId.toString(),        //<-- filtro se non null
+                            "clienteId": "null",
+                            "tipologiaClienteId": "null"   //se valorizzata filtra per tipologia
+                          };
+                          request.headers['Authorization'] = 'Bearer $tt';
+
+                          http.StreamedResponse response = await request.send();
+                          response.stream.asBroadcastStream();
+                          var jsonData=  jsonDecode(await response.stream.bytesToString());
+
+                          if (response.statusCode == 200) {
+                            print(jsonData);
+                            for(var client in jsonData){
+
+                            }
+                          }
+                          else {
+                            print(response.reasonPhrase);
                           }
 
-                          var result = await PostsRepository.getPosts(
-                              pageSize: pageSize,
-                              pageToken: pageToken,
-                              sortBy: sortBy?.columnId,
-                              sortDescending: sortBy?.descending ?? false,
-                              gender: filtering.valueOrNullAs<Gender>("gender"),
-                              authorName: filtering.valueOrNullAs<String>("authorName"),
-                              between: filtering.valueOrNullAs<DateTimeRange>("betweenDate"));
-                          return PaginationResult.items(
-                              elements: result.items, nextPageToken: result.nextPageToken);
+
+                          //Gestione dei filtri fratm'
+
                         },
                         initialPage: "",
-                        columns: colonne(),
+
+                        // columns: [
+                        //   TableColumn(
+                        //     title: "Identificator",
+                        //     cellBuilder: (item) => Text(item.clienteId.toString()),
+                        //     sizeFactor: .05,
+                        //   ),
+                        //   TableColumn(
+                        //       title: "Author", cellBuilder: (item) => Text(item.author)),
+                        //   LargeTextTableColumn(
+                        //       title: "Content",
+                        //       getter: (post) => post.content,
+                        //       setter: (post, newContent, rowIndex) async {
+                        //         await Future.delayed(const Duration(seconds: 1));
+                        //         post.content = newContent;
+                        //         return true;
+                        //       },
+                        //       sizeFactor: .3),
+                        //   TableColumn(
+                        //       id: "createdAt",
+                        //       title: "Created At",
+                        //       sortable: true,
+                        //       cellBuilder: (item) =>
+                        //           Text(DateFormat.yMd().format(item.createdAt))),
+                        //   DropdownTableColumn<Post, Gender>(
+                        //     title: "Gender",
+                        //     sizeFactor: null,
+                        //     getter: (post) => post.authorGender,
+                        //     setter: (post, newGender, rowIndex) async {
+                        //       post.authorGender = newGender;
+                        //       await Future.delayed(const Duration(seconds: 1));
+                        //       return true;
+                        //     },
+                        //     items: const [
+                        //       DropdownMenuItem(value: Gender.male, child: Text("Male")),
+                        //       DropdownMenuItem(value: Gender.female, child: Text("Female")),
+                        //       DropdownMenuItem(
+                        //           value: Gender.unespecified, child: Text("Unspecified")),
+                        //     ],
+                        //   ),
+                        //   TableColumn(
+                        //       title: "Enabled",
+                        //       sizeFactor: null,
+                        //       cellBuilder: (item) => IconButton(onPressed: (){print("ciao");}, icon: Icon(Icons.add))),
+                        //   TextTableColumn(
+                        //       title: "Number",
+                        //       id: "number",
+                        //       sortable: true,
+                        //       sizeFactor: .05,
+                        //       isNumeric: true,
+                        //       getter: (post) => post.number.toString(),
+                        //       setter: (post, newValue, rowIndex) async {
+                        //         await Future.delayed(const Duration(seconds: 1));
+                        //         int? number = int.tryParse(newValue);
+                        //         if (number == null) {
+                        //           return false;
+                        //         }
+                        //         post.number = number;
+                        //         // if you want to do this too, dont forget to call refreshRow
+                        //         post.author = "empty content haha";
+                        //         tableController.refreshRow(rowIndex);
+                        //         return true;
+                        //       }),
+                        //
+                        // ],
                         filters: [
                           TextTableFilter(
                               id: "authorName",
@@ -140,8 +218,7 @@ class ClientiState extends State<Clienti> {
                               items: const [
                                 DropdownMenuItem(value: Gender.male, child: Text("Male")),
                                 DropdownMenuItem(value: Gender.female, child: Text("Female")),
-                                DropdownMenuItem(
-                                    value: Gender.unespecified, child: Text("Unspecified")),
+                                DropdownMenuItem(value: Gender.unespecified, child: Text("Unspecified")),
                               ]),
                           DatePickerTableFilter(
                             id: "date",
@@ -159,11 +236,7 @@ class ClientiState extends State<Clienti> {
                             lastDate: DateTime.now(),
                           )
                         ],
-                        footer: TextButton(
-                          onPressed: () {},
 
-                          child: const Text("Im a footer button"),
-                        ),
 
                       ),
                     ),
@@ -351,103 +424,37 @@ class ClientiState extends State<Clienti> {
     );
   }
 
-  List<BaseTableColumn<Post>> colonne(){
-    return [
-        TableColumn(
-          title: "Identificator",
-          cellBuilder: (item) => Text(item.id.toString()),
-          sizeFactor: .05,
-        ),
-        TableColumn(
-            title: "Author", cellBuilder: (item) => Text(item.author)),
-        LargeTextTableColumn(
-            title: "Content",
-            getter: (post) => post.content,
-            setter: (post, newContent, rowIndex) async {
-              await Future.delayed(const Duration(seconds: 1));
-              post.content = newContent;
-              return true;
-            },
-            sizeFactor: .3),
-        TableColumn(
-            id: "createdAt",
-            title: "Created At",
-            sortable: true,
-            cellBuilder: (item) =>
-                Text(DateFormat.yMd().format(item.createdAt))),
-        DropdownTableColumn<Post, Gender>(
-          title: "Gender",
-          sizeFactor: null,
-          getter: (post) => post.authorGender,
-          setter: (post, newGender, rowIndex) async {
-            post.authorGender = newGender;
-            await Future.delayed(const Duration(seconds: 1));
-            return true;
-          },
-          items: const [
-            DropdownMenuItem(value: Gender.male, child: Text("Male")),
-            DropdownMenuItem(value: Gender.female, child: Text("Female")),
-            DropdownMenuItem(
-                value: Gender.unespecified, child: Text("Unspecified")),
-          ],
-        ),
-        TableColumn(
-            title: "Enabled",
-            sizeFactor: null,
-            cellBuilder: (item) => IconButton(onPressed: (){print("ciao");}, icon: Icon(Icons.add))),
-        TextTableColumn(
-            title: "Number",
-            id: "number",
-            sortable: true,
-            sizeFactor: .05,
-            isNumeric: true,
-            getter: (post) => post.number.toString(),
-            setter: (post, newValue, rowIndex) async {
-              await Future.delayed(const Duration(seconds: 1));
 
-              int? number = int.tryParse(newValue);
-              if (number == null) {
-                return false;
-              }
-
-              post.number = number;
-
-              // if you want to do this too, dont forget to call refreshRow
-              post.author = "empty content haha";
-              tableController.refreshRow(rowIndex);
-              return true;
-            }),
-
-      ];
-
-  }
-
-
-  getClienti() async {
-
-    var request = http.Request('POST', Uri.parse('http://www.studiodoc.it/api/Cliente/ClienteListGet'));
-    String tt=modello.token!;
-    request.bodyFields={
-      "studioId": modello!.studioId.toString(),        //<-- filtro se non null
-      "clienteId": "null",
-      "tipologiaClienteId": "1"
-
-    };
-    request.headers['Authorization'] = 'Bearer $tt';
-
-    http.StreamedResponse response = await request.send();
-    response.stream.asBroadcastStream();
-
-    var jsonData=  jsonDecode(await response.stream.bytesToString());
-
-    if (response.statusCode == 200) {
-      print(jsonData);
-    }
-    else {
-      print(response.reasonPhrase);
-    }
-  }
 
 
 }
+
+
+
+class Cliente {
+
+  int clienteId;
+  String codiceCliente;
+  int studioId;
+  String clienteNome;
+  String clienteCognome;
+  String email;
+  String telefono;
+  int tipologiaClienteId;
+  String tipologiaClienteDescr;
+
+  Cliente(
+      this.clienteId,
+      this.codiceCliente,
+      this.studioId,
+      this.clienteNome,
+      this.clienteCognome,
+      this.email,
+      this.telefono,
+      this.tipologiaClienteId,
+      this.tipologiaClienteDescr
+  );
+
+}
+
 
