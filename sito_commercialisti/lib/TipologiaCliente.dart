@@ -24,9 +24,9 @@ class ToolsState extends State<Tools> {
 
   Modello modello=Modello();
 
-  final tableController = PagedDataTableController<String, int, Tipologia>();
+  final tableController = PagedDataTableController<String, int, TipologiaCliente>();
 
-  List<Tipologia> tipologieClienti= [];
+  List<TipologiaCliente> tipologieClienti= [];
 
   Future<http.StreamedResponse> deleteTipologia(int tipol) async {
 
@@ -118,7 +118,7 @@ class ToolsState extends State<Tools> {
                       child: Container(
 
                         margin: EdgeInsets.symmetric(vertical: 5, horizontal: 20),
-                        child: PagedDataTable<String, int, Tipologia>(
+                        child: PagedDataTable<String, int, TipologiaCliente>(
 
                           controller: tableController,
                           idGetter: (tipologia) => tipologia.idTipologia,
@@ -149,7 +149,7 @@ class ToolsState extends State<Tools> {
                                 String tipologiaDescr=tip["tipologiaClienteDescr"].toString();
                                 int tipologiaId= tip["tipologiaClienteId"];
                                 String ultimaModifica=tip["dataUltimaModifica"].toString();
-                                tipologieClienti?.add(Tipologia(tipologiaDescr, tipologiaId, ultimaModifica) );
+                                tipologieClienti?.add(TipologiaCliente(tipologiaDescr, tipologiaId, ultimaModifica) );
                               }
                             }
                             else {
@@ -588,12 +588,12 @@ class ToolsState extends State<Tools> {
 
 
 
-class Tipologia {
+class TipologiaCliente {
 
   String nome;
   int idTipologia;
-  String ultimaModifica;
-  Tipologia(this.nome, this.idTipologia, this.ultimaModifica);
+  String? ultimaModifica;
+  TipologiaCliente(this.nome, this.idTipologia, [this.ultimaModifica]);
 
 }
 

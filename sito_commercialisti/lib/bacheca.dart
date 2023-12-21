@@ -152,31 +152,36 @@ class BachecaState extends State<Bacheca> {
                             }
 
 
-                            String? filtroTitolo=filtering.valueOrNullAs<String>("titolo");
+                            String? filtroCerca=filtering.valueOrNullAs<String>("keyword");
 
-                            if(filtroTitolo!=null){
+                            List<MexBacheca> rimuovi=[];
+                            if(filtroCerca!=null){
                               for(MexBacheca mex in bacheca){
-                                if(mex.titolo.toLowerCase().contains(filtroTitolo.toLowerCase())){
+                                if( !(mex.titolo.toLowerCase().contains(filtroCerca.toLowerCase())||
+                                    mex.messaggio.toLowerCase().contains(filtroCerca.toLowerCase()))){
+                                  rimuovi.add(mex);
+                                }
+                              }
+                            }
 
-                                }else{
+                            for(MexBacheca mex in rimuovi){
+                              bacheca.remove(mex);
+                            }
+
+                            DateTimeRange? between= filtering.valueOrNullAs<DateTimeRange>("periodo");
+                            rimuovi=[];
+
+                            if (between != null) {
+                              for(MexBacheca mex in bacheca) {
+                                if (!(between.start.isBefore(mex.dataInserimento) &&
+                                    between.end.isAfter(mex.dataInserimento))) {
                                   bacheca.remove(mex);
                                 }
                               }
                             }
-                            //non so perchè il for each non funziona correttamente,
-                            // lascia sempre un po' di elementi in più nella lista
 
-
-                            DateTimeRange? between= filtering.valueOrNullAs<DateTimeRange>("periodo");
-
-                            if (between != null) {
-                              for(MexBacheca mex in bacheca) {
-                                if (between.start.isBefore(mex.dataInserimento) &&
-                                    between.end.isAfter(mex.dataInserimento)) {
-                                }else{
-                                  bacheca.remove(mex);
-                                }
-                              }
+                            for(MexBacheca mex in rimuovi){
+                              bacheca.remove(mex);
                             }
                             //non so perchè il for each non funziona correttamente,
                             //toglie qualche elemento di troppo dalla lista
@@ -633,8 +638,8 @@ class BachecaState extends State<Bacheca> {
 
                           filters: [
                             TextTableFilter(
-                                id: "titolo",
-                                title: "Titolo",
+                                id: "keyword",
+                                title: "Cerca",
                                 chipFormatter: (text) => "$text"),
 
                             DateRangePickerTableFilter(
@@ -890,13 +895,13 @@ class BachecaState extends State<Bacheca> {
     int hour= int.parse(data.substring(11,13));
     int minute= int.parse(data.substring(14,16));
     int second= int.parse(data.substring(17,19));
-
-    print (year);
-    print (month);
-    print (day);
-    print (hour);
-    print (minute);
-    print (second);
+    //
+    // print (year);
+    // print (month);
+    // print (day);
+    // print (hour);
+    // print (minute);
+    // print (second);
 
     return DateTime(year, month, day, hour, minute, second);
   }

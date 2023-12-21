@@ -746,6 +746,53 @@ class DipendentiState extends State<Dipendenti> {
 }
 
 
+class Dipendente{
+  String codiceUtente;
+  int dipendenteId;
+  String dipendenteNome;
+  String dipendenteCognome;
+  int ufficioId;
+  String ufficioDescr;
+  String email;
+  String telefono;
+  bool amministratore;
+  int studioId;
+  String studioNome;
+
+  Dipendente(
+      this.codiceUtente,
+      this.dipendenteId,
+      this.dipendenteNome,
+      this.dipendenteCognome,
+      this.ufficioId,
+      this.ufficioDescr,
+      this.email,
+      this.telefono,
+      this.amministratore,
+      this.studioId,
+      this.studioNome
+  );
+
+/*
+  * "codiceUtente": "MARRSI",
+  * "dipendenteId": 3,
+  * "dipendenteNome": "Marco",
+  * "dipendenteCognome": "Rossi",
+  * "ufficioId": 0,
+  * "ufficioDescr": null,
+  * "email": "",
+  * "telefono": "",
+  * "amministratore": false,
+  * "studioId": 1,
+  * "studioNome": "Studio Grasso Commercialisti"
+  *
+  * */
+
+}
+
+
+
+
 
 
 
