@@ -109,7 +109,6 @@ class _LoginState extends State<LoginUser> {
     };
     request.headers['Authorization'] = 'Bearer $tt';
 
-
     return request.send();
   }
 
@@ -257,6 +256,7 @@ class _LoginState extends State<LoginUser> {
 
                                         //chiamata per il token
                                         http.StreamedResponse response2 = await getToken();
+
                                         final jsonData2 =  jsonDecode(await response2.stream.bytesToString()) as Map<String, dynamic>;
                                         response2.stream.asBroadcastStream();
 
@@ -268,6 +268,7 @@ class _LoginState extends State<LoginUser> {
                                           modello!.expiration= jsonData2["expires_in"];
 
 
+                                          print(modello!.token);
                                           //chiamata per definire il ruolo e i dati del dipendente
 
 

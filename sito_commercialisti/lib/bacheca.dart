@@ -134,11 +134,9 @@ class BachecaState extends State<Bacheca> {
                               "messaggioId": "null"
                             };
                             request.headers['Authorization'] = 'Bearer $tt';
-
                             http.StreamedResponse response = await request.send();
                             response.stream.asBroadcastStream();
                             var jsonData=  jsonDecode(await response.stream.bytesToString());
-
                             if (response.statusCode == 200) {
                               print(jsonData);
                               for(var mex in jsonData){
@@ -183,6 +181,7 @@ class BachecaState extends State<Bacheca> {
                             for(MexBacheca mex in rimuovi){
                               bacheca.remove(mex);
                             }
+
                             //non so perchè il for each non funziona correttamente,
                             //toglie qualche elemento di troppo dalla lista
 
