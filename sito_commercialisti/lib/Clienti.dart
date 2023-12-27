@@ -29,13 +29,12 @@ class ClientiState extends State<Clienti> {
 
   Modello modello=Modello();
 
-
+  TipologiaCliente? dropdownValue2;
+  TipologiaCliente? get $dropdownValue2 => null;
 
   // TipologiaCliente? dropdownValue;
   // TipologiaCliente? get $dropdownValue => null;
 
-  // TipologiaCliente? dropdownValue2;
-  // TipologiaCliente? get $dropdownValue2 => null;
 
 
 
@@ -142,6 +141,7 @@ class ClientiState extends State<Clienti> {
                             var inspect = jsonData['Cliente'];
                             if (response.statusCode == 200) {
                               print(jsonData);
+                              print("");
                               for(var client in inspect){
                                   clienti.add(Cliente(client["clienteId"], client["codiceCliente"], client["studioId"], client["clienteNome"], client["clienteCognome"], client["email"], client["telefono"], client["tipologiaClienteId"],client["tipologiaClienteDescr"], List.empty()));
                               }
@@ -165,6 +165,7 @@ class ClientiState extends State<Clienti> {
                               var inspect2 = jsonData2['Dipendente'];
 
                               print(jsonData2);
+                              print("");
 
                               cl.dipendentiDesignati=List.of(dipendenti);
 
@@ -202,7 +203,7 @@ class ClientiState extends State<Clienti> {
 
                             String ciao="cuao";
 
-                          //Gestione dei filtri fratm'
+                            //Gestione dei filtri fratm'
 
                           return PaginationResult.items(elements: clienti);
 
@@ -270,7 +271,375 @@ class ClientiState extends State<Clienti> {
                                                 return StatefulBuilder(
                                                     builder: (BuildContext context, StateSetter setState) {
                                                        //return popUp("edit", item);
-                                                      return AlertDialog();
+                                                      List<DipendenteDesignato> updateDipendenti= List.of(item.dipendentiDesignati);
+
+                                                      String nuovoNome="";
+                                                      String nuovoCognome="";
+                                                      String nuovaEmail="";
+                                                      String nuovoNumero="";
+
+                                                      return AlertDialog(
+                                                        backgroundColor: Colors.deepPurple.shade100,
+                                                        scrollable: true,
+                                                        content: Form(
+                                                          child: Column(
+                                                            mainAxisSize: MainAxisSize.min,
+                                                            mainAxisAlignment: MainAxisAlignment.start,
+                                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                                            children: [
+
+                                                              Row(
+                                                                mainAxisAlignment: MainAxisAlignment.center,
+                                                                children: [
+                                                                  SizedBox(width: 170,),
+                                                                  Text("Modifica", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22)),
+                                                                  SizedBox(width: 170,),
+                                                                  SizedBox(height: 20,),
+                                                                ],
+                                                              ),
+
+                                                              Text("Codice cliente: ", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                                                              SizedBox(height: 5),
+                                                              Container(
+                                                                margin: EdgeInsets.only(right: 100),
+                                                                decoration:BoxDecoration(
+                                                                    color: Colors.blueGrey.shade50,
+                                                                    borderRadius: BorderRadius.circular(5),
+                                                                    border: Border.all(color: Colors.deepPurple.shade400)
+                                                                ),
+                                                                child: Padding(
+                                                                  padding: const EdgeInsets.only(left: 12),
+                                                                  child: Text(item.codiceCliente),
+                                                                ),
+                                                              ),
+                                                              SizedBox(height: 10,),
+
+                                                              Text("Nome: ", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                                                              SizedBox(height: 5),
+                                                              Container(
+                                                                margin: EdgeInsets.only(right: 100),
+                                                                decoration:BoxDecoration(
+                                                                    color: Colors.blueGrey.shade50,
+                                                                    borderRadius: BorderRadius.circular(5),
+                                                                    border: Border.all(color: Colors.deepPurple.shade400)
+                                                                ),
+                                                                child:Padding(
+                                                                  padding: const EdgeInsets.only(left: 12),
+                                                                  child: TextFormField(
+                                                                    initialValue: item.clienteNome,
+                                                                    decoration: InputDecoration(
+                                                                        border: InputBorder.none,
+                                                                    ),
+                                                                    onChanged: (String value) {
+                                                                      nuovoNome=value;
+                                                                    },
+                                                                    validator: (value) {
+                                                                      if (value == null || value.isEmpty) {
+                                                                        return 'Please enter some text';
+                                                                      }
+                                                                      return null;
+                                                                    },
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                              SizedBox(height: 10,),
+
+                                                              Text("Cognome: ", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                                                              SizedBox(height: 5),
+                                                              Container(
+                                                                margin: EdgeInsets.only(right: 100),
+                                                                decoration:BoxDecoration(
+                                                                    color: Colors.blueGrey.shade50,
+                                                                    borderRadius: BorderRadius.circular(5),
+                                                                    border: Border.all(color: Colors.deepPurple.shade400)
+                                                                ),
+                                                                child:Padding(
+                                                                  padding: const EdgeInsets.only(left: 12),
+
+                                                                  child: TextFormField(
+                                                                    initialValue: item.clienteCognome,
+                                                                    decoration: InputDecoration(
+                                                                        border: InputBorder.none,
+                                                                        hintText: item.clienteCognome
+                                                                    ),
+                                                                    onChanged: (String value) {
+                                                                      nuovoCognome=value;
+                                                                    },
+                                                                    validator: (value) {
+                                                                      if (value == null || value.isEmpty) {
+                                                                        return 'Please enter some text';
+                                                                      }
+                                                                      return null;
+                                                                    },
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                              SizedBox(height: 10,),
+
+                                                              Text("Email: ", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                                                              SizedBox(height: 5),
+                                                              Container(
+                                                                margin: EdgeInsets.only(right: 100),
+                                                                decoration:BoxDecoration(
+                                                                    color: Colors.blueGrey.shade50,
+                                                                    borderRadius: BorderRadius.circular(5),
+                                                                    border: Border.all(color: Colors.deepPurple.shade400)
+                                                                ),
+                                                                child:Padding(
+                                                                  padding: const EdgeInsets.only(left: 12),
+
+                                                                  child: TextFormField(
+                                                                    initialValue: item.email,
+                                                                    decoration: InputDecoration(
+                                                                        border: InputBorder.none,
+                                                                    ),
+                                                                    onChanged: (String value) {
+                                                                      nuovaEmail=value;
+                                                                    },
+                                                                    validator: (value) {
+                                                                      if (value == null || value.isEmpty) {
+                                                                        return 'Please enter some text';
+                                                                      }
+                                                                      return null;
+                                                                    },
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                              SizedBox(height: 10,),
+
+                                                              Text("Numero: ", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                                                              SizedBox(height: 5),
+                                                              Container(
+                                                                margin: EdgeInsets.only(right: 100),
+                                                                decoration:BoxDecoration(
+                                                                    color: Colors.blueGrey.shade50,
+                                                                    borderRadius: BorderRadius.circular(5),
+                                                                    border: Border.all(color: Colors.deepPurple.shade400)
+                                                                ),
+                                                                child:Padding(
+                                                                  padding: const EdgeInsets.only(left: 12),
+
+                                                                  child: TextFormField(
+                                                                    initialValue: item.telefono,
+                                                                    decoration: InputDecoration(
+                                                                        border: InputBorder.none,
+                                                                    ),
+                                                                    onChanged: (String value) {
+                                                                      nuovoNumero=value;
+                                                                    },
+                                                                    validator: (value) {
+                                                                      if (value == null || value.isEmpty) {
+                                                                        return 'Please enter some text';
+                                                                      }
+                                                                      return null;
+                                                                    },
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                              SizedBox(height: 10,),
+
+                                                              //dropdown tipologia
+                                                              Text("Tipologia: ", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                                                              SizedBox(height: 5),
+                                                              Container(
+                                                                decoration:BoxDecoration(
+                                                                    color: Colors.blueGrey.shade50,
+                                                                    borderRadius: BorderRadius.circular(5),
+                                                                    border: Border.all(color: Colors.deepPurple.shade400)
+                                                                ),
+                                                                child: Padding(
+                                                                  padding: const EdgeInsets.only(left: 10, right: 10),
+                                                                  child: DropdownButtonHideUnderline(
+                                                                    child: DropdownButton<TipologiaCliente>(
+                                                                      items: tipoClienti!.map<DropdownMenuItem<TipologiaCliente>>((TipologiaCliente value){
+                                                                        return DropdownMenuItem<TipologiaCliente>(
+                                                                                        child: Text(value.nome, style: TextStyle(color: Colors.black),),
+                                                                                        value: value,
+                                                                                      );
+                                                                      }).toList(),
+                                                                      onChanged: (TipologiaCliente? value) {
+                                                                        setState(() {
+                                                                          dropdownValue2 = value;
+                                                                        });
+                                                                      },
+                                                                      value: dropdownValue2,
+                                                                      icon: const Icon(Icons.arrow_downward),
+                                                                      elevation: 16,
+                                                                      style:TextStyle(color: Colors.blueGrey.shade700, fontSize: 15),
+                                                                      underline: Container(
+                                                                        width: 100,
+                                                                        height: 2,
+                                                                        color: Colors.deepPurple.shade400,
+                                                                      ),
+                                                                      iconEnabledColor: Colors.deepPurple.shade400,
+                                                                      iconDisabledColor: Colors.deepPurple.shade400,
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                              SizedBox(height: 20),
+
+                                                              //dipendenti designati checkbox
+
+                                                              Padding(
+                                                                padding: const EdgeInsets.symmetric(horizontal: 20),
+                                                                child: Text(
+                                                                  "Scegli i dipendenti designati: ",
+                                                                  style: TextStyle(fontSize: 16,color: Colors.black, fontWeight: FontWeight.w500),
+                                                                ),
+                                                              ),
+                                                              SizedBox(height: 10),
+                                                              Divider(),
+                                                              SizedBox(height: 5),
+
+                                                              Padding(
+                                                                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                                                                  child: Column(
+                                                                      children: updateDipendenti.map((dipendente) {
+                                                                        return CheckboxListTile(
+                                                                            activeColor: Colors.deepPurple.shade400,
+                                                                            checkboxShape: RoundedRectangleBorder(
+                                                                                borderRadius: BorderRadius.circular(5)),
+                                                                            value: dipendente.isChecked,
+                                                                            title: Text(dipendente.dipendenteNome+ " "+dipendente.dipendenteCognome),
+                                                                            onChanged: (val) {
+                                                                              setState(() {
+                                                                                dipendente.isChecked = val!;
+                                                                              });
+                                                                            });
+                                                                      }).toList()),
+
+                                                              ),
+
+
+                                                              SizedBox(height: 50),
+
+
+                                                              Row(
+                                                                mainAxisAlignment: MainAxisAlignment.start,
+                                                                children: [
+                                                                  Padding(
+                                                                    padding: const EdgeInsets.all(5.0),
+                                                                    child: ElevatedButton(
+
+                                                                      style: ElevatedButton.styleFrom(
+                                                                        primary: Colors.deepPurple.shade400,
+                                                                        shape: RoundedRectangleBorder(
+                                                                            borderRadius: BorderRadius.circular(20.0)
+                                                                        ),
+                                                                      ),
+                                                                      child: Row(
+                                                                        children: [
+                                                                          Text("Invio"),
+                                                                          SizedBox(width: 10,),
+                                                                          Icon(Icons.edit)
+                                                                        ],
+                                                                      ),
+
+                                                                      onPressed:() async {
+                                                                        try{
+
+
+                                                                          var request = http.Request('POST', Uri.parse('http://www.studiodoc.it/api/Cliente/ClienteMng'));
+                                                                          String tt=modello.token!;
+
+                                                                          String designati="";
+                                                                          for(DipendenteDesignato dd in updateDipendenti){
+                                                                            if(dd.isChecked){
+                                                                              designati=dd.dipendenteId.toString()+"|";
+                                                                            }
+                                                                          }
+                                                                          designati=designati.substring(0,designati.length-2);
+
+                                                                          request.bodyFields={
+                                                                            "clienteId" : item.clienteId.toString(),
+                                                                            "clienteNome": nuovoNome,
+                                                                            "clienteCognome": nuovoCognome,
+                                                                            "email": nuovaEmail,
+                                                                            "telefono": nuovoNumero,
+                                                                            "tipologiaClienteId": dropdownValue2!.idTipologia.toString(),
+                                                                            "dipIds": designati,
+                                                                            "tipoOperazione": "U",
+                                                                            "utenteId": modello.dipendenteId.toString()
+                                                                          };
+
+                                                                          request.headers['Authorization'] = 'Bearer $tt';
+
+                                                                          http.StreamedResponse response=await request.send();
+
+                                                                          response.stream.asBroadcastStream();
+                                                                          var jsonData=  jsonDecode(await response.stream.bytesToString());
+
+                                                                          if(jsonData["retCode"]==0){
+                                                                            ScaffoldMessenger.of(context).showSnackBar(
+                                                                              SnackBar(content: Text(jsonData["retDescr"].toString())),
+                                                                            );
+                                                                          }else{
+                                                                            ScaffoldMessenger.of(context).showSnackBar(
+                                                                              SnackBar(content: Text("Qualcosa è andato storto durante la modifica!")),
+                                                                            );
+                                                                          }
+                                                                          Navigator.of(context).pop();
+                                                                          setState((){
+                                                                            tableController.refresh();
+                                                                          });
+
+                                                                        }catch(er){
+                                                                          print(er);
+                                                                          ScaffoldMessenger.of(context).showSnackBar(
+                                                                            const SnackBar(content: Text('Errore del Server!')),
+                                                                          );
+                                                                        }
+
+                                                                      },
+                                                                      // {
+                                                                      //   try{
+                                                                      //
+                                                                      //     http.StreamedResponse response=await updateCliente();
+                                                                      //
+                                                                      //     var jsonData= jsonDecode(await response.stream.bytesToString());
+                                                                      //
+                                                                      //     if (response.statusCode == 200) {
+                                                                      //       Navigator.of(context).pop();
+                                                                      //       ScaffoldMessenger.of(context).showSnackBar(
+                                                                      //         SnackBar(content: Text(jsonData["retDescr"].toString())),
+                                                                      //       );
+                                                                      //       setState((){
+                                                                      //         tableController.refresh();
+                                                                      //       });
+                                                                      //       print(jsonData);
+                                                                      //
+                                                                      //     }
+                                                                      //     else {
+                                                                      //       print(response.reasonPhrase);
+                                                                      //     }
+                                                                      //
+                                                                      //     for (var dip in dipendentiDesignati){
+                                                                      //       dip.isChecked=false;
+                                                                      //     }
+                                                                      //
+                                                                      //   }catch(er){
+                                                                      //     print(er);
+                                                                      //     ScaffoldMessenger.of(context).showSnackBar(
+                                                                      //       const SnackBar(content: Text('Errore del Server!')),
+                                                                      //     );
+                                                                      //   }
+                                                                      // },
+
+                                                                    ),
+                                                                  ),
+
+
+
+                                                                ],
+                                                              ),
+
+
+
+                                                            ],
+                                                          ),
+                                                        ),
+                                                      );
                                                     }
                                                 );
                                               }
@@ -582,7 +951,8 @@ class ClientiState extends State<Clienti> {
 
     request.bodyFields={
       "dipendenteId" : "null",
-      "ufficioId": modello!.ufficioId.toString()
+      "ufficioId": modello!.ufficioId.toString(),
+
     };
 
     request.headers['Authorization'] = 'Bearer $tt';
@@ -595,6 +965,7 @@ class ClientiState extends State<Clienti> {
 
     if (response.statusCode == 200) {
       print(jsonData);
+      print("");
       for(var dip in jsonData){
         if(dip["superUser"]==false) {
           dipendenti.add(DipendenteDesignato(

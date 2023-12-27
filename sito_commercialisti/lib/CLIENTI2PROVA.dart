@@ -459,6 +459,7 @@ class ClientiState2 extends State<Clienti2> {
                                                               ),
                                                             ),
                                                             SizedBox(height: 10,),
+
                                                             Text("Cognome: ", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
                                                             SizedBox(height: 5),
                                                             Container(
@@ -489,6 +490,7 @@ class ClientiState2 extends State<Clienti2> {
                                                                 ),
                                                               ),
                                                             ),
+
                                                             SizedBox(height: 10,),
                                                             Text("Email: ", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
                                                             SizedBox(height: 5),
@@ -521,6 +523,7 @@ class ClientiState2 extends State<Clienti2> {
                                                               ),
                                                             ),
                                                             SizedBox(height: 10,),
+
                                                             Text("Numero: ", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
                                                             SizedBox(height: 5),
                                                             Container(
