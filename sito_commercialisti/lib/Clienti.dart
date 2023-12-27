@@ -143,7 +143,7 @@ class ClientiState extends State<Clienti> {
                               print(jsonData);
                               print("");
                               for(var client in inspect){
-                                  clienti.add(Cliente(client["clienteId"], client["codiceCliente"], client["studioId"], client["clienteNome"], client["clienteCognome"], client["email"], client["telefono"], client["tipologiaClienteId"],client["tipologiaClienteDescr"], List.empty()));
+                                  clienti.add(Cliente(client["clienteId"], client["codiceCliente"], client["studioId"], client["clienteNome"], client["clienteCognome"], client["email"], client["telefono"], TipologiaCliente(client["tipologiaClienteDescr"],client["tipologiaClienteId"]), List.empty()));
                               }
                             }
                             else {
@@ -167,7 +167,7 @@ class ClientiState extends State<Clienti> {
                               print(jsonData2);
                               print("");
 
-                              cl.dipendentiDesignati=List.of(dipendenti);
+                              cl.dipendentiDesignati=List.from(dipendenti);
 
                               if (response.statusCode == 200) {
                                 for(var j in inspect2){
@@ -251,7 +251,7 @@ class ClientiState extends State<Clienti> {
                           TableColumn(
                             id: "tipologia",
                             title: "Tipologia",
-                            cellBuilder: (item)=> Text(item.tipologiaClienteDescr),
+                            cellBuilder: (item)=> Text(item.tipologiaCliente.nome),
                             sizeFactor: .1
                           ),
 
@@ -271,12 +271,13 @@ class ClientiState extends State<Clienti> {
                                                 return StatefulBuilder(
                                                     builder: (BuildContext context, StateSetter setState) {
                                                        //return popUp("edit", item);
-                                                      List<DipendenteDesignato> updateDipendenti= List.of(item.dipendentiDesignati);
+                                                      List<DipendenteDesignato> updateDipendenti= List.from(item.dipendentiDesignati);
 
-                                                      String nuovoNome="";
-                                                      String nuovoCognome="";
-                                                      String nuovaEmail="";
-                                                      String nuovoNumero="";
+                                                      String nuovoNome=item.clienteNome;
+                                                      String nuovoCognome=item.clienteCognome;
+                                                      String nuovaEmail=item.email;
+                                                      String nuovoNumero=item.telefono;
+                                                      inizializzaDropDown2(item.tipologiaCliente);
 
                                                       return AlertDialog(
                                                         backgroundColor: Colors.deepPurple.shade100,
@@ -300,18 +301,7 @@ class ClientiState extends State<Clienti> {
 
                                                               Text("Codice cliente: ", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
                                                               SizedBox(height: 5),
-                                                              Container(
-                                                                margin: EdgeInsets.only(right: 100),
-                                                                decoration:BoxDecoration(
-                                                                    color: Colors.blueGrey.shade50,
-                                                                    borderRadius: BorderRadius.circular(5),
-                                                                    border: Border.all(color: Colors.deepPurple.shade400)
-                                                                ),
-                                                                child: Padding(
-                                                                  padding: const EdgeInsets.only(left: 12),
-                                                                  child: Text(item.codiceCliente),
-                                                                ),
-                                                              ),
+                                                              Text(item.codiceCliente),
                                                               SizedBox(height: 10,),
 
                                                               Text("Nome: ", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
@@ -706,7 +696,7 @@ class ClientiState extends State<Clienti> {
                                                                 Row(
                                                                   children: [
                                                                     Text("Tipologia cliente: ", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-                                                                    Text("${item.tipologiaClienteDescr}",  style: TextStyle( fontSize: 18)),
+                                                                    Text("${item.tipologiaCliente.nome}",  style: TextStyle( fontSize: 18)),
                                                                   ],
                                                                 ),
 
@@ -946,19 +936,15 @@ class ClientiState extends State<Clienti> {
 
   void dipendentiGet() async {
 
-    var request = http.Request('POST', Uri.parse('http://www.studiodoc.it/api/Dipendente/DipendenteListGet'));
+    var request = http.Request('POST', Uri.parse('http://www.studiodoc.it/api/Studio/StudioDipendentiGet'));
     String tt=modello.token!;
-
     request.bodyFields={
-      "dipendenteId" : "null",
-      "ufficioId": modello!.ufficioId.toString(),
-
+       "studioId": modello!.studioId.toString(),
+       "ufficioId": "-1"
     };
 
     request.headers['Authorization'] = 'Bearer $tt';
-
     http.StreamedResponse response = await request.send();
-
     response.stream.asBroadcastStream();
 
     var jsonData=  jsonDecode(await response.stream.bytesToString());
@@ -977,11 +963,9 @@ class ClientiState extends State<Clienti> {
     else {
       print(response.reasonPhrase);
     }
-
   }
 
   Future<http.StreamedResponse> getDipendentiPerCliente(int idCliente) async{
-
     String tt=modello.token!;
     var request = http.Request('POST', Uri.parse('http://www.studiodoc.it/api/Cliente/ClienteListGet'));
     request.bodyFields = {
@@ -990,9 +974,7 @@ class ClientiState extends State<Clienti> {
       "tipologiaClienteId": "null"
     };
     request.headers['Authorization'] = 'Bearer $tt';
-
     return request.send();
-
   }
 
   Future<http.StreamedResponse> categorieClientiGet() async {
@@ -1009,6 +991,13 @@ class ClientiState extends State<Clienti> {
 
   }
 
+  inizializzaDropDown2(TipologiaCliente item){
+    for(TipologiaCliente tc in tipoClienti){
+      if(tc.idTipologia==item.idTipologia){
+        dropdownValue2=tc;
+      }
+    }
+  }
 
   AlertDialog popUp(String tipo, Cliente? cliente){
 
@@ -1049,8 +1038,7 @@ class Cliente {
   String clienteCognome;
   String email;
   String telefono;
-  int tipologiaClienteId;
-  String tipologiaClienteDescr;
+  TipologiaCliente tipologiaCliente;
   List<DipendenteDesignato> dipendentiDesignati=[];
 
   Cliente(
@@ -1061,8 +1049,7 @@ class Cliente {
       this.clienteCognome,
       this.email,
       this.telefono,
-      this.tipologiaClienteId,
-      this.tipologiaClienteDescr,
+      this.tipologiaCliente,
       this.dipendentiDesignati
   );
 
